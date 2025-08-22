@@ -1,0 +1,219 @@
+<div>
+    <div class="col-md-6">
+        <ng-select [items]="incidencias" bindLabel="name" [(ngModel)]="incidencia" placeholder="Selecione el Tipo de Incidencia"></ng-select>
+        <br>
+        <button type="button" class="btn btn-danger btn-md" (click)="finalizar()">GUARDAR INCIDENCIA</button>
+    </div>  
+    <hr/>
+    <h4 style="text-align: center;">ENCUESTA DE GASTOS DE REALIZACIÓN DE EXPORTACIÓN DE MINERALES &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="color: brown;">GESTION: {{currentYear}}</b></h4>
+    <p-accordion [activeIndex]="0">
+        <p-accordionTab header="CAPÍTULO I. IDENTIFICACIÓN Y UBICACIÓN DE LA UNIDAD ECONÓMICA">
+        <h5>1. IDENTIFICACIÓN</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-container">
+                    <label for="input-text">1. Razón Social o Nombre:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.razon_social" readonly/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-container">
+                    <label for="input-text">3. NIT:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.nit" readonly/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-container">
+                    <label for="input-text">2. Rotulo Comercial:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.rotulo_comercial" readonly/>
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <h5>2. UBICACIÓN</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">1. Departamento:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.departamento" readonly/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">2. Ciudad:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.ciudad" readonly/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">3. Zona:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.zona" readonly/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">4. Calle o Avenida:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.calle" readonly/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">5. Numero:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.numero" readonly/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">6. Entre Calles:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.entre_calles" readonly/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-container">
+                    <label for="input-text">7. Edificio:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.edificio" readonly/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-container">
+                    <label for="input-text">8. Piso:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.piso" readonly/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-container">
+                    <label for="input-text">9. Numero de Oficina:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.numero_oficina" readonly/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="input-container">
+                    <label for="input-text">10. Telefono:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.telefono" readonly/>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-container">
+                    <label for="input-text">11. Fax:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.fax" readonly/>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-container">
+                    <label for="input-text">12. E-mail:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.email" readonly/>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-container">
+                    <label for="input-text">13. Pagina Web:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.pagina" readonly/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="input-container">
+                    <label for="input-text"><b>Actividad Principal:</b></label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.actividad_principal" readonly/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <br>
+                <label for="input-text"><b>Tipo Sector:</b></label>
+                <div class="checkbox-container">
+                    <div *ngFor="let category of categories" class="form-group">
+                        <label [for]="category.key">{{ category.name }}</label>&nbsp;
+                        <p-checkbox name="group" [value]="category" [inputId]="category.key" [(ngModel)]="registro.tipo_sector" [disabled]="true"></p-checkbox>
+                    </div>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="registro.otro" [readonly]="sw==0"/>
+                </div>
+            </div>
+        </div>
+        <br>
+    </p-accordionTab>
+    <p-accordionTab header="CAPÍTULO II. GASTOS DE REALIZACIÓN (En dólares estadounidenses)">
+            <div class="row">
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">14. Nombre Informante:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="informante" readonly/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-container">
+                    <label for="input-text">15. Cargo del informante:</label>
+                    <input type="text" id="input-text" class="form-control" [(ngModel)]="cargo" readonly/>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-10">
+                <div class="card flex justify-content-center">
+                    <p-selectButton [options]="justifyOptions" [(ngModel)]="selectedOption" optionLabel="name" optionreadonly="readonly" (onChange)="onOptionClick($event)">
+                        <ng-template let-item pTemplate>
+                            <i [class]="item.icon">&nbsp;&nbsp;{{item.name}}</i>
+                        </ng-template>
+                    </p-selectButton>
+                </div>
+            </div>
+        </div>
+        <p-card *ngIf="dw==1">
+            <ng-template pTemplate="header">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="checkbox-container">
+                            <div *ngFor="let category of gastos" class="radio-group">
+                                <label [for]="category.key">{{ category.name }}</label>
+                                <p-radioButton [inputId]="category.key" name="category" [value]="category.name" [(ngModel)]="gastosUn.tipo" [disabled]="true"></p-radioButton>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-container">
+                            <label for="input-text">(Descripción del mineral)</label>
+                            <input type="text" id="inputDescricpion" class="form-control"  [(ngModel)]="gastosUn.descripcion" readonly/>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+            <div class="card-body">
+                <p-table [value]="tabla" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>GASTO</th>
+                            <th>1er. Trimestre<br>Enero a Marzo</th>
+                            <th>2do. Trimestre<br>Abril a Junio</th>
+                            <th>3er. Trimestre<br>Julio a Septiembre</th>
+                            <th>4to. Trimestre<br>Octubre a Diciembre</th>
+                            <th>TOTAL ($us)</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-product>
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td><input type="text" id="input-text" class="form-control" [(ngModel)]="gastosUn[product.titulo].trimUno" readonly/></td>
+                            <td><input type="text" id="input-text" class="form-control" [(ngModel)]="gastosUn[product.titulo].trimDos" readonly/></td>
+                            <td><input type="text" id="input-text" class="form-control" [(ngModel)]="gastosUn[product.titulo].trimTres" readonly/></td>
+                            <td><input type="text" id="input-text" class="form-control" [(ngModel)]="gastosUn[product.titulo].trimCuatro" readonly/></td>
+                            <td><input type="text" id="input-text" class="form-control" [(ngModel)]="gastosUn[product.titulo].total" readonly/></td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </p-card>
+        <br>
+    </p-accordionTab>
+    </p-accordion>
+</div>

@@ -1,0 +1,22 @@
+export interface RegistroForm{
+    razon_social: string,
+    nit: string,
+    rotulo_comercial: string,
+    departamento: string,
+    ciudad: string,
+    zona: string,
+    calle: string,
+    numero: string,
+    entre_calles: string,
+    edificio: string,
+    piso: string,
+    numero_oficina: string,
+    telefono: string,
+    fax: string,
+    email: string,
+    pagina: string,
+    actividad_principal: string,
+    tipo_sector: any,
+    otro: string,
+    login: string
+}

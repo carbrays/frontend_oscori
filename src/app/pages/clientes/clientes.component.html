@@ -1,0 +1,133 @@
+<div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nuevo Cliente" class="p-button-success"
+          (click)="abrirNuevoCliente()"></button>
+</div>
+
+<div class="card p-3 mb-3 shadow-sm">
+  <div class="row g-2">
+    <div class="col-md-3">
+      <input type="text" id="filtroCliente" pInputText [(ngModel)]="filtroCliente" placeholder="Buscar por Cliente">
+    </div>
+  </div>
+</div>
+
+<p-table [value]="clientesFiltrados" [tableStyle]="{ 'min-width': '80rem' }">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>ID</th>
+      <th>Nombre Comercial</th>
+      <th>Razón Social</th>
+      <th>NIT</th>
+      <th>Correo</th>
+      <th>Teléfono</th>
+      <th>WhatsApp</th>
+      <th>Dirección</th>
+      <th>País</th>
+      <th>Ciudad</th>
+      <th>Persona Contacto</th>
+      <th>Teléfono Contacto</th>
+      <th>Correo Contado</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-cliente>
+    <tr>
+      <td>{{ cliente.id_cliente }}</td>
+      <td>{{ cliente.nombre_comercial }}</td>
+      <td>{{ cliente.razon_social }}</td>
+      <td>{{ cliente.nit }}</td>
+      <td>{{ cliente.correo }}</td>
+      <td>{{ cliente.telefono }}</td>
+      <td>{{ cliente.whatsapp }}</td>
+      <td>{{ cliente.direccion }}</td>
+      <td>{{ cliente.pais }}</td>
+      <td>{{ cliente.ciudad }}</td>
+      <td>{{ cliente.persona_contacto }}</td>
+      <td>{{ cliente.telefono_contacto }}</td>
+      <td>{{ cliente.correo_contacto }}</td>
+      <td>{{ cliente.estado }}</td>
+      <td>
+        <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarCliente(cliente)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+        <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarCliente(cliente)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+      
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '700px' }" [header]="tituloPopup">
+  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+    <div class="p-fluid p-grid p-formgrid">
+      <div class="p-field p-col-6">
+        <label for="nombre_comercial">Nombre Comercial</label>
+        <input pInputText id="nombre_comercial" [(ngModel)]="clienteSeleccionado.nombre_comercial" name="nombre_comercial" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="razon_social">Razón Social</label>
+        <input pInputText id="razon_social" [(ngModel)]="clienteSeleccionado.razon_social" name="razon_social" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="nit">NIT</label>
+        <input pInputText id="nit" [(ngModel)]="clienteSeleccionado.nit" name="nit" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="correo">Correo</label>
+        <input pInputText id="correo" [(ngModel)]="clienteSeleccionado.correo" name="correo" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="telefono">Teléfono</label>
+        <input pInputText id="telefono" [(ngModel)]="clienteSeleccionado.telefono" name="telefono" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="whatsapp">WhatsApp</label>
+        <input pInputText id="whatsapp" [(ngModel)]="clienteSeleccionado.whatsapp" name="whatsapp" />
+      </div>
+
+      <div class="p-field p-col-8">
+        <label for="direccion">Dirección</label>
+        <input pInputText id="direccion" [(ngModel)]="clienteSeleccionado.direccion" name="direccion" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="pais">País</label>
+        <input pInputText id="pais" [(ngModel)]="clienteSeleccionado.pais" name="pais" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="ciudad">Ciudad</label>
+        <input pInputText id="ciudad" [(ngModel)]="clienteSeleccionado.ciudad" name="ciudad" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="persona_contacto">Persona de Contacto</label>
+        <input pInputText id="persona_contacto" [(ngModel)]="clienteSeleccionado.persona_contacto" name="persona_contacto" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="telefono_contacto">Teléfono Contacto</label>
+        <input pInputText id="telefono_contacto" [(ngModel)]="clienteSeleccionado.telefono_contacto" name="telefono_contacto" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="correo_contacto">Correo Contado</label>
+        <input pInputText id="correo_contacto" [(ngModel)]="clienteSeleccionado.correo_contacto" name="correo_contacto" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="estado">Estado</label>
+        <!-- <p-dropdown [options]="estados" [(ngModel)]="clienteSeleccionado.estado" name="estado" placeholder="Selecciona un estado"></p-dropdown> -->
+      </div>
+    </div>
+
+    <div class="p-dialog-footer">
+      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+    </div>
+  </form>
+</p-dialog>

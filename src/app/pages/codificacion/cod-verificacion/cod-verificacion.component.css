@@ -1,0 +1,19 @@
+.cd1 {
+    color: rgb(45, 45, 162);
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .cd2 {
+    color:  rgb(149, 52, 40);
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  :host ::ng-deep #cargo {
+    background-color: rgba(0, 102, 255, 0.102) !important;
+}
+
+:host ::ng-deep #cargoF {
+    background-color: rgba(0, 102, 255, 0.102) !important;
+}

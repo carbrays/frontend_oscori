@@ -1,0 +1,825 @@
+<!-- <div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nuevo Contenedor" class="p-button-success"
+          (click)="abrirNuevoContenedor()"></button>
+</div> -->
+
+<div class="card p-3 mb-3 shadow-sm">
+  <div class="row g-2">
+    <div class="col-md-3">
+      <label for="filtroCliente">Contenedor</label>
+      <!-- <ng-select [items]="clientesFiltro" bindLabel="label" bindValue="value" [(ngModel)]="filtroCliente"
+          [ngModelOptions]="{ standalone: true }" placeholder="Buscar por cliente">
+        </ng-select> -->
+      <input type="text" id="filtroContenedor" pInputText [(ngModel)]="filtroContenedor" placeholder="Buscar por Contenedor">
+    </div>
+    <div class="col-md-3">
+      <label for="filtroNaviera">Vencimiento</label>
+      <ng-select 
+  [items]="opcionesVencimiento" 
+  bindLabel="label" 
+  bindValue="value"
+  [(ngModel)]="filtroVencimiento"
+  [ngModelOptions]="{ standalone: true }"
+  placeholder="Filtrar por vencimiento">
+</ng-select>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+      <button pButton type="button"
+        (click)="ordenarDatos()"
+        [label]="ordenAscendente ? 'Orden Ascendente' : 'Orden Descendente'" 
+        [icon]="ordenAscendente ?  'ri-arrow-up-line' : 'ri-arrow-down-line'"
+        class="p-button-sm p-mb-2"
+        label="">
+</button>
+    
+</div>
+
+    <div class="col-md-3 d-flex align-items-end">
+      <button pButton type="button" label="Limpiar filtros" icon="pi pi-filter-slash" class="p-button-sm" (click)="limpiarFiltros()"></button>
+    </div>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+  <button pButton type="button" 
+        label="{{ mostrarTabla ? 'Ver como tarjetas' : 'Ver como tabla' }}" 
+        icon="{{ mostrarTabla ? 'pi pi-th-large' : 'pi pi-table' }}"
+        (click)="alternarVista()">
+
+</button>
+
+
+</div>
+<div *ngIf="gastosDeuda.length > 0" class="mt-3">
+  
+  <h5>DEUDAS</h5>
+  <div class="d-flex justify-content align-items-start mb-2">
+    <ng-container *ngFor="let gasto of gastosDeuda">
+      <label
+        class="btn btn-outline-secondary d-inline-flex"
+        style="cursor: pointer; width: auto;"
+      >
+        {{ gasto.tipo }} - {{ gasto.sum }} Bs.
+      </label>
+    </ng-container>
+  </div>
+
+</div>
+</div>
+
+
+<p-table *ngIf="!mostrarTabla" [value]="contenedoresFiltrados" [tableStyle]="{ 'min-width': '80rem' }" 
+  [scrollable]="true" 
+  scrollHeight="600px">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>#</th>
+      <th>Cliente</th>
+      <th>N° Contenedor</th>
+      <th>Mercancía</th>
+      <th>BL Madre</th>
+      <th>Tipo Contenedor</th>
+      <th>Tamaño</th>
+      <th>Año</th>
+      <th>Tipo</th>
+      <th>Naviera</th>
+      <th>Categoría</th>
+      <th>Ciudad Origen</th>
+      <th>Estado Contenedor</th>
+      <th>Fecha Llegada</th>
+      <th>Fecha Limite</th>
+      <th>Estado</th>
+      <th>Fecha Devolución</th>
+      <th>Ubicación Devolución</th>
+      <th>Dias</th>
+      <th>Observaciones</th>
+      <th>Acciones</th>
+    </tr>
+    <tr>
+  <th></th> <!-- # -->
+  <th><input type="text" pInputText [(ngModel)]="filtroCliente" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroContenedor" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroMercancia" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroBlMadre" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroTipoContenedor" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroTamano" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroAno" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroTipo" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroNaviera" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroCategoria" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroCiudadOrigen" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroEstadoContenedor" style="width: 100%;"/></th>
+  <th><input type="date" pInputText [(ngModel)]="filtroFechaLlegada" style="width: 100%;"/></th>
+  <th><input type="date" pInputText [(ngModel)]="filtroFechaLimite" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroEstado" style="width: 100%;"/></th>
+  <th><input type="date" pInputText [(ngModel)]="filtroFechaDevolucion" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroUbicacionDevolucion" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroDias" style="width: 100%;"/></th>
+  <th><input type="text" pInputText [(ngModel)]="filtroObservaciones" style="width: 100%;"/></th>
+  <th></th> <!-- Acciones -->
+</tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-contenedor>
+    <tr [ngClass]="estiloFila(contenedor.fecha_limite, contenedor.estado)">
+      <td>{{ contenedor.id_contenedor }}</td>
+      <td>{{ getClienteNombre(contenedor.id_cliente) }}</td>
+      <td>{{ contenedor.numero_contenedor }}</td>
+      <td>{{ getMercanciaNombre(contenedor.id_mercancia) }}</td>
+      <td>{{ contenedor.bl_madre }}</td>
+      <td>{{ contenedor.tipo_contenedor }}</td>
+      <td>{{ contenedor.tamano }}</td>
+      <td>{{ contenedor.ano }}</td>
+      <td>{{ contenedor.tipo_contenedor }}</td>
+      <td>{{ getNavieraNombre(contenedor.id_naviera) }}</td>
+      <td>{{ contenedor.id_categoria }}</td>
+      <td>{{ getCiudadNombre(contenedor.id_ciudad_origen) }}</td>
+      <td>{{ contenedor.estado_contenedor }}</td>
+      <td>{{ contenedor.fecha_llegada | date: 'yyyy-MM-dd' }}</td>
+      <td [ngClass]="estiloFila(contenedor.fecha_limite, contenedor.estado)">
+        {{ contenedor.fecha_limite | date: 'yyyy-MM-dd' }}
+      </td>
+      <td>{{ contenedor.estado }}</td>
+      <td>{{ contenedor.fecha_devolucion | date: 'yyyy-MM-dd' }}</td>
+      <td>{{ contenedor.ubicacion_devolucion }}</td>
+      <td>
+  <span *ngIf="calcularDiasRestantes(contenedor.fecha_limite) >= 0">
+    Faltan {{ calcularDiasRestantes(contenedor.fecha_limite) }} días
+  </span>
+  <span *ngIf="contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_limite) < 0">
+    Vencido hace {{ calcularDiasRestantes(contenedor.fecha_limite) * -1 }} días
+  </span>
+  <span *ngIf="contenedor.estado === 'DEVUELTO'">
+  </span>
+</td>
+      <td>{{ contenedor.observaciones }}</td>
+      <td>
+        <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarContenedor(contenedor)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+        <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarContenedor(contenedor)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+        
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+
+<p-dataView *ngIf="mostrarTabla" [value]="contenedoresFiltrados" layout="list" [rows]="5">
+  <ng-template let-contenedor pTemplate="listItem">
+    <div class="p-3 border rounded mb-3 shadow-sm" [ngClass]="estiloFila(contenedor.fecha_limite, contenedor.estado)">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+  <!-- Columna Izquierda: Textos uno encima del otro -->
+  <div>
+    <div class="text-primary fs-5"><b>#:</b> {{ contenedor.id_contenedor }}</div>
+    <div class="text-primary fs-5"><b>N° Contenedor:</b> {{ contenedor.numero_contenedor }}</div>
+    <div class="fs-6"><b>Cliente:</b> {{ getClienteNombre(contenedor.id_cliente) }}</div>
+  </div>
+
+  <!-- Columna Derecha: Botones lado a lado -->
+  <div class="d-flex align-items-center gap-2">
+  <div class="text-primary fs-5">
+    <b>ESTADO:</b> {{ contenedor.estado }}
+  </div>
+
+  <button class="btn btn-sm btn-outline-info" (click)="editarContenedor(contenedor)">
+    <i class="pi pi-pencil"></i> Editar
+  </button>
+
+  <button class="btn btn-sm btn-outline-danger" (click)="eliminarContenedor(contenedor)">
+    <i class="pi pi-trash"></i> Eliminar
+  </button>
+</div>
+
+</div>
+
+      <hr class="my-1" />
+      <!-- Contenedor Grid -->
+<div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px;">
+
+  <!-- Fecha Llegada -->
+  <div [ngClass]="{'faltante': !contenedor.fecha_llegada}">
+    <b>Fecha Llegada:</b> {{ contenedor.fecha_llegada | date:'yyyy-MM-dd' }}
+  </div>
+
+  <!-- Mercancía -->
+  <div [ngClass]="{'faltante': !contenedor.id_mercancia}">
+    <b>Mercancía:</b> {{ getMercanciaNombre(contenedor.id_mercancia) }}
+  </div>
+
+  <!-- Días -->
+  <div style="grid-column: span 1;">
+    <b>Días:</b>
+    <span *ngIf="calcularDiasRestantes(contenedor.fecha_limite) >= 0">
+      Faltan {{ calcularDiasRestantes(contenedor.fecha_limite) }} días
+    </span>
+    <span *ngIf="contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_limite) < 0">
+      Vencido hace {{ calcularDiasRestantes(contenedor.fecha_limite) * -1 }} días
+    </span>
+    <span *ngIf="contenedor.estado === 'DEVUELTO'">Entregado</span>
+  </div>
+
+  <!-- Fecha Límite -->
+  <div [ngClass]="estiloFila(contenedor.fecha_limite, contenedor.estado)">
+    <b>Fecha Límite:</b> {{ contenedor.fecha_limite | date:'yyyy-MM-dd' }}
+  </div>
+
+  <!-- Tamaño -->
+  <div [ngClass]="{'faltante': !contenedor.tamano}">
+    <b>Tamaño:</b> {{ contenedor.tamano }}
+  </div>
+
+  <!-- Estado Contenedor -->
+  <div [ngClass]="{'faltante': !contenedor.estado_contenedor}">
+    <b>Estado Contenedor:</b> {{ contenedor.estado_contenedor }}
+  </div>
+
+  <!-- Naviera -->
+  <div [ngClass]="{'faltante': !contenedor.id_naviera}">
+    <b>Naviera:</b> {{ getNavieraNombre(contenedor.id_naviera) }}
+  </div>
+
+  <!-- Categoría -->
+  <div [ngClass]="{'faltante': !contenedor.id_categoria}">
+    <b>Categoría:</b> {{ contenedor.id_categoria }}
+  </div>
+
+  <!-- Año -->
+  <div [ngClass]="{'faltante': !contenedor.ano}">
+    <b>Año:</b> {{ contenedor.ano }}
+  </div>
+
+  <!-- Ubicación Devolución -->
+  <div [ngClass]="{'faltante': !contenedor.ubicacion_devolucion}">
+    <b>Ubicación Devolución:</b> {{ contenedor.ubicacion_devolucion }}
+  </div>
+
+  <!-- BL Madre -->
+  <div [ngClass]="{'faltante': !contenedor.bl_madre}">
+    <b>BL Madre:</b> {{ contenedor.bl_madre }}
+  </div>
+
+  <!-- Fecha Devolución -->
+  <div [ngClass]="{'faltante': !contenedor.fecha_devolucion}">
+    <b>Fecha Devolución:</b> {{ contenedor.fecha_devolucion | date:'yyyy-MM-dd' }}
+  </div>
+
+  <!-- Ciudad Origen -->
+  <div [ngClass]="{'faltante': !contenedor.id_ciudad_origen}">
+    <b>Ciudad Origen:</b> {{ getCiudadNombre(contenedor.id_ciudad_origen) }}
+  </div>
+
+  <!-- Observaciones -->
+  <div style="grid-column: span 2; white-space: pre-wrap; word-break: break-word;">
+    <b>Observaciones:</b> {{ contenedor.observaciones }}
+  </div>
+
+  <!-- Tipo Contenedor -->
+  <div [ngClass]="{'faltante': !contenedor.tipo_contenedor}">
+    <b>Tipo Contenedor:</b> {{ contenedor.tipo_contenedor }}
+  </div>
+  
+</div>
+<hr class="my-1" />
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+  <ng-container *ngFor="let gasto of tiposGasto">
+    <label
+      class="btn btn-sm"
+      [ngClass]="{
+        'btn-success': contenedor[gasto.nombre.toLowerCase()],
+        'btn-outline-danger': !contenedor[gasto.nombre.toLowerCase()]
+      }"
+      style="cursor: pointer;"
+      for="file-{{contenedor.id_contenedor}}-{{gasto.id}}"
+      title="Subir {{ gasto.nombre }}"
+      (click)="verGasto(contenedor, gasto)"
+    >
+      {{ gasto.nombre }} <b>{{ contenedor[gasto.nombre.toLowerCase()] }} Bs.</b><br>
+DEUDA {{ contenedor['deuda_' + gasto.nombre.toLowerCase()] ? contenedor['deuda_' + gasto.nombre.toLowerCase()] : 0 }} Bs.
+
+    </label>
+  </ng-container>
+</div>
+<div>
+    <button class="btn btn-sm btn-outline-secondary me-2" (click)="verImagenes(contenedor)">
+      <i class="pi pi-pencil"></i> FOTOS
+    </button>
+    <button class="btn btn-sm btn-outline-secondary me-2" (click)="verDevoluciones(contenedor)">
+      <i class="pi pi-pencil"></i> DEVOLUCIÓN
+    </button>
+    <button class="btn btn-sm btn-outline-secondary me-2" (click)="verPdfs(contenedor, 'EIR')">
+      <i class="pi pi-pencil"></i> EIR
+    </button>
+  </div>
+
+<!-- <div class="d-flex flex-wrap gap-2 mt-3">
+        <label for="estado">Estado</label>
+        <p-selectButton [options]="estados" [(ngModel)]="contenedor.estado" optionLabel="label"
+          optionValue="value" class="small-select-button" [ngModelOptions]="{ standalone: true }"
+          name="estado" (onChange)="guardarEstadoContenedor(contenedor, $event.value)"/>
+      </div> -->
+
+    </div>
+  </ng-template>
+</p-dataView>
+
+<p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '90%' }" [header]="tituloPopup">
+  <div class="d-flex" style="gap: 1rem;">
+  <form (ngSubmit)="guardarCambios()" #form="ngForm" style="flex: 1;">
+    <div class="d-flex flex-wrap mb-4 p-fluid">
+
+      <div class="p-2 flex-fill">
+        <label for="numero_contenedor">N° Contenedor</label>
+        <input pInputText id="numero_contenedor" [(ngModel)]="contenedorSeleccionado.numero_contenedor" name="numero_contenedor" [disabled]="true" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="tipo_contenedor">Tipo de Contenedor</label>
+        <p-selectButton [options]="tipo_contenedor" [(ngModel)]="contenedorSeleccionado.tipo_contenedor" optionLabel="label"
+          optionValue="value" [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
+          name="tipo_contenedor" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="tamano">Tamaño</label>
+        <input pInputText id="tamano" [(ngModel)]="contenedorSeleccionado.tamano" name="tamano" [disabled]="true" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="ano">Modelo</label>
+        <input pInputText id="ano" type="number" [(ngModel)]="contenedorSeleccionado.ano" name="ano" (ngModelChange)="asignarCategoria()"/>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_naviera">Naviera</label>
+        <p-selectButton [options]="navieras" [(ngModel)]="contenedorSeleccionado.id_naviera" optionLabel="label"
+          optionValue="value" [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
+          name="naviera" [disabled]="true"/>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_categoria">Categoría</label>
+        <input pInputText id="id_categoria" [(ngModel)]="contenedorSeleccionado.id_categoria" name="id_categoria" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_ciudad_origen">Ciudad Origen</label>
+        <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+          [(ngModel)]="contenedorSeleccionado.id_ciudad_origen" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione una ciudad" [disabled]="true">
+        </ng-select>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="ano_plaqueta">Año Plaqueta</label>
+        <input pInputText id="ano_plaqueta" [(ngModel)]="contenedorSeleccionado.ano_plaqueta" name="ano_plaqueta" (input)="numeros($event, 'ano_plaqueta')"/>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="estado_contenedor">Estado Contenedor</label>
+        <input pInputText id="estado_contenedor" [(ngModel)]="contenedorSeleccionado.estado_contenedor" name="estado_contenedor" />
+      </div>
+
+      <div class="p-2 flex-fill d-flex flex-column align-items-center">
+  <label for="verificado" class="mb-1">Verificación</label>
+  <p-checkbox 
+    [(ngModel)]="contenedorSeleccionado.verificado" 
+    [binary]="true"
+    inputId="verificado"
+    name="verificado">
+  </p-checkbox>
+</div>
+
+<div class="p-field p-col-12">
+        <label for="ubicacion_devolucion">Lugar de Devolución</label>
+        <input pInputText id="ubicacion_devolucion" [(ngModel)]="contenedorSeleccionado.ubicacion_devolucion" name="ubicacion_devolucion"/>
+      </div>
+
+      <!-- <div class="p-2 flex-fill" style="min-width: 250px;">
+        <label for="fecha_devolucion">Fecha Devolución</label>
+        <p-calendar inputId="fecha_devolucion" [(ngModel)]="contenedorSeleccionado.fecha_devolucion" name="fecha_devolucion"
+         dateFormat="yy-mm-dd" [showIcon]="true"
+          [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+      </div> -->
+
+      <div class="p-field p-col-12">
+        <label for="observaciones">Observaciones</label>
+        <textarea pInputTextarea id="observaciones" rows="3" [(ngModel)]="contenedorSeleccionado.observaciones" name="observaciones"></textarea>
+      </div>
+
+    </div>
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>
+       <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+    </div>
+    </form> 
+
+<!-- <div style="flex: 1; height: 600px; border: 1px solid #ccc;">
+  <ng-container *ngFor="let pdf of pdfs">
+    <label
+      class="btn btn-sm"
+      [ngClass]="
+        'btn-success'
+      "
+      style="cursor: pointer;"
+      for="file-{{contenedorSeleccionado.id_despacho}}-BL"
+      title="Subir bl"
+      (click)="verPdfs(contenedorSeleccionado.id_despacho, pdf)"
+    >
+      {{ pdf.nombre }}
+    </label>
+  </ng-container>
+      <ngx-doc-viewer
+        [url]="urlPdf(contenedorSeleccionado.id_despacho)"
+        viewer="url"
+        style="width:100%;height:100%;"
+        filename="contenedorSeleccionado.id_despacho+ '.pdf'"
+        disabledDownload="false">
+      </ngx-doc-viewer> -->
+    <!-- </div> -->
+</div>
+  
+</p-dialog>
+
+
+<p-dialog 
+  [header]="tituloMostrarGastos" 
+  [(visible)]="mostrarGastos" 
+  [modal]="true" 
+  [style]="{ width: '80%' }">
+  
+  <div class="p-fluid">
+    <p-table [value]="gastos" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Lugar</th>
+          <th>Monto</th>
+          <th>Cancelado</th>
+          <th>Fecha Pago</th>
+          <th>Modalidad Pago</th>
+          <th>Persona Pago</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-gasto let-rowIndex="rowIndex">
+        <tr>
+          <!-- Lugar -->
+          <td>
+            <ng-select
+  [items]="ciudades"
+  bindLabel="label"
+  bindValue="value"
+  [(ngModel)]="gasto.lugar"
+  [ngModelOptions]="{ standalone: true }"
+  placeholder="Seleccione una ciudad"
+  appendTo="body">
+</ng-select>
+          </td>
+
+          <!-- Monto -->
+          <td>
+            <input type="number" 
+                   pInputText 
+                   [(ngModel)]="gasto.monto"
+                   placeholder="0.00" />
+          </td>
+
+          <!-- Cancelado -->
+          <td class="text-center">
+            <p-checkbox [(ngModel)]="gasto.cancelado" [binary]="true"></p-checkbox>
+          </td>
+
+          <!-- Fecha Pago -->
+          <td>
+            <p-calendar inputId="fecha_pago" [(ngModel)]="gasto.fecha_pago" name="fecha_pago"
+         dateFormat="yy-mm-dd" [showIcon]="true"
+          [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+          </td>
+
+          <!-- Modalidad Pago -->
+          <td>
+            <ng-select
+  [items]="modalidad_pago"
+  bindLabel="label"
+  bindValue="value"
+  [(ngModel)]="gasto.modalidad_pago"
+  [ngModelOptions]="{ standalone: true }"
+  placeholder="Seleccione una modalidad"
+  appendTo="body">
+</ng-select>
+          </td>
+
+          <!-- Persona Pago -->
+          <td>
+            <input type="text" 
+                   pInputText 
+                   [(ngModel)]="gasto.persona_pago"
+                   placeholder="Persona que pagó" />
+          </td>
+
+          <!-- Eliminar -->
+          <td>
+            <button pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-danger p-button-sm" 
+                    (click)="eliminarGasto(rowIndex)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="button" label="+ Agregar" class="p-button-secondary" (click)="agregarGasto()"></button>
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2" (click)="guardarGasto()"></button>
+    </div>    
+  </div>
+
+</p-dialog>
+
+<p-dialog 
+  header="Devolución" 
+  [(visible)]="mostrarDevolucion" 
+  [modal]="true" 
+  [style]="{ width: '80%' }">
+  
+  <div class="p-fluid">
+    <p-table [value]="devoluciones" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Vehiculo</th>
+          <th>Urbano</th>
+          <th>Fecha Devolución</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-devolucion let-rowIndex="rowIndex">
+        <tr>
+          <!-- Vehiculo -->
+          <td>
+            <ng-select [items]="vehiculos" bindLabel="label" bindValue="value"
+          [(ngModel)]="devolucion.id_vehiculo" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione un vehículo" appendTo="body">
+        </ng-select>
+          </td>
+          <!-- Urbano -->
+          <td class="text-center">
+            <p-checkbox [(ngModel)]="devolucion.urbano" [binary]="true"></p-checkbox>
+          </td>
+
+          <!-- Fecha Devolución -->
+          <td>
+            <p-calendar inputId="fecha_devolucion" [(ngModel)]="devolucion.fecha_devolucion" name="fecha_devolucion"
+         dateFormat="yy-mm-dd" [showIcon]="true"
+          [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+          </td>
+
+          <!-- Eliminar -->
+          <td>
+            <button pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-danger p-button-sm" 
+                    (click)="eliminarDevolucion(rowIndex)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="button" label="+ Agregar" class="p-button-secondary" (click)="agregarDevolucion()"></button>
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2" (click)="guardarDevolucion()"></button>
+    </div>    
+  </div>
+
+</p-dialog>
+
+<p-dialog header="Fotos" [(visible)]="mostrarImagen" [modal]="true" [style]="{width: '800px'}">
+  
+  <div style="display: flex; flex-direction: column; gap: 24px; width: 100%; margin: auto;">
+
+  <!-- Grupo 1: Botón al centro -->
+  <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+  <p class="mb-2 font-semibold" style="font-size: 25px;">CONTENEDOR 1</p>
+</div>
+
+    </div>
+
+  <!-- Grupo 2: Botón izquierda, imagen centro, botón derecha -->
+  <div style="display: flex; justify-content: space-between; align-items: center; height: 80px;">
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+      <button *ngIf="existe('C1_IZQUIERDA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C1_IZQUIERDA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    
+      <!-- <p class="mb-2 font-semibold">Izquierda</p> -->
+      <button pButton type="button" label="Izquierda" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C1_IZQUIERDA')"></button>
+      
+        </div>
+        
+        <img src="assets/images/contenedor.png"
+       alt="Imagen"
+       style="margin: 0 16px;"
+        />
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+      
+    <!-- <p class="mb-2 font-semibold">Derecha</p> -->
+        <button pButton type="button" label="Derecha" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C1_DERECHA')"></button>
+        <button *ngIf="existe('C1_DERECHA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C1_DERECHA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    </div>
+  </div>
+
+  <!-- Grupo 3: Botón al centro -->
+  <div style="display: flex; justify-content: center; align-items: center; height: 80px;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+    <!-- <p class="mb-2 font-semibold">Puerta</p> -->
+    <button pButton type="button" label="Puerta" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C1_PUERTA')"></button>
+    <button *ngIf="existe('C1_PUERTA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C1_PUERTA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    </div>
+        
+  </div>
+
+  <!-- Grupo 4: Botón al centro -->
+  <div style="display: flex; justify-content: space-between; align-items: center; height: 80px;">
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+    <!-- <p class="mb-2 font-semibold">Precinto</p> -->
+    <button *ngIf="existe('C1_PRECINTO')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C1_PRECINTO'))">
+        <i class="pi pi-pencil"></i> Ver
+</button>
+        <button pButton type="button" label="Precinto" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C1_PRECINTO')"></button>
+    </div>
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+    <!-- <p class="mb-2 font-semibold">Plaqueta</p> -->
+        <button pButton type="button" label="Plaqueta" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C1_PLAQUETA')"></button>
+        <button *ngIf="existe('C1_PLAQUETA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C1_PLAQUETA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    </div>
+  </div>
+
+  <hr class="my-1" />
+
+  <!-- Grupo 1: Botón al centro -->
+  <div style="display: flex; justify-content: center; align-items: center; ">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+  <p class="mb-2 font-semibold" style="font-size: 25px;">CONTENEDOR 2</p>
+
+</div>
+
+    </div>
+
+  <!-- Grupo 2: Botón izquierda, imagen centro, botón derecha -->
+  <div style="display: flex; justify-content: space-between; align-items: center; height: 80px;">
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+    <button *ngIf="existe('C2_IZQUIERDA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C2_IZQUIERDA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+      <!-- <p class="mb-2 font-semibold">Izquierda</p> -->
+        <button pButton type="button" label="Izquierda" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C2_IZQUIERDA')"></button>
+        </div>
+
+         <img src="assets/images/contenedor.png"
+       alt="Imagen"
+       style="margin: 0 16px;"
+        />
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+      
+    <!-- <p class="mb-2 font-semibold">Derecha</p> -->
+        <button pButton type="button" label="Derecha" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C2_DERECHA')"></button>
+
+        <button *ngIf="existe('C2_DERECHA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C2_DERECHA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    </div>
+  </div>
+
+  <!-- Grupo 3: Botón al centro -->
+  <div style="display: flex; justify-content: center; align-items: center; height: 80px;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+    <!-- <p class="mb-2 font-semibold">Puerta</p> -->
+    <button pButton type="button" label="Puerta" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C2_PUERTA')"></button>
+
+    <button *ngIf="existe('C2_PUERTA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C2_PUERTA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    </div>
+        
+  </div>
+
+  <!-- Grupo 4: Botón al centro -->
+  <div style="display: flex; justify-content: space-between; align-items: center; height: 80px;">
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+    <!-- <p class="mb-2 font-semibold">Precinto</p> -->
+    <button *ngIf="existe('C2_PRECINTO')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C2_PRECINTO'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    
+    <button pButton type="button" label="Precinto" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C2_PRECINTO')"></button>
+       
+    </div>
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;">
+    <!-- <p class="mb-2 font-semibold">Plaqueta</p> -->
+    <button pButton type="button" label="Plaqueta" class="p-button-secondary" (click)="abrirSelectorImagen(contenedorSeleccionado, 'C2_PLAQUETA')"></button>
+
+    <button *ngIf="existe('C2_PLAQUETA')" 
+        class="btn btn-sm btn-outline-info me-2" 
+        (click)="verImagen(getImagen('C2_PLAQUETA'))">
+  <i class="pi pi-pencil"></i> Ver
+</button>
+    </div>
+  </div>
+</div>
+</p-dialog>
+<p-dialog [(visible)]="mostrarDialogImagen" 
+          [modal]="true" 
+          [closable]="true"
+          [style]="{ width: '90vw', maxWidth: '1200px', padding: '0' }"
+          [contentStyle]="{ padding: '0' }"
+          styleClass="dialog-fullscreen">
+
+  <div class="dialog-img-container">
+    <img [src]="imagenSeleccionadaURL"
+         alt="Imagen"
+         class="dialog-img" />
+  </div>
+</p-dialog>
+
+<p-dialog 
+  header="EIR" 
+  [(visible)]="mostrarDialogVariosPDF" 
+  [modal]="true" 
+  [style]="{ width: 'auto' }">
+  <div class="d-flex" style="gap: 1rem;">
+  
+        <p-table [value]="pdfs" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre del archivo</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-pdf let-rowIndex="rowIndex">
+        <tr>
+          <td>
+            <label for="nombre"> {{ pdf.nombre }}</label>
+          </td>
+
+          <td>
+            
+            <button class="btn btn-sm btn-outline-info me-2" (click)="verPDF(pdf.nombre)">
+          <i class="pi pi-pencil"></i>Ver
+        </button>
+        <button class="btn btn-sm btn-outline-danger" (click)="eliminarPDF(pdf.nombre)">
+          <i class="pi pi-trash"></i>Eliminar
+        </button>
+           
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="p-dialog-footer mt-3">
+      <button pButton type="button" label="+ Agregar" class="p-button-secondary" (click)=" abrirSelectorArchivo(contenedorSeleccionado)"></button>
+  
+    </div>
+
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarDialogPDF" [modal]="true" [style]="{ width: '80%' }" >
+  <div class="d-flex" style="gap: 1rem;">
+  
+<div style="flex: 1; height: 600px; border: 1px solid #ccc;">
+      <ngx-doc-viewer
+        [url]="pdfSeleccionadoURL"
+        viewer="url"
+        style="width:100%;height:100%;"
+        disabledDownload="false">
+      </ngx-doc-viewer>
+    </div>
+</div>
+  
+</p-dialog>

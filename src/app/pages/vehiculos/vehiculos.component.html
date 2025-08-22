@@ -1,0 +1,128 @@
+<div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nuevo Vehículo" class="p-button-success"
+          (click)="abrirNuevoVehiculo()"></button>
+</div>
+
+<p-table [value]="vehiculos" [tableStyle]="{ 'min-width': '80rem' }">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Placa</th>
+      <th>Marca</th>
+      <th>Modelo</th>
+      <th>Fabricación</th>
+      <th>Tipo</th>
+      <th>Color</th>
+      <th>Chasis</th>
+      <th>Motor</th>
+      <th>Carga (kg)</th>
+      <th>Volumen (m³)</th>
+      <th>Combustible</th>
+      <th>Kilometraje</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-vehiculo>
+    <tr>
+      <td>{{ vehiculo.placa }}</td>
+      <td>{{ vehiculo.marca }}</td>
+      <td>{{ vehiculo.modelo }}</td>
+      <td>{{ vehiculo.fabricacion }}</td>
+      <td>{{ vehiculo.tipo_vehiculo }}</td>
+      <td>{{ vehiculo.color }}</td>
+      <td>{{ vehiculo.nro_chasis }}</td>
+      <td>{{ vehiculo.nro_motor }}</td>
+      <td>{{ vehiculo.capacidad_carga_kg }}</td>
+      <td>{{ vehiculo.volumen_carga_m3 }}</td>
+      <td>{{ vehiculo.tipo_combustible }}</td>
+      <td>{{ vehiculo.kilometraje }}</td>
+      <td>{{ vehiculo.despachos_en_proceso }}</td>
+      <td>
+        <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarVehiculo(vehiculo)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+        <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarVehiculo(vehiculo)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '800px' }" [header]="tituloPopup">
+  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+    <div class="p-fluid p-grid p-formgrid">
+
+      <div class="p-field p-col-4">
+        <label for="placa">Placa</label>
+            <input pInputText id="placa" [(ngModel)]="vehiculoSeleccionado.placa" name="placa" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="marca">Marca</label>
+        <input pInputText id="marca" [(ngModel)]="vehiculoSeleccionado.marca" name="marca" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="modelo">Modelo</label>
+        <input pInputText id="modelo" [(ngModel)]="vehiculoSeleccionado.modelo" name="modelo" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="fabricacion">Año de Fabricación</label>
+        <input pInputText id="fabricacion" [(ngModel)]="vehiculoSeleccionado.fabricacion" name="fabricacion" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="tipo_vehiculo">Tipo de Vehículo</label>
+        <input pInputText id="tipo_vehiculo" [(ngModel)]="vehiculoSeleccionado.tipo_vehiculo" name="tipo_vehiculo" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="color">Color</label>
+        <input pInputText id="color" [(ngModel)]="vehiculoSeleccionado.color" name="color" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="nro_chasis">N° Chasis</label>
+        <input pInputText id="nro_chasis" [(ngModel)]="vehiculoSeleccionado.nro_chasis" name="nro_chasis" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="nro_motor">N° Motor</label>
+        <input pInputText id="nro_motor" [(ngModel)]="vehiculoSeleccionado.nro_motor" name="nro_motor" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="capacidad_carga_kg">Capacidad (kg)</label>
+        <input pInputText id="capacidad_carga_kg" [(ngModel)]="vehiculoSeleccionado.capacidad_carga_kg" name="capacidad_carga_kg" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="volumen_carga_m3">Volumen (m³)</label>
+        <input pInputText id="volumen_carga_m3" [(ngModel)]="vehiculoSeleccionado.volumen_carga_m3" name="volumen_carga_m3" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="tipo_combustible">Combustible</label>
+        <input pInputText id="tipo_combustible" [(ngModel)]="vehiculoSeleccionado.tipo_combustible" name="tipo_combustible" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="kilometraje">Kilometraje</label>
+        <input pInputText id="kilometraje" [(ngModel)]="vehiculoSeleccionado.kilometraje" name="kilometraje" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="estado">Estado</label>
+        <ng-select [items]="estados" placeholder="Selecciona un estado" bindLabel="label" 
+            bindValue="value" 
+            [(ngModel)]="vehiculoSeleccionado.estado" name="cargo">
+        </ng-select>
+        
+      </div>
+
+    </div>
+    <div class="p-dialog-footer">
+      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+    </div>
+  </form>
+</p-dialog>

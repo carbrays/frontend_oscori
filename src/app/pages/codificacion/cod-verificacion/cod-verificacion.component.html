@@ -1,0 +1,193 @@
+<p-card>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Señor(a)</label>
+                </div>    
+                <div class="col-md-10">
+                    <ng-select [items]="personas" bindLabel="nombre" [(ngModel)]="persona" (change)="seleccionar()">
+                        <ng-template ng-option-tmp let-item="item" let-index="index">
+                            <b [style.color]="item.sw==1 ? 'dark' : '#164CA4'">{{item.nombre}}</b>
+                        </ng-template>
+                    </ng-select>
+                </div>    
+            </div>    
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username"  style="padding-top: 8%;">Nro</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12" [(ngModel)]="numero" readonly/>
+                </div>    
+            </div>    
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username"  style="padding-top: 8%;">C.I.</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12" [(ngModel)]="carnet" readonly/>
+                </div>    
+            </div>    
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Fecha</label>
+                </div>    
+                <div class="col-md-10">
+                    <div class="p-inputgroup">
+                        <div *ngIf="idRol!='22'">
+                            <button pButton pRipple type="button" icon="ri-calendar-line" class="p-button-rounded p-button-outlined" (click)="fecha()"></button>
+                        </div>
+                        <input pInputText id="correo" class="p-inputtext-sm col-md-12" [(ngModel)]="fechaFormateada" readonly/>
+                    </div>
+                </div>    
+            </div>    
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Cargo</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="cargo" class="p-inputtext-sm col-md-12" [(ngModel)]="cargo"/>
+                </div>    
+            </div>    
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username"  style="padding-top: 8%;">Unidad</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12" [(ngModel)]="unidad" readonly/>
+                </div>    
+            </div>    
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Dirección</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12"  [(ngModel)]="direccion" readonly/>
+                </div>    
+            </div>    
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Referencia</label>
+                </div>    
+                <div class="col-md-10">
+                    <ng-select [items]="referencias" bindLabel="referencia" [(ngModel)]="referencia"></ng-select>
+                </div>    
+            </div>    
+        </div>
+    </div>
+</p-card><br>
+<p-card>
+    <div class="row">
+        <div class="col-md-1">
+            <label htmlFor="username" style="padding-top: 8%;">Asunto:</label>
+        </div>    
+        <div class="col-md-11">
+            <input pInputText id="correo" class="p-inputtext-sm col-md-12" [(ngModel)]="asunto"/>
+        </div>   
+    </div>
+    <div class="row">
+        <div class="col-md-1">
+            <label htmlFor="username" style="padding-top: 8%;">Contenido:</label>
+        </div>    
+        <div class="col-md-11">
+            <textarea rows="7" class="p-inputtext-sm col-md-12" [(ngModel)]="contenido" pInputTextarea></textarea>
+        </div>   
+    </div>
+</p-card><br>
+<p-card>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-1">
+                    <label htmlFor="username" style="padding-top: 8%;">Cc.</label>
+                </div>    
+                <div class="col-md-11">
+                    <textarea rows="5" class="p-inputtext-sm col-md-12" pInputTextarea [(ngModel)]="cc  "></textarea>
+                </div> 
+            </div>
+            <br>
+            <div *ngIf="sw==2; else loggedOut">
+                <button pButton type="button" label="Guardar" class="p-button-sm p-button-info" (click)="guardar()"></button>&nbsp;&nbsp;&nbsp;
+                <button pButton type="button" label="Cancelar" class="p-button-sm p-button-danger"  (click)="cancelar()"></button>
+            </div>
+            <ng-template #loggedOut>
+                <button pButton type="button" label="Confirmar" class="p-button-sm p-button-success"  (click)="cancelar()"></button>&nbsp;&nbsp;&nbsp;
+                <button pButton type="button" label="Modificar Cambios" class="p-button-sm p-button-info" (click)="guardar()"></button>
+            </ng-template>
+        </div>    
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Firma</label>
+                </div>    
+                <div class="col-md-10">
+                    <ng-select [items]="firmas" bindLabel="nombre" [(ngModel)]="firma" (change)="seleccionarFirma()">
+                        <ng-template ng-option-tmp let-item="item" let-index="index">
+                            <b [style.color]="item.sw==1 ? 'dark' : '#164CA4'">{{item.nombre}}</b>
+                        </ng-template>
+                    </ng-select>
+                </div>    
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">C.I.</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12" [(ngModel)]="carnetF" readonly/>
+                </div>    
+            </div>  
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Cargo</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="cargoF" class="p-inputtext-sm col-md-12"  [(ngModel)]="cargoF"/>
+                </div>    
+            </div>  
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Unidad</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12"  [(ngModel)]="unidadF" readonly/>
+                </div>    
+            </div>  
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Dirección</label>
+                </div>    
+                <div class="col-md-10">
+                    <input pInputText id="correo" class="p-inputtext-sm col-md-12"  [(ngModel)]="direccionF" readonly/>
+                </div>    
+            </div>  
+        </div>   
+    </div>
+</p-card>
+
+<p-dialog appendTo="body" header="Selecione la fecha" [(visible)]="display" [modal]="true"  [style]="{width: '40vw'}" [draggable]="false" [resizable]="false">
+    <p-calendar appendTo="body" [inline]="true" inputId="time" [style]="{width: '100%'}" [locale]="es" [(ngModel)]="fechaActual" (onSelect)="selecionarFecha()"></p-calendar>
+</p-dialog>
+<ngx-spinner type="ball-scale-multiple">
+    <p style="color: aliceblue; font-size: 18px;">Espere mientras se carga la información</p>
+</ngx-spinner>

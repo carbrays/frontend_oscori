@@ -1,0 +1,131 @@
+label, input {
+    display: inline-block;
+    vertical-align: middle;
+}
+input {
+    height: 35px;
+}
+label {
+    margin-right: 10px;
+}
+.input-container {
+    padding-top: 0.5%;
+}
+.checkbox-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+:host ::ng-deep .form-group {
+    display: flex;
+    align-items: center;
+}
+:host ::ng-deep .form-group label {
+    margin: 0;
+    padding: 0;
+}
+:host ::ng-deep .form-group .p-checkbox {
+    margin: 0;
+}
+:host ::ng-deep .radio-group {
+    display: flex;
+    align-items: center;
+}
+:host ::ng-deep .radio-group label {
+    margin-left: 0.5rem;
+}
+:host ::ng-deep .radio-group .p-radiobutton {
+    margin: 0;
+}
+/*
+.card-body {
+    max-height: 450px;
+    overflow-y: auto;
+}*/
+#inputDescricpion{
+    width: 70%;
+}
+
+.p-dialog-content .p-formgrid {
+    margin-top: 20px;
+}
+
+.p-formgrid .p-field {
+    margin-bottom: 15px;
+}
+
+.p-dialog-content .p-field label {
+    font-weight: normal;
+}
+
+.p-dialog-content .p-field input {
+    width: 100%;
+}
+
+.responsive-calendar {
+    width: 100%;
+    max-width: 400px;
+    /* Ajusta esto según sea necesario */
+}
+
+.p-inputtext {
+  text-transform: uppercase;
+}
+
+.despacho {
+  color: #2255e4 !important; 
+  font-weight: bold;
+}
+
+.despacho-culminado {
+  background-color: #d7f8da !important; 
+  color: #2255e4 !important; 
+  font-weight: bold;
+}
+
+.despacho-observado {
+  background-color: #f8f5d7 !important;
+  color: #2255e4 !important;
+  font-weight: bold;
+}
+
+.despacho-faltante {
+  background-color: #ffe5e5 !important; /* Fondo rosado claro */
+/*  border: 1px solid #d32f2f !important;*/ /* Borde rojo */
+  color: #2255e4 !important; /* Texto rojo */
+}
+
+.input-error {
+  border: 1px solid red !important;
+  box-shadow: 0 0 0 0.1rem rgba(255, 0, 0, 0.25);
+}
+
+.vibrar {
+  animation: vibrar 0.3s linear;
+}
+
+@keyframes vibrar {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+    
+pInputText:placeholder-shown {
+  border: solid 2px red; /* Color del placeholder */
+}
+
+.small-select-button .p-button {
+  font-size: 5px;
+  padding: 2px 8px;  /* más compacto */
+}
+
+.small-select-button .p-selectbutton {
+  font-size: 12px;
+}
+
+.faltante {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}

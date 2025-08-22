@@ -1,0 +1,561 @@
+<div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nuevo Despacho" class="p-button-success"
+    (click)="abrirNuevoDespacho()"></button>
+  <button pButton type="button" icon="pi pi-file-pdf" label="Generar PDF" class="p-button-secondary"
+    (click)="exportarDespachosPDF()"></button>
+  <button pButton type="button" icon="pi pi-file-excel" label="Exportar Excel" class="p-button-secondary"
+    (click)="exportarDespachosExcel()"></button>
+    <button pButton type="button" 
+        label="{{ mostrarTabla ? 'Ver como tabla' : 'Ver como tarjetas'  }}" 
+        icon="{{ mostrarTabla ? 'pi pi-th-large' : 'pi pi-table' }}"
+        (click)="alternarVista()">
+</button>
+</div>
+
+<div class="card p-3 mb-3 shadow-sm">
+  <div class="row g-2">
+    
+
+    <div class="col-md-3">
+  <label for="filtroEstado">Estado</label>
+  <ng-select 
+    [items]="estados" 
+    bindLabel="label" 
+    bindValue="value"
+    [(ngModel)]="filtroEstado"
+    [ngModelOptions]="{ standalone: true }"
+    placeholder="Filtrar por estado"
+    
+  >
+  </ng-select>
+</div>
+
+
+    <div class="col-md-3 d-flex align-items-end">
+      <button pButton type="button"
+        (click)="ordenarDatos()"
+        [label]="ordenAscendente ? 'Orden Ascendente' : 'Orden Descendente'" 
+        [icon]="ordenAscendente ?  'ri-arrow-up-line' : 'ri-arrow-down-line'"
+        class="p-button-sm p-mb-2"
+        label="">
+</button>
+    
+</div>
+
+    <div class="col-md-3 d-flex align-items-end">
+      <button pButton type="button" label="Limpiar filtros" icon="pi pi-filter-slash" class="p-button-sm" (click)="limpiarFiltros()"></button>
+    </div>
+  </div>
+
+</div>
+
+<p-table *ngIf="!mostrarTabla" [value]="despachosFiltrados" [tableStyle]="{ 'min-width': '75rem' }"
+[scrollable]="true" 
+  scrollHeight="600px">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Cliente</th>
+      <th>Mercancía</th>
+      <th>Contenedor</th>
+      <th>Tipo Carga</th>
+      <th>Descripción Carga</th>
+      <th>BL Madre</th>
+      <th>Fecha BL Madre</th>
+      <th>BL Hijo</th>
+      <th>Fecha BL Hijo</th>
+      <th>DAM</th>
+      <th>Fecha DAM</th>
+      <th>Embalaje</th>
+      <th>Peso (kg)</th>
+      <th>Volumen (m³)</th>
+      <th>Naviera</th>
+      <th>Origen</th>
+      <th>Destino</th>
+      <th>Despacho Portuario</th>
+      <th>Despacho Aduanero</th>
+      <th>Despacho Aduanero General</th>
+      <th>Depósito Aduanero</th>
+      <th>Asignación Carga</th>
+      <th>Fecha Carga</th>
+      <th>Asignación Descarga</th>
+      <th>Fecha Descarga</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+    <tr>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroCliente" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroMercancia" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroContenedor"  style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroTipoCarga"  style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDescripcion"  style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroBlMadre"  style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="date" pInputText [(ngModel)]="filtroFechaBlMadre" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroBlHijo"  style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="date" pInputText [(ngModel)]="filtroFechaBlHijo" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDam"  style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="date" pInputText [(ngModel)]="filtroFechaDam" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroEmbalaje" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="number" pInputText [(ngModel)]="filtroPeso" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="number" pInputText [(ngModel)]="filtroVolumen" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroNaviera" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroOrigen" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDestino" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDespachoPortuario" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDespachoAduanero" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDespachoAduaneroGeneral" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroDepositoAduanero" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroAsignacionCarga" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="date" pInputText [(ngModel)]="filtroFechaCarga" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroAsignacionDescarga" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="date" pInputText [(ngModel)]="filtroFechaDescarga" style="width: 100%;"/>
+  </th>
+  <th>
+    <input type="text" pInputText [(ngModel)]="filtroEstado" style="width: 100%;"/>
+  </th>
+  <th></th>
+</tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-despacho>
+    <tr [ngClass]="estiloFila(despacho)">
+      <td>{{ getClienteNombre(despacho.id_cliente) }}</td>
+      <td>{{ getMercanciaNombre(despacho.id_mercancia) }}</td>
+      <td>{{ despacho.numero_contenedor }}</td>
+      <td>{{ despacho.id_tipo_carga }}</td>
+      <td>{{ despacho.descripcion_carga }}</td>
+      <td>{{ despacho.bl_madre }}</td>
+      <td>{{ despacho.fecha_bl_madre | date:'yyyy-MM-dd' }}</td>
+      <td>{{ despacho.bl_hijo }}</td>
+      <td>{{ despacho.fecha_bl_hijo | date:'yyyy-MM-dd' }}</td>
+      <td>{{ despacho.dam }}</td>
+      <td>{{ despacho.fecha_dam | date:'yyyy-MM-dd' }}</td>
+      <td>{{ despacho.embalaje }}</td>
+      <td>{{ despacho.peso_kg }}</td>
+      <td>{{ despacho.volumen_m3 }}</td>
+      <td>{{ getNavieraNombre(despacho.id_naviera) }}</td>
+      <td>{{ getCiudadNombre(despacho.id_ciudad_origen) }}</td>
+      <td>{{ getCiudadNombre(despacho.id_ciudad_destino) }}</td>
+      <td>{{ despacho.id_despacho_portuario }}</td>
+      <td>{{ despacho.id_despacho_aduanero }}</td>
+      <td>{{ despacho.id_despacho_aduanero_general }}</td>
+      <td>{{ despacho.id_deposito_aduanero }}</td>
+      <td>{{ getVehiculoNombre(despacho.id_asignacion_vehiculo_carga) }}</td>
+      <td>{{ despacho.fecha_carga | date:'yyyy-MM-dd' }}</td>
+      <td>{{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</td>
+      <td>{{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</td>
+      <td>{{ despacho.estado }}</td>
+      <td class="text-center d-flex justify-content-center gap-2">
+  <button class="btn btn-sm btn-outline-info" (click)="editarDespacho(despacho)">
+    <i class="pi pi-pencil"></i> Editar
+  </button>
+  <button class="btn btn-sm btn-outline-danger" (click)="eliminarDespacho(despacho)">
+    <i class="pi pi-trash"></i> Eliminar
+  </button>
+</td>
+
+    </tr>
+  </ng-template>
+</p-table>
+
+
+<p-dataView *ngIf="mostrarTabla" [value]="despachosFiltrados" layout="list" [rows]="5">
+  <ng-template let-despacho pTemplate="listItem">
+    <div class="p-3 border rounded mb-3 shadow-sm" [ngClass]="estiloFila(despacho)">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+<div>
+    <div class="fs-5"><b>Cliente:</b> {{ getClienteNombre(despacho.id_cliente) }}</div>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    
+  <div class="fs-5">
+    <b>ESTADO:</b> {{ despacho.estado }}
+  </div>
+
+  <button class="btn btn-sm btn-outline-info me-2" (click)="editarDespacho(despacho)">
+            <i class="pi pi-pencil"></i> Editar
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="eliminarDespacho(despacho)">
+            <i class="pi pi-trash"></i> Eliminar
+          </button>
+</div>
+      </div>
+
+      <hr class="my-2" />
+      <div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px;">
+
+<div [ngClass]="{'faltante': !despacho.id_tipo_carga}"><b>Tipo Carga:</b> {{ despacho.id_tipo_carga }}</div>
+        <div><b>Contenedor:</b> {{ despacho.numero_contenedor }}</div>
+<div [ngClass]="{'faltante': !despacho.descripcion_carga}"><b>Tamaño:</b> {{ despacho.descripcion_carga }}</div>
+<div [ngClass]="{'faltante': !despacho.id_naviera}"><b>Naviera:</b> {{ getNavieraNombre(despacho.id_naviera) }}</div>
+
+<div [ngClass]="{'faltante': !despacho.peso_kg}"><b>Peso (kg):</b> {{ despacho.peso_kg }}</div>
+<div [ngClass]="{'faltante': !despacho.volumen_m3}"><b>Volumen (m³):</b> {{ despacho.volumen_m3 }}</div>
+        <div [ngClass]="{'faltante': !despacho.id_mercancia}"><b>Mercancía:</b> {{ getMercanciaNombre(despacho.id_mercancia) }}</div>
+
+<div [ngClass]="{'faltante': !despacho.embalaje}"><b>Embalaje:</b> {{ despacho.embalaje }}</div>
+<div [ngClass]="{'faltante': !despacho.id_ciudad_origen}"><b>Origen:</b> {{ getCiudadNombre(despacho.id_ciudad_origen) }}</div>
+<div [ngClass]="{'faltante': !despacho.id_ciudad_destino}"><b>Destino:</b> {{ getCiudadNombre(despacho.id_ciudad_destino) }}</div>
+
+<div [ngClass]="{'faltante': !despacho.fecha_llegada}"><b>Fecha Llegada:</b> {{ despacho.fecha_llegada | date:'yyyy-MM-dd' }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_limite}"><b>Fecha Límite:</b> {{ despacho.fecha_limite | date:'yyyy-MM-dd' }}</div>
+
+  <div [ngClass]="{'faltante': !despacho.id_despacho_portuario}"><b>Despacho Portuario:</b> {{ despacho.id_despacho_portuario }}</div>
+<div [ngClass]="{'faltante': !despacho.id_despacho_aduanero}"><b>Despacho Aduanero:</b> {{ despacho.id_despacho_aduanero }}</div>
+  <div [ngClass]="{'faltante': !despacho.id_despacho_aduanero_general}"><b>Despacho Aduanero General:</b> {{ despacho.id_despacho_aduanero_general }}</div>
+  <div [ngClass]="{'faltante': !despacho.id_deposito_aduanero}"><b>Deposito Aduanero:</b> {{ despacho.id_deposito_aduanero }}</div>
+
+  <div [ngClass]="{'faltante': !despacho.bl_madre}"><b>BL Madre:</b> {{ despacho.bl_madre }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_bl_madre}"><b>Fecha BL Madre:</b> {{ despacho.fecha_bl_madre | date:'yyyy-MM-dd' }}</div>
+
+  <div [ngClass]="{'faltante': !despacho.bl_hijo}"><b>BL Hijo:</b> {{ despacho.bl_hijo }}</div> 
+  <div [ngClass]="{'faltante': !despacho.fecha_bl_hijo}"><b>Fecha BL Hijo:</b> {{ despacho.fecha_bl_hijo | date:'yyyy-MM-dd' }}</div>
+
+  <div [ngClass]="{'faltante': !despacho.dam}"><b>DAM:</b> {{ despacho.dam }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_dam}"><b>Fecha DAM:</b> {{ despacho.fecha_dam | date:'yyyy-MM-dd' }}</div>
+
+  <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_carga}"><b>Asignación Carga:</b> {{ getVehiculoNombre(despacho.id_asignacion_vehiculo_carga) }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_carga}"><b>Fecha Carga:</b> {{ despacho.fecha_carga | date:'yyyy-MM-dd' }}</div>
+  <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_descarga}"><b>Asignación Descarga:</b> {{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_descarga}"><b>Fecha Descarga:</b> {{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</div>
+
+
+  <!-- Descripción Adicional ocupa toda la fila -->
+  <div style="grid-column: span 2; white-space: pre-wrap; word-break: break-word;">
+    <b>Descripción Adicional:</b> {{ despacho.descripcion }}
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+  <ng-container *ngFor="let doc of getDocumentosFiltrados(despacho)">
+    <label
+      class="btn btn-sm"
+      [ngClass]="{
+        'btn-success': despacho.archivosSubidos?.includes(doc.id),
+        'btn-outline-danger': !despacho.archivosSubidos?.includes(doc.id)
+      }"
+      style="cursor: pointer;"
+      for="file-{{despacho.id_despacho}}-{{doc.id}}"
+      title="Subir {{ doc.nombre }}"
+      (click)="verPdfs(despacho, doc)"
+    >
+    <!-- (click)="despacho.archivosSubidos?.includes(doc.id) ? verPDF(despacho, doc) : abrirSelectorArchivo(despacho, doc)" -->
+      {{ doc.nombre }}
+    </label>
+    <!-- <input
+      type="file"
+      id="file-{{despacho.id_despacho}}-{{doc.id}}"
+      accept="application/pdf"
+      style="display: none"
+      (change)="onFileSelected($event, despacho, doc)"
+    /> -->
+  </ng-container>
+</div>
+
+<!-- <div class="d-flex flex-wrap gap-2 mt-3">
+        <label for="estado">Estado</label>
+        <p-selectButton [options]="estados" [(ngModel)]="despacho.estado" optionLabel="label"
+          optionValue="value" class="small-select-button" [ngModelOptions]="{ standalone: true }"
+          name="estado" (onChange)="guardarEstadoDespacho(despacho, $event.value)"/>
+      </div> -->
+      <div class="d-flex justify-content-end mt-2">
+      <span class="text-muted small">{{ observacionDespacho(despacho) }}</span>
+    </div>
+    </div>
+    
+  </ng-template>
+</p-dataView>
+
+
+<p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '80%' }" [header]="tituloPopup">
+  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+    <div class="d-flex flex-wrap mb-4 p-fluid">
+      <div class="p-2 flex-fill">
+        <label for="id_cliente">Cliente</label>
+
+        <ng-select [items]="clientes" bindLabel="label" bindValue="value" [(ngModel)]="despachoSeleccionado.id_cliente"
+          [ngModelOptions]="{ standalone: true }" placeholder="Seleccione un cliente">
+        </ng-select>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_mercancia">Mercancía</label>
+
+        <ng-select [items]="mercancias" bindLabel="label" bindValue="value"
+          [(ngModel)]="despachoSeleccionado.id_mercancia" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione una mercancía" [style.width.%]="100"      
+    [style.minWidth.px]="250">
+        </ng-select>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="numero_contenedor">Contenedor</label>
+        <input pInputText id="numero_contenedor" [(ngModel)]="despachoSeleccionado.numero_contenedor" name="numero_contenedor" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_tipo_carga">Tipo Carga</label>
+        <p-selectButton [options]="tipo_carga" [(ngModel)]="despachoSeleccionado.id_tipo_carga" optionLabel="label"
+          optionValue="value" [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
+          name="tipo_carga" />
+
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="descripcion_carga">Tamaño</label>
+        <input pInputText id="descripcion_carga" [(ngModel)]="despachoSeleccionado.descripcion_carga"
+          name="descripcion_carga" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="bl_madre">BL Madre</label>
+        <input pInputText id="bl_madre" [(ngModel)]="despachoSeleccionado.bl_madre" name="bl_madre" />
+      </div>
+
+      <div class="p-2 flex-fill" style="min-width: 250px;">
+        <label for="fecha_bl_madre">Fecha BL Madre</label>
+        <p-calendar inputId="fecha_bl_madre" [(ngModel)]="despachoSeleccionado.fecha_bl_madre" name="fecha_bl_madre"
+          dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"
+          ></p-calendar>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="bl_hijo">BL Hijo</label>
+        <input pInputText id="bl_hijo" [(ngModel)]="despachoSeleccionado.bl_hijo" name="bl_hijo" />
+      </div>
+
+      <div class="p-2 flex-fill" style="min-width: 250px;">
+        <label for="fecha_bl_hijo">Fecha BL Hijo</label>
+        <p-calendar inputId="fecha_bl_hijo" [(ngModel)]="despachoSeleccionado.fecha_bl_hijo" name="fecha_bl_hijo"
+          dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"
+          ></p-calendar>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="dam">DAM</label>
+        <input pInputText id="dam" [(ngModel)]="despachoSeleccionado.dam" name="dam" />
+      </div>
+
+      <div class="p-2 flex-fill" style="min-width: 250px;">
+        <label for="fecha_dam">Fecha DAM</label>
+        <p-calendar inputId="fecha_dam" [(ngModel)]="despachoSeleccionado.fecha_dam" name="fecha_dam"
+          dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"
+          ></p-calendar>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="peso_kg">Peso KG</label>
+        <input pInputText id="peso_kg" [(ngModel)]="despachoSeleccionado.peso_kg" name="peso_kg" (input)="numeros($event, 'peso_kg')"/>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="volumen_m3">Volumen m3</label>
+        <input pInputText id="volumen_m3" [(ngModel)]="despachoSeleccionado.volumen_m3" name="volumen_m3" (input)="numeros($event, 'volumen_m3')"/>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="embalaje">Embalaje</label>
+        <input pInputText id="embalaje" [(ngModel)]="despachoSeleccionado.embalaje" name="embalaje" />
+      </div>
+
+      <div class="p-2 w-100">
+        <label for="id_naviera">Naviera</label>
+        <p-selectButton [options]="navieras" [(ngModel)]="despachoSeleccionado.id_naviera" optionLabel="label"
+          optionValue="value" [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
+          name="naviera" />
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_ciudad_origen">Ciudad Origen</label>
+        <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+        (ngModelChange)="actualizarOrigen($event)"
+          [(ngModel)]="despachoSeleccionado.id_ciudad_origen" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione una ciudad">
+        </ng-select>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="id_ciudad_destino">Ciudad Destino</label>
+        <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+          [(ngModel)]="despachoSeleccionado.id_ciudad_destino" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione una ciudad">
+        </ng-select>
+      </div>
+
+      <div *ngIf="bloquearOrigen" class="p-2 w-100">
+        <label for="id_despacho_portuario">Tipo Despacho Portuario</label>
+        <p-selectButton [options]="tipo_despacho_portuario" [(ngModel)]="despachoSeleccionado.id_despacho_portuario"
+        (ngModelChange)="actualizarDespachoPortuario($event)"
+          optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
+          [ngModelOptions]="{ standalone: true }" name="tipo_despacho_portuario" />
+      </div>
+
+      <div *ngIf="bloquearDespachoPortuario || !bloquearOrigen" class="p-2 w-100">
+        <label for="id_despacho_aduanero">Despacho Aduanero</label>
+        <p-selectButton [options]="tipo_despacho_aduanero" [(ngModel)]="despachoSeleccionado.id_despacho_aduanero"
+          (ngModelChange)="actualizarDespacho($event)"
+          optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
+          [ngModelOptions]="{ standalone: true }" name="despacho_aduanero" />
+      </div>
+
+      <div *ngIf="(bloquearDespachoPortuario || !bloquearOrigen) && !bloquearDespachoGeneral" class="p-2 w-100">
+        <label for="id_despacho_aduanero_general">Despacho Aduanero General</label>
+        <p-selectButton [options]="tipo_despacho_aduanero_general" [(ngModel)]="despachoSeleccionado.id_despacho_aduanero_general"
+          optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
+          [ngModelOptions]="{ standalone: true }" name="despacho_aduanero_general" />
+      </div>
+
+      <div class="p-2 w-100">
+        <label for="id_deposito_aduanero">Deposito Aduanero</label>
+        <p-selectButton [options]="tipo_deposito_aduanero" [(ngModel)]="despachoSeleccionado.id_deposito_aduanero"
+          optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
+          [ngModelOptions]="{ standalone: true }" name="deposito_aduanero" />
+      </div>
+
+      <!-- Fecha Llegada -->
+      <div class="p-2 flex-fill" style="min-width: 250px;">
+        <label for="fecha_llegada">Fecha Llegada</label>
+        <p-calendar inputId="fecha_llegada" [(ngModel)]="despachoSeleccionado.fecha_llegada" name="fecha_llegada"
+          (ngModelChange)="calcularFechaLimite($event)" dateFormat="yy-mm-dd" [showIcon]="true"
+          [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+      </div>
+
+      <!-- Fecha Límite -->
+      <div class="p-2 flex-fill" style="min-width: 250px;">
+        <label for="fecha_limite">Fecha Límite</label>
+        <p-calendar inputId="fecha_limite" [(ngModel)]="despachoSeleccionado.fecha_limite" name="fecha_limite"
+          dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"
+          [disabled]="true"></p-calendar>
+      </div>
+
+
+      <!-- <div class="p-2 flex-fill">
+        <label for="descripcion">Descripción</label>
+        <textarea pInputTextarea id="descripcion" rows="1" [(ngModel)]="despachoSeleccionado.descripcion" name="descripcion"></textarea>
+      </div> -->
+
+    </div>
+
+    <hr class="my-2" />
+    <label for="archivo">ASIGNACION DE DESPACHO</label>
+    <div class="p-2 flex-fill">
+        <label for="id_asignacion_vehiculo_carga">Vehículo de Carga</label>
+        <ng-select [items]="vehiculos" bindLabel="label" bindValue="value"
+          [(ngModel)]="despachoSeleccionado.id_asignacion_vehiculo_carga" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione un vehículo">
+        </ng-select>
+      </div>
+    <div class="p-dialog-footer">
+
+      
+      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog 
+  [header]="tituloDialogVariosPDF" 
+  [(visible)]="mostrarDialogVariosPDF" 
+  [modal]="true" 
+  [style]="{ width: 'auto' }">
+  <div class="d-flex" style="gap: 1rem;">
+  
+        <p-table [value]="pdfs" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre del archivo</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-pdf let-rowIndex="rowIndex">
+        <tr>
+          <td>
+            <label for="nombre"> {{ pdf.nombre }}</label>
+          </td>
+
+          <td>
+            
+            <button class="btn btn-sm btn-outline-info me-2" (click)="verPDF(pdf.nombre)">
+          <i class="pi pi-pencil"></i>Ver
+        </button>
+        <button class="btn btn-sm btn-outline-danger" (click)="eliminarPDF(pdf.nombre)">
+          <i class="pi pi-trash"></i>Eliminar
+        </button>
+           
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="p-dialog-footer mt-3">
+      <button pButton type="button" label="+ Agregar" class="p-button-secondary" (click)=" abrirSelectorArchivo(despachoSeleccionado)"></button>
+  
+    </div>
+
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarDialogPDF" [modal]="true" [style]="{ width: '80%' }" >
+  <div class="d-flex" style="gap: 1rem;">
+  
+<div style="flex: 1; height: 600px; border: 1px solid #ccc;">
+      <ngx-doc-viewer
+        [url]="pdfSeleccionadoURL"
+        viewer="url"
+        style="width:100%;height:100%;"
+        filename="despachoSeleccionado.id_despacho + '.pdf'"
+        disabledDownload="false">
+      </ngx-doc-viewer>
+    </div>
+</div>
+  
+</p-dialog>

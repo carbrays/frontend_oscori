@@ -1,0 +1,392 @@
+<div *ngIf="!mostrarFormulario" class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nueva Cotización" class="p-button-success"
+    (click)="abrirNuevaCotizacion()"></button>
+</div>
+<div *ngIf="mostrarFormulario" class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Cerrar" class="p-button-success"
+    (click)="cerrarCotizacion()"></button>
+</div>
+
+<div *ngIf="!mostrarFormulario">
+<p-table [value]="cotizaciones" [tableStyle]="{ 'min-width': '80rem' }">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Nombre Empresa</th>
+      <th>Nombre Cliente</th>
+      <th>Celular</th>
+      <th>Tipo Documento</th>
+      <th>Tipo Carga</th>
+      <th>Fecha Llegada</th>
+      <th>Flete</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-cotizacion>
+    <tr>
+      <td>{{ cotizacion.razon_social }}</td>
+      <td>{{ cotizacion.nombre_comercial }}</td>
+      <td>{{ cotizacion.telefono }}</td>
+      <td>{{ cotizacion.tipo_documento }}</td>
+      <td>{{ cotizacion.id_tipo_carga }}</td>
+      <td>{{ cotizacion.fecha_llegada | date:'dd/MM/yyyy' }}</td>
+      <td>{{ cotizacion.flete }}</td>
+      <td>
+        <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarCotizacion(cotizacion)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+        <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarCotizacion(cotizacion)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+</div>
+
+<div *ngIf="mostrarFormulario">
+<p-steps [model]="steps" [activeIndex]="activeIndex"></p-steps>
+
+<div class="p-3">
+  <ng-container [ngSwitch]="activeIndex">
+    
+    <!-- Paso 1 -->
+    <div *ngSwitchCase="0" class="p-fluid">
+        <div class="mx-lg-4">
+  <h3 class="mb-4">Paso 1: Datos del Cliente</h3>
+
+  <div class="grid">
+    <!-- Modo Cliente -->
+    <div class="col-12 md:col-6">
+      <label for="modo_cliente">Modo Cliente</label>
+      <p-selectButton [options]="modo_cliente" [(ngModel)]="cotizacionSeleccionada.modo_cliente" 
+        optionLabel="label" optionValue="value"
+        (ngModelChange)="actualizarTipoCliente($event)"
+        [ngModelOptions]="{ standalone: true }" name="modo_cliente" />
+    </div>
+
+    <!-- Tipo Cliente -->
+    <div *ngIf="!bloquearTipoCliente" class="col-12 md:col-6">
+      <label for="tipo_cliente">Tipo Cliente</label>
+      <p-selectButton [options]="tipo_cliente" [(ngModel)]="cotizacionSeleccionada.tipo_cliente" 
+        optionLabel="label" optionValue="value"
+        [ngModelOptions]="{ standalone: true }"
+        [disabled]="cotizacionSeleccionada.modo_cliente != 'TERCERO'" 
+        name="tipo_cliente" />
+    </div>
+
+    <!-- Categoría Cliente -->
+    <div class="col-12 md:col-6">
+      <label for="categoria_cliente">Categoría Cliente</label>
+      <p-selectButton [options]="categoria_cliente" [(ngModel)]="cotizacionSeleccionada.categoria_cliente" 
+        optionLabel="label" optionValue="value"
+        [ngModelOptions]="{ standalone: true }"
+        (ngModelChange)="actualizarRazonSocial($event)"
+        [disabled]="!((cotizacionSeleccionada.modo_cliente == 'TERCERO' && cotizacionSeleccionada.tipo_cliente) || cotizacionSeleccionada.modo_cliente == 'CONSIGNATARIO')" 
+        name="categoria_cliente" />
+    </div>
+
+<p-autoComplete 
+  [(ngModel)]="cotizacionSeleccionada.cliente"
+  [suggestions]="filteredClientes"
+  (completeMethod)="buscarClientes($event)"
+  placeholder="Seleccione o escriba un cliente">
+</p-autoComplete>
+
+    <!-- Nombre Empresa -->
+    <div *ngIf="!bloquearRazonSocial" class="col-12 md:col-6">
+      <label for="razon_social">Nombre Empresa</label>
+      <input pInputText id="razon_social" [(ngModel)]="cotizacionSeleccionada.razon_social"
+        name="razon_social" [disabled]="cotizacionSeleccionada.categoria_cliente != 'JURIDICA'" />
+    </div>
+
+    <!-- Nombre Encargado -->
+    <div class="col-12 md:col-6">
+      <label for="nombre_comercial">Nombre Encargado</label>
+      <input pInputText id="nombre_comercial" [(ngModel)]="cotizacionSeleccionada.nombre_comercial" 
+        name="nombre_comercial" 
+        [disabled]="!( (cotizacionSeleccionada.categoria_cliente === 'JURIDICA' && cotizacionSeleccionada.razon_social) 
+            || cotizacionSeleccionada.categoria_cliente === 'UNIPERSONAL' )" />
+    </div>
+
+    <!-- Correo -->
+    <div class="col-12 md:col-6">
+      <label for="correo">Correo</label>
+      <input pInputText id="correo" [(ngModel)]="cotizacionSeleccionada.correo"
+        name="correo" [disabled]="!cotizacionSeleccionada.nombre_comercial" />
+    </div>
+
+    <!-- Celular -->
+    <div class="col-12 md:col-6">
+      <label for="telefono">Celular</label>
+      <input pInputText id="telefono" [(ngModel)]="cotizacionSeleccionada.telefono"
+        name="telefono" [disabled]="!cotizacionSeleccionada.correo" />
+    </div>
+
+    <!-- Departamento -->
+    <div class="col-12 md:col-6">
+      <label for="ciudad">Departamento</label>
+      <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+        [(ngModel)]="cotizacionSeleccionada.ciudad"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Seleccione una ciudad"
+        [disabled]="!cotizacionSeleccionada.correo">
+      </ng-select>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mt-3">
+    <button pButton label="Siguiente" (click)="nextStep()" style="width: auto;"
+      [disabled]="!cotizacionSeleccionada.ciudad" class="p-button-primary w-full md:w-auto"></button>
+  </div>
+  </div>
+</div>
+
+    <!-- Paso 2 -->
+    <div *ngSwitchCase="1">
+        <div class="mx-lg-4">
+  <h3>Paso 2: Información</h3>
+
+<form #form="ngForm">
+    <div class="d-flex flex-wrap mb-4 p-fluid">
+  <div class="p-1 w-100">
+    <label for="tipo_documento">Tipo Documento</label>
+    <p-selectButton [options]="tipo_documento" [(ngModel)]="cotizacionSeleccionada.tipo_documento"
+      optionLabel="label" optionValue="value"
+      [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }"
+      name="tipo_documento"/>
+  </div>
+
+  <div class="p-1 w-100">
+    <label for="tipo_bl">Tipo BL</label>
+    <p-selectButton [options]="tipo_bl" [(ngModel)]="cotizacionSeleccionada.tipo_bl"
+      optionLabel="label" optionValue="value"
+      [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }"
+      name="tipo_bl" />
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="numero_bl">Número BL</label>
+    <input pInputText id="numero_bl" [(ngModel)]="cotizacionSeleccionada.numero_bl" name="numero_bl" />
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="id_tipo_carga">Tipo Carga</label>
+    <p-selectButton [options]="tipo_carga" [(ngModel)]="cotizacionSeleccionada.id_tipo_carga"
+      optionLabel="label" optionValue="value"
+      (ngModelChange)="actualizarTipoCarga($event)"
+      [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }"
+      name="tipo_carga" />
+  </div>
+
+  <div *ngIf="!bloquearContenedor" class="p-1 flex-fill">
+    <label for="numero_contenedor">Contenedor</label>
+    <input pInputText id="numero_contenedor" [(ngModel)]="cotizacionSeleccionada.numero_contenedor" name="numero_contenedor"
+      [disabled]="bloquearContenedor" />
+  </div>
+
+  <div *ngIf="!bloquearTamano" class="p-1 flex-fill">
+    <label for="tamano">Tamaño</label>
+    <input pInputText id="tamano" [(ngModel)]="cotizacionSeleccionada.tamano" name="tamano" />
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="peso_kg">Peso KG</label>
+    <input pInputText type="number" id="peso_kg" [(ngModel)]="cotizacionSeleccionada.peso_kg" name="peso_kg" />
+  </div>
+
+  <div class="p-1 flex-fill">
+  <label for="id_mercancia">Mercancía</label>
+  <ng-select [items]="mercancias" bindLabel="label" bindValue="value"
+    [(ngModel)]="cotizacionSeleccionada.id_mercancia"
+    [ngModelOptions]="{ standalone: true }"
+    placeholder="Seleccione una mercancía"
+    [style.width.%]="100"      
+    [style.minWidth.px]="250">  
+  </ng-select>
+</div>
+
+
+  <div class="p-1 flex-fill">
+    <label for="embalaje">Embalaje</label>
+    <input pInputText id="embalaje" [(ngModel)]="cotizacionSeleccionada.embalaje" name="embalaje" />
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="volumen_m3">Volumen m3</label>
+    <input pInputText type="number" id="volumen_m3" [(ngModel)]="cotizacionSeleccionada.volumen_m3" name="volumen_m3" />
+  </div>
+
+  <div class="p-1 w-100">
+    <label for="id_naviera">Naviera</label>
+    <p-selectButton [options]="navieras" [(ngModel)]="cotizacionSeleccionada.id_naviera" optionLabel="label"
+      optionValue="value"
+      (ngModelChange)="actualizarGateIn($event)"
+      [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }"
+      name="naviera"/>
+  </div>
+
+  <div class="p-1 flex-fill" style="min-width: 250px;">
+    <label for="fecha_llegada">Fecha Llegada</label>
+    <p-calendar inputId="fecha_llegada" [(ngModel)]="cotizacionSeleccionada.fecha_llegada" name="fecha_llegada"
+      dateFormat="yy-mm-dd" [showIcon]="true"
+      [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="id_ciudad_origen">Ciudad Origen</label>
+    <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+      [(ngModel)]="cotizacionSeleccionada.id_ciudad_origen"
+      [ngModelOptions]="{ standalone: true }"
+      placeholder="Seleccione una ciudad">
+    </ng-select>
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="id_ciudad_destino">Ciudad Destino</label>
+    <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+      [(ngModel)]="cotizacionSeleccionada.id_ciudad_destino"
+      [ngModelOptions]="{ standalone: true }"
+      placeholder="Seleccione una ciudad">
+    </ng-select>
+  </div>
+
+  <div class="p-1 w-100">
+    <label for="id_despacho_aduanero">Despacho Aduanero</label>
+    <p-selectButton [options]="tipo_despacho_aduanero" [(ngModel)]="cotizacionSeleccionada.id_despacho_aduanero"
+      optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }" name="despacho_aduanero" />
+  </div>
+
+  <div class="p-1 flex-fill">
+    <label for="lugar_descarga">Lugar Descarga</label>
+    <input pInputText id="lugar_descarga" [(ngModel)]="cotizacionSeleccionada.lugar_descarga" name="lugar_descarga"/>
+  </div>
+
+  <div class="p-1 w-100">
+    <label for="id_despacho_portuario">Despacho Portuario</label>
+    <p-selectButton [options]="tipo_despacho_portuario" [(ngModel)]="cotizacionSeleccionada.id_despacho_portuario"
+      optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }" name="id_despacho_portuario" />
+  </div>
+
+  <br /><br />
+  
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+  <button pButton label="Anterior" class="p-button-secondary" (click)="prevStep()"></button>
+  <button pButton label="Siguiente" (click)="nextStep()"></button>
+</div>
+
+</form>
+</div>
+</div>
+
+    <!-- Paso 3 -->
+    <div *ngSwitchCase="2" class="mx-lg-4">
+
+        <!-- Checkboxes -->
+  <div *ngSwitchCase="2" class="mx-lg-4">
+  <h3>Paso 3: Cotizar Flete</h3>
+
+  <!-- Checkboxes uno encima del otro alineados a la izquierda -->
+  <div class="d-flex flex-column gap-2 mb-3">
+    <div class="d-flex flex-column">
+      <label for="devolucion" class="mb-1">Devolución</label>
+      <p-checkbox 
+        [(ngModel)]="cotizacionSeleccionada.devolucion" 
+        [binary]="true"
+        inputId="devolucion"
+        name="devolucion">
+      </p-checkbox>
+    </div>
+
+    <!-- Gate In -->
+<div class="d-flex flex-column mb-2">
+  <label for="gate_in" class="mb-1">Gate In</label>
+  <p-checkbox 
+    [(ngModel)]="cotizacionSeleccionada.gate_in" 
+    [binary]="true"
+    inputId="gate_in"
+    name="gate_in"
+    (onChange)="actualizarTotal()">
+  </p-checkbox>
+</div>
+</div>  
+<!-- Flete -->
+<div class="p-2 w-100 mb-3 d-flex align-items-center gap-3">
+  <input pInputText 
+         type="number" 
+         id="flete" 
+         [(ngModel)]="cotizacionSeleccionada.flete" 
+         name="flete" 
+         (input)="actualizarTotal()" 
+         style="flex: 1; max-width: 200px;" />
+         
+  <span style="font-size: 1.2rem; font-weight: 600;">
+    Total: {{ total | number:'1.2-2' }} $.
+  </span>
+</div>
+
+
+
+  <!-- Botón Ver Cotización -->
+  <div class="d-flex justify-content-start mb-3">
+    <button pButton label="Ver Cotización" class="p-button-secondary"></button>
+  </div>
+
+</div>
+
+  <!-- Botones Anterior / Siguiente -->
+  <div class="d-flex justify-content-between mt-3">
+    <button pButton label="Anterior" class="p-button-secondary" (click)="prevStep()"></button>
+    <button pButton label="Siguiente" (click)="nextStep()" [disabled]="!cotizacionSeleccionada.flete"></button>
+  </div>
+</div>
+
+    <!-- Paso 4 -->
+    <div *ngSwitchCase="3">
+      <h3>Paso 4: Decision</h3>
+     <!-- <label for="estado">Estado</label> -->
+      <div class="d-flex justify-content-center mb-3">
+  <p-selectButton 
+    [options]="estado" 
+    [(ngModel)]="cotizacionSeleccionada.estado"
+    optionLabel="label" 
+    optionValue="value"
+    [style]="{ width: '300px', height: '35px' }" 
+    [ngModelOptions]="{ standalone: true }"
+    name="estado">
+  </p-selectButton>
+</div>
+
+    <p-selectButton [options]="estado" [(ngModel)]="cotizacionSeleccionada.estado"
+      optionLabel="label" optionValue="value"
+      [style]="{ width: '100%', height: '35px' }"
+      [ngModelOptions]="{ standalone: true }"
+      name="estado"/>
+      <br /><br />
+      <div class="d-flex justify-content-between mt-3">
+  <button pButton label="Anterior" class="p-button-secondary" (click)="prevStep()"></button>
+  <button pButton label="Finalizar" (click)="finalizar()" [disabled]="!cotizacionSeleccionada.estado"></button>
+</div>
+
+    </div>
+
+
+    <!-- Paso 6 -->
+    <!-- <div *ngSwitchCase="5">
+      <h3>Paso 6: Confirmación</h3> -->
+      <!-- <p><strong>Nombre:</strong> {{ formData.nombre }}</p>
+      <p><strong>Ciudad:</strong> {{ formData.ciudad }}</p>
+      <p><strong>Email:</strong> {{ formData.email }}</p>
+      <p><strong>DNI:</strong> {{ formData.dni }}</p>
+      <p><strong>Comentarios:</strong> {{ formData.comentarios }}</p> -->
+
+      <!-- <button pButton label="Anterior" class="p-button-secondary" (click)="prevStep()"></button>
+      <button pButton label="Finalizar" class="p-button-success" (click)="submit()"></button>
+    </div> -->
+
+  </ng-container>
+</div>
+</div>

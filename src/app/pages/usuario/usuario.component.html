@@ -1,0 +1,198 @@
+<div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nuevo Usuario" class="p-button-success"
+          (click)="abrirNuevoUsuario(form)"></button>
+</div>
+<p-table [value]="usuarios" [tableStyle]="{ 'min-width': '70rem' }">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>CI</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Teléfono Chile</th>
+            <th>Correo</th>
+            <th>Cargo</th>
+            <th>Persona Ref.</th>
+            <th>Telefono Ref.</th>
+            <th>Vencimiento Licencia</th>
+            <th>Acciones</th>
+        </tr>
+    </ng-template>
+
+    <!-- ✅ Aquí está el cambio: let-usuario -->
+    <ng-template pTemplate="body" let-usuario>
+        <tr>
+            <td>{{ usuario.id_usuario }}</td>
+            <td>{{ usuario.nombre }} {{ usuario.paterno }} {{ usuario.materno }}</td>
+            <td>{{ usuario.ci }}</td>
+            <td>{{ usuario.direccion }}</td>
+            <td>{{ usuario.telefono }}</td>
+            <td>{{ usuario.telefono_chile }}</td>
+            <td>{{ usuario.correo }}</td>
+            <td>{{ usuario.cargo }}</td>
+            <td>{{ usuario.persona_ref }}</td>
+            <td>{{ usuario.telefono_ref }}</td>
+            <td
+  [ngClass]="{
+    'fecha-vencida': esFechaVencida(usuario.licencia_vencimiento)
+  }"
+>
+  {{ usuario.licencia_vencimiento | date: 'yyyy-MM-dd' }}
+</td>
+            <td>
+                                    <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarUsuario(usuario)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarUsuario(usuario, form)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+                                </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-dialog [header]="tituloPopup" [(visible)]="popupVisible" [modal]="true" [style]="{ width: '80%' }">
+  <form (ngSubmit)="guardarCambios(form)" #form="ngForm"  >
+
+   <div class="d-flex flex-wrap mb-4 p-fluid">
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="nombre">Nombre</label>
+    <input pInputText id="nombre" [(ngModel)]="usuarioSeleccionado.nombre" name="nombre" required class="form-control" />
+  </div>
+
+  <div class="p-2 flex-fill">
+    <label for="paterno">Paterno</label>
+    <input pInputText id="paterno" [(ngModel)]="usuarioSeleccionado.paterno" name="paterno" class="form-control" />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="materno">Materno</label>
+    <input pInputText id="materno" [(ngModel)]="usuarioSeleccionado.materno" name="materno" class="form-control" />
+  </div>
+
+  <div class="p-2 flex-wrap" style="min-width: 250px;">
+    <label for="ci">CI</label>
+    <input pInputText id="ci" [(ngModel)]="usuarioSeleccionado.ci" name="ci" class="form-control" />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="direccion">Dirección</label>
+    <input pInputText id="direccion" [(ngModel)]="usuarioSeleccionado.direccion" name="direccion" class="form-control" />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="cargo">Cargo</label>
+    <p-selectButton 
+      [options]="opcionesCargo" 
+      [(ngModel)]="usuarioSeleccionado.cargo" 
+      optionLabel="label" 
+      optionValue="value" 
+      [style]="{ width: '100%', height: '35px' }"
+      name="cargo">
+    </p-selectButton>
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="telefono">Teléfono Bolivia</label>
+    <input
+      pInputText
+      id="telefono"
+      type="tel"
+      [(ngModel)]="usuarioSeleccionado.telefono"
+      name="telefono"
+      (input)="numeros($event, 'telefono')"
+      class="form-control"
+      required
+      #telefonoCtrl="ngModel"
+      [ngClass]="{ 'input-error vibrar': telefonoCtrl.invalid && telefonoCtrl.touched }"
+    />
+    <small *ngIf="telefonoCtrl.invalid && telefonoCtrl.touched" class="p-error">
+      Campo obligatorio
+    </small>
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="telefono_chile">Teléfono Chile</label>
+    <input
+      pInputText
+      id="telefono_chile"
+      type="tel"
+      [(ngModel)]="usuarioSeleccionado.telefono_chile"
+      name="telefono_chile"
+      (input)="numeros($event, 'telefono_chile')"
+      class="form-control"
+    />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="correo">Correo</label>
+    <input pInputText id="correo" [(ngModel)]="usuarioSeleccionado.correo" name="correo" class="form-control" />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="persona_ref">Persona Referencia</label>
+    <input pInputText id="persona_ref" [(ngModel)]="usuarioSeleccionado.persona_ref" name="persona_ref" class="form-control" />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="telefono_ref">Teléfono Referencia</label>
+    <input
+      pInputText
+      id="telefono_ref"
+      type="tel"
+      [(ngModel)]="usuarioSeleccionado.telefono_ref"
+      name="telefono_ref"
+      (input)="numeros($event, 'telefono_ref')"
+      class="form-control"
+    />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="licencia_categoria">Licencia Categoría</label>
+    <input
+      pInputText
+      id="licencia_categoria"
+      [(ngModel)]="usuarioSeleccionado.licencia_categoria"
+      name="licencia_categoria"
+      maxlength="1"
+      pattern="[A-Za-z]"
+      title="Solo se permite una letra"
+      class="form-control"
+    />
+  </div>
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="licencia_vencimiento">Licencia Vencimiento</label>
+    <p-calendar
+  inputId="licencia_vencimiento"
+  [(ngModel)]="usuarioSeleccionado.licencia_vencimiento"
+  name="licencia_vencimiento"
+  dateFormat="yy-mm-dd"
+  [showIcon]="true"
+  [style]="{ width: '100%', height: '35px' }"
+  [appendTo]="'body'"
+></p-calendar>
+  </div>
+
+  
+
+  <div class="p-2 flex-fill" style="min-width: 250px;">
+    <label for="fecha_inicio">Fecha de Inicio</label>
+    <p-calendar
+  inputId="fecha_inicio"
+  [(ngModel)]="usuarioSeleccionado.fecha_inicio"
+  name="fecha_inicio"
+  dateFormat="yy-mm-dd"
+  [showIcon]="true"
+  [style]="{ width: '100%', height: '35px' }"
+  [appendTo]="'body'"
+></p-calendar>
+  </div>
+
+</div>
+
+<div class="p-dialog-footer mt-3">
+  <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>
+  <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+</div>
+
+  </form>
+</p-dialog>

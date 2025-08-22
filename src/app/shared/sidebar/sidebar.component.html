@@ -1,0 +1,179 @@
+<!-- ========== App Menu ========== -->
+<div class="app-menu navbar-menu">
+    <!-- LOGO -->
+    <div class="navbar-brand-box">
+        <!-- Dark Logo-->
+        <a href="index.html" class="logo logo-dark">
+            <span class="logo-sm">
+                <img src="assets/images/logo-sm.png" alt="" height="32">
+            </span>
+            <span class="logo-lg">
+                <img src="assets/images/logo-dark.png" alt="" height="17">
+            </span>
+        </a>
+        <!-- Light Logo-->
+        <a href="index.html" class="logo logo-light">
+            <span class="logo-sm">
+                <img src="assets/images/logo-sm.png" alt="" height="32">
+            </span>
+            <span class="logo-lg">
+                <img src="assets/images/logo.png" alt="" height="117">
+            </span>
+        </a>
+        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover" title="Vertical Hover">
+            <i class="ri-record-circle-line"></i>
+        </button>
+    </div>
+
+    <div id="scrollbar">
+        <div class="container-fluid">
+
+            <div id="two-column-menu">
+            </div>
+            <ul class="navbar-nav" id="navbar-nav">
+                <!-- <li class="menu-title"><span data-key="t-menu"><b style="color: rgb(248, 235, 178);">Menu principal</b></span></li> -->
+                <ul class="navbar-nav" id="navbar-nav">
+  <li class="menu-title">
+    <span><b style="color: rgb(248, 235, 178);">Menú principal</b></span>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/dashboard'" routerLinkActive="active">
+      <i class="ri-dashboard-line"></i>
+      <span>Dashboard</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/usuarios'" routerLinkActive="active">
+      <i class="ri-user-line"></i>
+      <span>Usuarios</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/navieras'" routerLinkActive="active">
+      <i class="ri-ship-line"></i>
+      <span>Navieras</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/vehiculos'" routerLinkActive="active">
+      <i class="ri-truck-line"></i>
+      <span>Vehículos</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/clientes'" routerLinkActive="active">
+      <i class="ri-map-pin-line"></i>
+      <span>Clientes</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/mercancias'" routerLinkActive="active">
+      <i class="ri-stack-line"></i>
+      <span>Mercancías</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/cotizacion'" routerLinkActive="active">
+      <i class="ri-inbox-unarchive-line"></i>
+      <span>Cotizacion</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/despachos'" routerLinkActive="active">
+      <i class="ri-inbox-unarchive-line"></i>
+      <span>Despachos</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/contenedor'" routerLinkActive="active">
+      <i class="ri-archive-line"></i>
+      <span>Contenedor</span>
+    </a>
+  </li>
+
+  </ul>
+            </ul>
+        </div>
+        <!-- Sidebar -->
+    </div>
+
+    <div class="sidebar-background"></div>
+</div>
+
+<!-- Left Sidebar End -->
+
+<!-- <ul class="navbar-nav" id="navbar-nav">
+  <li class="menu-title">
+    <span><b style="color: rgb(248, 235, 178);">Menú principal</b></span>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" [routerLink]="'/dashboard'" routerLinkActive="active">
+      <i class="ri-dashboard-line"></i>
+      <span>Dashboard</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link menu-link" href="#usuariosSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="usuariosSubmenu">
+      <i class="ri-user-line"></i>
+      <span>Gestión de Usuarios</span>
+    </a>
+    <div class="collapse" id="usuariosSubmenu">
+      <ul class="nav nav-sm flex-column">
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/usuarios'" routerLinkActive="active">Usuarios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/clientes'" routerLinkActive="active">Clientes</a>
+        </li>
+      </ul>
+    </div>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link menu-link" href="#logisticaSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="logisticaSubmenu">
+      <i class="ri-truck-line"></i>
+      <span>Logística</span>
+    </a>
+    <div class="collapse" id="logisticaSubmenu">
+      <ul class="nav nav-sm flex-column">
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/navieras'" routerLinkActive="active">Navieras</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/vehiculos'" routerLinkActive="active">Vehículos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/contenedor'" routerLinkActive="active">Contenedores</a>
+        </li>
+      </ul>
+    </div>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link menu-link" href="#operacionesSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="operacionesSubmenu">
+      <i class="ri-stack-line"></i>
+      <span>Operaciones</span>
+    </a>
+    <div class="collapse" id="operacionesSubmenu">
+      <ul class="nav nav-sm flex-column">
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/mercancias'" routerLinkActive="active">Mercancías</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/cotizacion'" routerLinkActive="active">Cotización</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="'/despachos'" routerLinkActive="active">Despachos</a>
+        </li>
+      </ul>
+    </div>
+  </li>
+</ul> -->

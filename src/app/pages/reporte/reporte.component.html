@@ -1,0 +1,90 @@
+
+<div style="display: flex;">
+    <div style="flex: 1; padding: 10px;">
+        <label for="id_departamento">Departamento</label>
+        <ng-select [items]="departamentos" bindLabel="departamento" bindValue="id_depto" [(ngModel)]="departamento"
+            (change)="onDeptoChange($event)">
+        </ng-select>
+    </div>
+    <div style="flex: 1; padding: 10px;">
+        <label for="id_escuela">Escuela</label>
+        <ng-select [items]="escuelas" bindLabel="nombre" bindValue="id_escuela" [(ngModel)]="escuela"
+            (change)="onEscuelaChange($event)">
+        </ng-select>
+    </div>
+    <div style="flex: 1; padding: 10px;">
+        <label for="id">Sexo</label>
+        <ng-select [items]="sexos" bindLabel="sexo" bindValue="id" [(ngModel)]="sexo"
+            (change)="onSexoChange($event)">
+        </ng-select>
+    </div>
+    <div style="flex: 1; padding: 10px;">
+        <label for="id_centro">Centro Médico</label>
+        <ng-select [items]="centros" bindLabel="nombre" bindValue="id_centro" [(ngModel)]="centro"
+            (change)="onCentroChange($event)">
+        </ng-select>
+    </div>
+</div>
+<div style="display: flex;">
+    <div style="padding: 10px; align-content: center;"><button pButton pRipple type="button" icon="ri-file-excel-2-line"
+            class="p-button-rounded p-button-success" (click)="exportExcel()"> Exportar</button></div>
+    <div style="padding: 10px; align-content: center;"><button pButton pRipple type="button" icon="mdi mdi-file-pdf-box"
+            class="p-button-rounded p-button-success" (click)="exportPDF()">Exportar</button></div>
+</div>
+<p-table #dt [value]="postulantes" dataKey="id_postulante" [rowHover]="true"
+    [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [loading]="loading"
+    [paginator]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+    [filterDelay]="0" [globalFilterFields]="['nombres']">
+
+    <ng-template pTemplate="header">
+        <tr>
+            <!-- <th style="min-width: 1rem"></th> -->
+            <th pSortableColumn="id_postulante" style="min-width: 50px; width: 50px;">N° Arch<p-sortIcon
+                    field="id_postulante"></p-sortIcon></th>
+            <th pSortableColumn="ci" style="min-width: 1rem">CI <p-sortIcon field="ci"></p-sortIcon></th>
+            <th pSortableColumn="nombres" style="min-width: 1rem">Nombre <p-sortIcon field="nombres"></p-sortIcon></th>
+            <th pSortableColumn="ap_pat" style="min-width: 1rem">Apellido Paterno <p-sortIcon
+                    field="ap_pat"></p-sortIcon></th>
+            <th pSortableColumn="ap_mat" style="min-width: 1rem">Apellido Materno <p-sortIcon
+                    field="ap_mat"></p-sortIcon></th>
+            <th pSortableColumn="celular" style="min-width: 1rem">Celular<p-sortIcon field="celular"></p-sortIcon></th>
+            <!-- <th pSortableColumn="estado" style="min-width: 1rem">Estado <p-sortIcon field="estado"></p-sortIcon></th> -->
+            <!-- <th style="min-width: 10rem">Examenes</th> -->
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-postulante>
+        <tr>
+            <!-- <td> -->
+                <!-- <button pButton pRipple type="button" icon="mdi mdi mdi-pencil mdi-24px"
+                    class="p-button-rounded p-button-secondary" (click)="editarPostulante(postulante.id_postulante)"
+                    [style]="{ 'width': '40px', 'height': '40px' }"></button> -->
+
+            <!-- </td> -->
+            <td>{{ postulante.id_postulante }}</td>
+            <td>{{ postulante.ci }}</td>
+            <td>{{ postulante.nombres }}</td>
+            <td>{{ postulante.ap_pat }}</td>
+            <td>{{ postulante.ap_mat }}</td>
+            <td>{{ postulante.celular }}</td>
+            <!-- <td><p-tag [value]="postulante.estado" [severity]="getSeverity(postulante.estado) ?? 'default'"></p-tag></td> -->
+            <!-- <td> -->
+                <!-- <button pButton pRipple type="button" icon="mdi mdi-heart-pulse mdi-24px"
+                    class="p-button-rounded p-button-danger" (click)="prueba()"></button>&nbsp;
+                <button pButton pRipple type="button" icon="mdi mdi-heart-pulse mdi-24px"
+                    class="p-button-rounded p-button-danger" (click)="evaluar(1)"></button>&nbsp;
+                <button pButton pRipple type="button" icon="mdi mdi-brain mdi-24px"
+                    class="p-button-rounded p-button-danger" (click)="evaluar(2)"></button>&nbsp;
+                <button pButton pRipple type="button" icon="mdi mdi-tooth-outline mdi-24px"
+                    class="p-button-rounded p-button-danger" (click)="evaluar(3)"></button> -->
+
+            <!-- </td> -->
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="5">No se encontraron postulantes.</td>
+        </tr>
+    </ng-template>
+</p-table>

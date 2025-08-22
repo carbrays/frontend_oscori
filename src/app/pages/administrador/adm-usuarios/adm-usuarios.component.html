@@ -1,0 +1,52 @@
+<div style="height: 80hv;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label htmlFor="username" style="padding-top: 8%;">Agregar Usuario</label>
+                </div>
+                <div class="col-md-9">
+                    <ng-select [items]="personas" bindLabel="nombre" [(ngModel)]="persona">
+                        <ng-template ng-option-tmp let-item="item" let-index="index">
+                            <b [style.color]="item.sw==1 ? 'dark' : '#164CA4'">{{item.nombre}}</b>
+                        </ng-template>
+                    </ng-select>
+               </div>
+                <div class="col-md-1">
+                    <i class="ri-checkbox-circle-fill" style="color: rgb(46, 46, 161); font-size: 24px;" (click)="seleccionar()"></i>
+                </div>
+            </div>
+        </div>
+    </div><br>
+    <p-table id="excel-table" [value]="registros"  [scrollable]="true" scrollHeight="600px">
+        <ng-template pTemplate="header">
+            <tr>
+                <th width="6%">C.I.</th>
+                <th>Nombre</th>
+                <th>Cargo</th>
+                <th>Dirección</th>
+                <th>Unidad</th>
+                <th>Rol</th>
+                <!--<th>Categoria</th>-->
+                <th>Modificar</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-asignacion>
+            <tr>
+                <td>{{ asignacion.ci }}</td>
+                <td>{{ asignacion.nombre }}</td>
+                <td>{{ asignacion.cargo }}</td>
+                <td>{{ asignacion.direccion }}</td>
+                <td>{{ asignacion.unidad }}</td>
+                <!--<td><ng-select [items]="datos" bindLabel="categoria" bindValue="categoria" [(ngModel)]="asignacion.categoria" [disabled]="asignacion.categoria!='ADMIN'"></ng-select></td>-->
+                <td><ng-select appendTo="body" [items]="roles" bindLabel="descripcion" bindValue="id_rol" [(ngModel)]="asignacion.id_rol" (change)="updateUsuario(asignacion)"></ng-select></td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger blue-gradient" (click)="eliminarUsuario(asignacion)">
+                        ELIMINAR
+                    </button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    <br>
+<div>

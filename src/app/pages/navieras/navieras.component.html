@@ -1,0 +1,100 @@
+<div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nueva Naviera" class="p-button-success"
+          (click)="abrirNuevaNaviera()"></button>
+</div>
+
+<p-table [value]="navieras" [tableStyle]="{ 'min-width': '80rem' }">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Nombre Comercial</th>
+      <th>Razón Social</th>
+      <th>País</th>
+      <th>Teléfono</th>
+      <th>Correo</th>
+      <th>Representante</th>
+      <th>Días</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-naviera>
+    <tr>
+      <td>{{ naviera.nombre_comercial }}</td>
+      <td>{{ naviera.razon_social }}</td>
+      <td>{{ naviera.pais_origen }}</td>
+      <td>{{ naviera.telefono_contacto }}</td>
+      <td>{{ naviera.correo_contacto }}</td>
+      <td>{{ naviera.representante }}</td>
+      <td>{{ naviera.dias }}</td>
+      <td>
+        <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" 
+                (click)="editarNaviera(naviera)">
+          <i class="ri-ball-pen-line fs-22" aria-hidden="true"></i>
+        </button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '800px' }" [header]="tituloPopup">
+  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+    <div class="p-fluid p-grid p-formgrid">
+
+      <div class="p-field p-col-6">
+        <label for="nombre_comercial">Nombre Comercial</label>
+        <input pInputText id="nombre_comercial" [(ngModel)]="navieraSeleccionada.nombre_comercial" name="nombre_comercial" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="razon_social">Razón Social</label>
+        <input pInputText id="razon_social" [(ngModel)]="navieraSeleccionada.razon_social" name="razon_social" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="pais_origen">País de Origen</label>
+        <input pInputText id="pais_origen" [(ngModel)]="navieraSeleccionada.pais_origen" name="pais_origen" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="telefono_contacto">Teléfono</label>
+        <input pInputText id="telefono_contacto" [(ngModel)]="navieraSeleccionada.telefono_contacto" name="telefono_contacto" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="correo_contacto">Correo</label>
+        <input pInputText id="correo_contacto" [(ngModel)]="navieraSeleccionada.correo_contacto" name="correo_contacto" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="direccion">Dirección</label>
+        <input pInputText id="direccion" [(ngModel)]="navieraSeleccionada.direccion" name="direccion" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="representante">Representante</label>
+        <input pInputText id="representante" [(ngModel)]="navieraSeleccionada.representante" name="representante" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="sitio_web">Sitio Web</label>
+        <input pInputText id="sitio_web" [(ngModel)]="navieraSeleccionada.sitio_web" name="sitio_web" />
+      </div>
+
+      <div class="p-field p-col-12">
+        <label for="observaciones">Observaciones</label>
+        <textarea pInputTextarea rows="3" id="observaciones" [(ngModel)]="navieraSeleccionada.observaciones" name="observaciones"></textarea>
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="dias">Días</label>
+        <input pInputText type="number" id="dias" [(ngModel)]="navieraSeleccionada.dias" name="dias" />
+      </div>
+
+    </div>
+    <div class="p-dialog-footer">
+      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+    </div>
+  </form>
+</p-dialog>
+

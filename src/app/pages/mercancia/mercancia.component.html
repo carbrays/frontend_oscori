@@ -1,0 +1,58 @@
+<div class="p-mb-3">
+  <button pButton type="button" icon="pi pi-plus" label="Nueva Mercancía" class="p-button-success"
+          (click)="abrirNuevaMercancia()"></button>
+</div>
+
+<p-table [value]="mercancias" [tableStyle]="{ 'min-width': '80rem' }">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Mercancía</th>
+      <th>Descripción</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-mercancia>
+    <tr>
+      <td>{{ mercancia.mercancia }}</td>
+      <td>{{ mercancia.descripcion }}</td>
+      <td>{{ mercancia.estado }}</td>
+      <td>
+        <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarMercancia(mercancia)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+        <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarMercancia(mercancia)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '800px' }" [header]="tituloPopup">
+  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+    <div class="p-fluid p-grid p-formgrid">
+
+      <div class="p-field p-col-4">
+        <label for="placa">Mercancía</label>
+            <input pInputText id="placa" [(ngModel)]="mercanciaSeleccionada.mercancia" name="placa" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="marca">Descripción</label>
+        <input pInputText id="marca" [(ngModel)]="mercanciaSeleccionada.descripcion" name="marca" />
+      </div>
+
+      <div class="p-field p-col-4">
+        <label for="estado">Estado</label>
+        <ng-select [items]="estados" placeholder="Selecciona un estado" bindLabel="label" 
+            bindValue="value" 
+            [(ngModel)]="mercanciaSeleccionada.estado" name="cargo">
+        </ng-select>
+        
+      </div>
+
+    </div>
+    <div class="p-dialog-footer">
+      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
+    </div>
+  </form>
+</p-dialog>

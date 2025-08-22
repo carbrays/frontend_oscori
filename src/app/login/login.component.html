@@ -1,0 +1,116 @@
+<div class="auth-page-wrapper pt-2">
+    <!-- auth page bg -->
+    <div class="auth-one-bg-position auth-one-bg" id="auth-particles">
+        <div class="bg-overlay"></div>
+
+        <div class="shape">
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1440 120">
+                <path d="M 0,36 C 144,53.6 432,123.2 720,124 C 1008,124.8 1296,56.8 1440,40L1440 140L0 140z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- auth page content -->
+    <div class="auth-page-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-center mt-sm-5 mb-4 text-white-50">
+                        <div>
+                            <!-- <a href="index.html" class="d-inline-block auth-logo">
+                                <img src="assets/images/logo-light.png" alt="" height="160">
+                            </a> -->
+                            <p></p><a href="index.html" class="d-inline-block auth-logo">
+                                <img src="assets/images/logo.png" alt="" height="160" >
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card mt-4">
+
+                        <div class="card-body p-4">
+                            <div class="text-center mt-2">
+                                <h2 class="text-primary">TRANSPORTES OSCORI</h2>
+                                <p class="text-muted">Inicia sesión para continuar</p>
+                            </div>
+                            <div class="p-2 mt-4">
+                                <form #f="ngForm" ngNativeValidate (ngSubmit)="ingresar(f)" autocomplete="off">
+
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Usuario</label>
+                                        <input ngModel name="login" type="text" class="form-control" id="login" placeholder="Ingrese usuario" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <!-- <div class="float-end">
+                                            <a href="auth-pass-reset-basic.html" class="text-muted">Forgot password?</a>
+                                        </div> -->
+                                        <label class="form-label" for="password-input">Contraseña</label>
+                                        <div class="position-relative auth-pass-inputgroup mb-3">
+                                            <input ngModel name="password" type="password" class="form-control pe-5 password-input" placeholder="Ingrese su password" id="password-input" required>
+                                            <!-- <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button> -->
+
+                                            <button type="button"
+                                                class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon custom-toggle active"
+                                                data-bs-toggle="button" (click)="passwordInput()" aria-label="Toggle eye icon">
+                                                <span class="icon-off"><i class="ri-eye-fill align-middle fs-15"></i></span>
+                                                <span class="icon-on"><i class="ri-eye-off-fill align-middle fs-15"></i></span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
+                                        <label class="form-check-label" for="auth-remember-check">Remember me</label>
+                                    </div> -->
+
+                                    <div class="mt-4">
+                                        <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
+                                    </div>
+
+                                    <!-- Buttons with Label -->
+                                    
+                                    <br><br>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- end card body -->
+                    </div>
+                    <!-- end card -->
+
+                    <!-- <div class="mt-4 text-center">
+                        <p class="mb-0">Don't have an account ? <a href="auth-signup-basic.html" class="fw-semibold text-primary text-decoration-underline"> Signup </a> </p>
+                    </div> -->
+
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- end container -->
+    </div>
+    <!-- end auth page content -->
+
+    <!-- footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-center">
+                        <p class="mb-0 text-muted">&copy;
+                            <!-- <script>document.write(new Date().getFullYear())</script> --> BRP <i class="mdi mdi-account-lock-open-outline text-danger"></i> Policia Boliviana Nacional
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- end Footer -->
+</div>
+<!-- end auth-page-wrapper -->
+
+

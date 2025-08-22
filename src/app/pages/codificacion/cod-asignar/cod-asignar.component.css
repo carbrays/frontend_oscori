@@ -1,0 +1,7 @@
+:host ::ng-deep #cargo {
+    background-color: rgba(0, 102, 255, 0.102) !important;
+}
+
+:host ::ng-deep #cargoF {
+    background-color: rgba(0, 102, 255, 0.102) !important;
+}

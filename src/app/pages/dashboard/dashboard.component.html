@@ -1,0 +1,12 @@
+<div class="row g-3">
+  <div class="col-md-2" *ngFor="let card of cards">
+    <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': card.color}">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="fs-4">{{ card.titulo }}</div>
+        <i [class]="card.icono" style="font-size: 1.5rem;"></i>
+      </div>
+      <div class="display-5 fw-bold">{{ card.cantidad }}</div>
+      <div class="small">{{ card.descripcion }}</div>
+    </div>
+  </div>
+</div>

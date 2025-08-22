@@ -1,0 +1,28 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~@ng-select/ng-select/themes/default.theme.css";
+
+#themecolors .selector, .cursor {
+    cursor: pointer;
+}
+
+
+.fast{
+    -webkit-animation-duration: 0.3s;
+    animation-duration: 0.3s;
+    -webkit-animation-fill-mode:both;
+    animation-fill-mode:both
+}
+
+/* @import "primeng/resources/themes/nano/theme.css"; */
+/* @import "~primeng/resources/themes/bootstrap4-dark-blue/theme.css"; */
+ @import "primeng/resources/primeng.css"; 
+
+.swal2-container {
+    z-index: 20000 !important;
+}
+
+.uber { transition: all .2s ease-in-out; }
+.uber:hover { transform: scale(1.2); }
+
+
+

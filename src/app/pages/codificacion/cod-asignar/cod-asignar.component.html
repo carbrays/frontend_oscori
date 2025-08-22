@@ -1,0 +1,26 @@
+<div>
+    <p-table [value]="directorio" [paginator]="true" [rows]="12" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>N°</th>
+                <th>RAZON SOCIAL</th>
+                <th>NIT.</th>
+                <th>NOMBRE DEL INFORMANTE</th>
+                <th>CARGO DEL INFORMANTE</th>
+                <th>ESTADO</th>
+                <th>--</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product let-i="rowIndex">
+            <tr>
+                <td>{{i+1}}</td>
+                <td>{{ product.razon_social }}</td>
+                <td>{{ product.nit }}</td>
+                <td>{{ product.informante }}</td>
+                <td>{{ product.cargo }}</td>
+                <td>{{ product.estado }}</td>
+                <td><button pButton pRipple type="button" label="Verificar" class="p-button-rounded" styleClass="p-button-sm" [disabled]="product.estado!='CONCLUIDO'" (click)="verificar(i)"></button></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

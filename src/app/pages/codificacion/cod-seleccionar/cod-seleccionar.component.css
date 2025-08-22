@@ -1,0 +1,47 @@
+label, input {
+    display: inline-block;
+    vertical-align: middle;
+}
+input {
+    height: 35px;
+}
+label {
+    margin-right: 10px;
+}
+.input-container {
+    padding-top: 0.5%;
+}
+.checkbox-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+:host ::ng-deep .form-group {
+    display: flex;
+    align-items: center;
+}
+:host ::ng-deep .form-group label {
+    margin: 0;
+    padding: 0;
+}
+:host ::ng-deep .form-group .p-checkbox {
+    margin: 0;
+}
+:host ::ng-deep .radio-group {
+    display: flex;
+    align-items: center;
+}
+:host ::ng-deep .radio-group label {
+    margin-left: 0.5rem;
+}
+:host ::ng-deep .radio-group .p-radiobutton {
+    margin: 0;
+}
+/*
+.card-body {
+    max-height: 450px;
+    overflow-y: auto;
+}*/
+#inputDescricpion{
+    width: 70%;
+}

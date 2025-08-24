@@ -131,15 +131,20 @@ filtroEstado: string = '';
   bloquearDespachoPortuario = false;
 
   mostrarDialogPDF = false;
+  mostrarDialogImagen: boolean = false;
   mostrarDialogVariosPDF = false;
   pdfSeleccionadoURL: string = '';
   documentoActual: any = null;
   tituloDialogVariosPDF = '';
   documentoSeleccionado: any = null;
 
+  imagenSeleccionadaURL: string = '';
+
   pdfs: any[] = [];
 
    mostrarTabla = true;
+
+   actualizar = false;
 
   constructor(private despachoService: DespachosService) { }
 
@@ -291,7 +296,7 @@ filtroEstado: string = '';
 
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'application/pdf';
+    input.accept = 'application/pdf,image/*';
 
     input.onchange = (event: any) => {
       this.onFileSelected(event, despacho, this.documentoSeleccionado);
@@ -301,9 +306,22 @@ filtroEstado: string = '';
   }
 
   verPDF(nombre: any) {
-    this.pdfSeleccionadoURL = `${URL_SERVICIOS}/despachos/verPdf/${nombre}`; // ajusta a tu ruta real
-    console.log('PDF URL:', this.pdfSeleccionadoURL);
+    const url = `${URL_SERVICIOS}/despachos/verPdf/${nombre}`;
+
+    const extension = nombre.split('.').pop()?.toLowerCase();
+
+  if (extension === 'pdf') {
+    this.pdfSeleccionadoURL = url;
     this.mostrarDialogPDF = true;
+  } else {
+    this.imagenSeleccionadaURL = url;
+    this.mostrarDialogImagen = true;
+  }
+
+    // this.pdfSeleccionadoURL = `${URL_SERVICIOS}/despachos/verPdf/${nombre}`; // ajusta a tu ruta real
+
+    // console.log('PDF URL:', this.pdfSeleccionadoURL);
+    // this.mostrarDialogPDF = true;
   }
 
   subirArchivosDespacho(idDespacho: number) {
@@ -480,6 +498,8 @@ filtroEstado: string = '';
   }
 
   editarDespacho(despacho: any): void {
+   this.actualizar = true;
+
     this.despachoSeleccionado = {
       ...despacho, fecha_llegada: despacho.fecha_llegada ? new Date(despacho.fecha_llegada) : null,
       fecha_limite: despacho.fecha_limite ? new Date(despacho.fecha_limite) : null,
@@ -489,9 +509,14 @@ filtroEstado: string = '';
       fecha_bl_hijo: despacho.fecha_bl_hijo ? new Date(despacho.fecha_bl_hijo) : null,
       fecha_dam: despacho.fecha_dam ? new Date(despacho.fecha_dam) : null,
     };
+    this.actualizarOrigen(despacho.id_ciudad_origen);
+    this.actualizarDespachoPortuario(despacho.id_despacho_portuario);
+    this.actualizarDespacho(despacho.id_despacho_aduanero);
+    
     this.popupVisible = true;
     this.modoEdicion = true;
     this.tituloPopup = 'Editar Despacho';
+    this.actualizar = false;
   }
 
   eliminarDespacho(despacho: any): void {
@@ -524,6 +549,7 @@ filtroEstado: string = '';
     if (this.modoEdicion) {
       this.despachoSeleccionado.usumod = localStorage.getItem('login');
       this.despachoSeleccionado.fecmod = new Date();
+      
       this.despachoService
         .editarDespacho(
           this.despachoSeleccionado.id_despacho,
@@ -742,9 +768,11 @@ filtroEstado: string = '';
         break;
       default:
         this.bloquearOrigen = true;
+        if(!this.actualizar){
         setTimeout(() => {
           this.despachoSeleccionado.id_despacho_portuario = '';
         }, 0);
+      }
 
     }
   }
@@ -756,10 +784,12 @@ filtroEstado: string = '';
         break;
       default:
         this.bloquearDespachoPortuario = true;
+        if(!this.actualizar){
         setTimeout(() => {
-          this.despachoSeleccionado.id_despacho_aduanero = '';
-          this.despachoSeleccionado.id_despacho_aduanero_general = '';
+            this.despachoSeleccionado.id_despacho_aduanero = '';
+            this.despachoSeleccionado.id_despacho_aduanero_general = '';
         }, 0);
+      }
 
     }
   }
@@ -771,9 +801,11 @@ filtroEstado: string = '';
         break;
       default:
         this.bloquearDespachoGeneral = true;
+        if(!this.actualizar){
         setTimeout(() => {
-          this.despachoSeleccionado.id_despacho_aduanero_general = '';
+            this.despachoSeleccionado.id_despacho_aduanero_general = '';
         }, 0);
+      }
 
     }
   }
@@ -783,18 +815,23 @@ filtroEstado: string = '';
   if (!input.files || input.files.length === 0) return;
 
   const file = input.files[0];
-  if (file.type !== 'application/pdf') {
-    Swal.fire('Error', 'Debe seleccionar un archivo PDF válido.', 'error');
+
+  // ✅ Validación: solo PDFs o imágenes
+  if (!(file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+    Swal.fire('Error', 'Tipo de archivo no permitido. Solo se permiten PDFs e imágenes.', 'error');
     input.value = '';
     return;
   }
+
+  // 🔹 Detectar extensión original
+  const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
   // 🔹 Pedir al usuario un nuevo nombre antes de confirmar
   Swal.fire({
     title: 'Renombrar archivo',
     input: 'text',
-    inputLabel: 'Escribe el nuevo nombre para el archivo (sin .pdf)',
-    inputValue: file.name.replace('.pdf', ''), // por defecto el nombre original
+    inputLabel: `Escribe el nuevo nombre para el archivo (sin .${extension})`,
+    inputValue: file.name.replace(`.${extension}`, ''), // quitar extensión original
     showCancelButton: true,
     confirmButtonText: 'Continuar',
     cancelButtonText: 'Cancelar',
@@ -807,12 +844,11 @@ filtroEstado: string = '';
   }).then((result) => {
     if (result.isConfirmed) {
       let nuevoNombre = result.value;
-          nuevoNombre = nuevoNombre.replace(/\.pdf$/, "");
-          nuevoNombre = nuevoNombre.replace(/\s+/g, "_");
+      nuevoNombre = nuevoNombre.replace(/\s+/g, "_"); // reemplazar espacios
 
       Swal.fire({
         title: '¿Estás seguro?',
-        text: `¿Deseas subir el archivo con el nombre: "${nuevoNombre}.pdf"?`,
+        text: `¿Deseas subir el archivo con el nombre: "${nuevoNombre}.${extension}"?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, subir',
@@ -821,11 +857,10 @@ filtroEstado: string = '';
         if (confirmResult.isConfirmed) {
           const formData = new FormData();
 
-          
-          // 🔹 Crear un nuevo File con el nombre editado
+          // 🔹 Crear un nuevo File con el nombre editado y su extensión original
           const nuevoArchivo = new File(
             [file],
-            `${despacho.id_despacho}-${documento.id}-${nuevoNombre}.pdf`,
+            `${despacho.id_despacho}-${documento.id}-${nuevoNombre}.${extension}`,
             { type: file.type }
           );
 
@@ -842,8 +877,8 @@ filtroEstado: string = '';
               this.obtenerListado(); 
             })
             .catch(error => {
-              console.error('Error al subir el PDF', error);
-              Swal.fire('Error', 'Error al subir el archivo PDF. Intenta nuevamente.', 'error');
+              console.error('Error al subir el archivo', error);
+              Swal.fire('Error', 'Error al subir el archivo. Intenta nuevamente.', 'error');
             });
         } else {
           input.value = '';
@@ -854,6 +889,7 @@ filtroEstado: string = '';
     }
   });
 }
+
 
   guardarEstadoDespacho(despacho: any, nuevoEstado: any): void {
     console.log('Nuevo estado seleccionado:', nuevoEstado);

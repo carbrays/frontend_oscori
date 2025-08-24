@@ -77,8 +77,8 @@
       <th>Depósito Aduanero</th>
       <th>Asignación Carga</th>
       <th>Fecha Carga</th>
-      <th>Asignación Descarga</th>
-      <th>Fecha Descarga</th>
+      <!-- <th>Asignación Descarga</th>
+      <th>Fecha Descarga</th> -->
       <th>Estado</th>
       <th>Acciones</th>
     </tr>
@@ -152,12 +152,12 @@
   <th>
     <input type="date" pInputText [(ngModel)]="filtroFechaCarga" style="width: 100%;"/>
   </th>
-  <th>
+  <!-- <th>
     <input type="text" pInputText [(ngModel)]="filtroAsignacionDescarga" style="width: 100%;"/>
-  </th>
-  <th>
+  </th> -->
+  <!-- <th>
     <input type="date" pInputText [(ngModel)]="filtroFechaDescarga" style="width: 100%;"/>
-  </th>
+  </th> -->
   <th>
     <input type="text" pInputText [(ngModel)]="filtroEstado" style="width: 100%;"/>
   </th>
@@ -190,8 +190,8 @@
       <td>{{ despacho.id_deposito_aduanero }}</td>
       <td>{{ getVehiculoNombre(despacho.id_asignacion_vehiculo_carga) }}</td>
       <td>{{ despacho.fecha_carga | date:'yyyy-MM-dd' }}</td>
-      <td>{{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</td>
-      <td>{{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</td>
+      <!-- <td>{{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</td> -->
+      <!-- <td>{{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</td> -->
       <td>{{ despacho.estado }}</td>
       <td class="text-center d-flex justify-content-center gap-2">
   <button class="btn btn-sm btn-outline-info" (click)="editarDespacho(despacho)">
@@ -248,9 +248,9 @@
 <div [ngClass]="{'faltante': !despacho.fecha_llegada}"><b>Fecha Llegada:</b> {{ despacho.fecha_llegada | date:'yyyy-MM-dd' }}</div>
   <div [ngClass]="{'faltante': !despacho.fecha_limite}"><b>Fecha Límite:</b> {{ despacho.fecha_limite | date:'yyyy-MM-dd' }}</div>
 
-  <div [ngClass]="{'faltante': !despacho.id_despacho_portuario}"><b>Despacho Portuario:</b> {{ despacho.id_despacho_portuario }}</div>
-<div [ngClass]="{'faltante': !despacho.id_despacho_aduanero}"><b>Despacho Aduanero:</b> {{ despacho.id_despacho_aduanero }}</div>
-  <div [ngClass]="{'faltante': !despacho.id_despacho_aduanero_general}"><b>Despacho Aduanero General:</b> {{ despacho.id_despacho_aduanero_general }}</div>
+  <div *ngIf="getCiudadNombre(despacho.id_ciudad_origen) !== 'IQUIQUE' " [ngClass]="{'faltante': !despacho.id_despacho_portuario}"><b>Despacho Portuario:</b> {{ despacho.id_despacho_portuario }}</div>
+<div *ngIf="getCiudadNombre(despacho.id_ciudad_origen) === 'IQUIQUE' || despacho.id_despacho_portuario !== 'INDIRECTO ANTICIPADO'" [ngClass]="{'faltante': !despacho.id_despacho_aduanero}"><b>Despacho Aduanero:</b> {{ despacho.id_despacho_aduanero }}</div>
+  <div *ngIf="(getCiudadNombre(despacho.id_ciudad_origen) === 'IQUIQUE' || despacho.id_despacho_portuario !== 'INDIRECTO ANTICIPADO') && despacho.id_despacho_aduanero !== 'GENERAL'" [ngClass]="{'faltante': !despacho.id_despacho_aduanero_general}"><b>Despacho Aduanero General:</b> {{ despacho.id_despacho_aduanero_general }}</div>
   <div [ngClass]="{'faltante': !despacho.id_deposito_aduanero}"><b>Deposito Aduanero:</b> {{ despacho.id_deposito_aduanero }}</div>
 
   <div [ngClass]="{'faltante': !despacho.bl_madre}"><b>BL Madre:</b> {{ despacho.bl_madre }}</div>
@@ -264,8 +264,8 @@
 
   <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_carga}"><b>Asignación Carga:</b> {{ getVehiculoNombre(despacho.id_asignacion_vehiculo_carga) }}</div>
   <div [ngClass]="{'faltante': !despacho.fecha_carga}"><b>Fecha Carga:</b> {{ despacho.fecha_carga | date:'yyyy-MM-dd' }}</div>
-  <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_descarga}"><b>Asignación Descarga:</b> {{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</div>
-  <div [ngClass]="{'faltante': !despacho.fecha_descarga}"><b>Fecha Descarga:</b> {{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</div>
+  <!-- <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_descarga}"><b>Asignación Descarga:</b> {{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_descarga}"><b>Fecha Descarga:</b> {{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</div> -->
 
 
   <!-- Descripción Adicional ocupa toda la fila -->
@@ -558,4 +558,18 @@
     </div>
 </div>
   
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarDialogImagen" 
+          [modal]="true" 
+          [closable]="true"
+          [style]="{ width: '90vw', maxWidth: '1200px', padding: '0' }"
+          [contentStyle]="{ padding: '0' }"
+          styleClass="dialog-fullscreen">
+
+  <div class="dialog-img-container">
+    <img [src]="imagenSeleccionadaURL"
+         alt="Imagen"
+         class="dialog-img" />
+  </div>
 </p-dialog>

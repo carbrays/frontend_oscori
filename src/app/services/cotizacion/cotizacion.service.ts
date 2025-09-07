@@ -36,6 +36,10 @@ export class CotizacionService {
     return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/clientes`);
   }
 
+  getForwaders(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/forwaders`);
+  }
+
   getMercancia(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/mercancias`);
   }

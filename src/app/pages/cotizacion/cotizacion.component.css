@@ -111,3 +111,18 @@ label {
 pInputText:placeholder-shown {
   border: solid 2px red; /* Color del placeholder */
 }
+
+.flex-container {
+  display: flex;
+}
+
+.divadd {
+  display: flex;
+  align-items: center; /* centra verticalmente */
+  gap: 8px;            /* espacio entre input y botón */
+  width: 100%;         /* para que ocupe todo el ancho del contenedor padre */
+}
+
+.input-full {
+  flex: 1;             /* hace que el autocomplete crezca */
+}

@@ -1,71 +1,83 @@
-label, input {
-    display: inline-block;
-    vertical-align: middle;
-}
+label,
 input {
-    height: 35px;
+  display: inline-block;
+  vertical-align: middle;
 }
+
+input {
+  height: 35px;
+}
+
 label {
-    margin-right: 10px;
+  margin-right: 10px;
 }
+
 .input-container {
-    padding-top: 0.5%;
+  padding-top: 0.5%;
 }
+
 .checkbox-container {
-    display: flex;
-    gap: 15px;
-    align-items: center;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
+
 :host ::ng-deep .form-group {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
+
 :host ::ng-deep .form-group label {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
+
 :host ::ng-deep .form-group .p-checkbox {
-    margin: 0;
+  margin: 0;
 }
+
 :host ::ng-deep .radio-group {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
+
 :host ::ng-deep .radio-group label {
-    margin-left: 0.5rem;
+  margin-left: 0.5rem;
 }
+
 :host ::ng-deep .radio-group .p-radiobutton {
-    margin: 0;
+  margin: 0;
 }
+
 /*
 .card-body {
     max-height: 450px;
     overflow-y: auto;
 }*/
-#inputDescricpion{
-    width: 70%;
+#inputDescricpion {
+  width: 70%;
 }
 
 .p-dialog-content .p-formgrid {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .p-formgrid .p-field {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .p-dialog-content .p-field label {
-    font-weight: normal;
+  font-weight: normal;
 }
 
 .p-dialog-content .p-field input {
-    width: 100%;
+  width: 100%;
 }
 
 .responsive-calendar {
-    width: 100%;
-    max-width: 400px;
-    /* Ajusta esto según sea necesario */
+  width: 100%;
+  max-width: 400px;
+  /* Ajusta esto según sea necesario */
 }
 
 .p-inputtext {
@@ -73,13 +85,14 @@ label {
 }
 
 .despacho {
-  color: #2255e4 !important; 
+  background-color: #ffffff !important;
+  color: #2255e4 !important;
   font-weight: bold;
 }
 
 .despacho-culminado {
-  background-color: #d7f8da !important; 
-  color: #2255e4 !important; 
+  background-color: #d7f8da !important;
+  color: #2255e4 !important;
   font-weight: bold;
 }
 
@@ -90,9 +103,12 @@ label {
 }
 
 .despacho-faltante {
-  background-color: #ffe5e5 !important; /* Fondo rosado claro */
-/*  border: 1px solid #d32f2f !important;*/ /* Borde rojo */
-  color: #2255e4 !important; /* Texto rojo */
+  background-color: #ffe5e5 !important;
+  /* Fondo rosado claro */
+  /*  border: 1px solid #d32f2f !important;*/
+  /* Borde rojo */
+  color: #2255e4 !important;
+  /* Texto rojo */
 }
 
 .input-error {
@@ -105,20 +121,36 @@ label {
 }
 
 @keyframes vibrar {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  50% {
+    transform: translateX(5px);
+  }
+
+  75% {
+    transform: translateX(-5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
-    
+
 pInputText:placeholder-shown {
-  border: solid 2px red; /* Color del placeholder */
+  border: solid 2px red;
+  /* Color del placeholder */
 }
 
 .small-select-button .p-button {
   font-size: 5px;
-  padding: 2px 8px;  /* más compacto */
+  padding: 2px 8px;
+  /* más compacto */
 }
 
 .small-select-button .p-selectbutton {
@@ -128,4 +160,65 @@ pInputText:placeholder-shown {
 .faltante {
   color: rgb(255, 0, 0);
   font-weight: bold;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  /* 6 columnas iguales */
+  gap: 1rem;
+  /* espacio entre columnas y filas */
+}
+
+.form-grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+/*PARA GENERAR IMAGEN PNG*/
+.overlay-carga {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8); /* semi-transparente */
+  z-index: 9999; /* encima de todo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.caja-carga {
+  text-align: center;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.modo-captura {
+  font-size: 1.2rem !important;
+  line-height: 1.4 !important;
+}
+
+.modo-captura .d-grid {
+  grid-template-columns: repeat(2, 1fr) !important; /* solo 2 columnas */
+  gap: 6px !important; /* compacta los espacios si quieres */
+}
+
+.modo-captura .d-flex {
+  flex-wrap: wrap !important; /* fuerza a que los flex hagan wrap y bajen */
+}
+
+.modo-captura div {
+  padding: 2px !important; /* reduce padding general si quieres */
+}
+
+.modo-captura .fs-5 {
+  font-size: 1.4rem !important; /* fuerza a que se aplique */
+  line-height: 1.4 !important;
+}
+
+.modo-captura .fs-4 {
+  font-size: 1.4rem !important; /* fuerza a que se aplique */
+  line-height: 1.4 !important;
 }

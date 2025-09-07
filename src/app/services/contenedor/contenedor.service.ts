@@ -110,4 +110,8 @@ export class ContenedorService {
   subirPdf(formData: FormData): Observable<any> {
   return this.http.post(`${URL_SERVICIOS}/contenedor/subir_pdf`, formData);
 }
+
+deleteFile(pdf: string): Observable<any> {
+    return this.http.delete(`${URL_SERVICIOS}/contenedor/eliminar_pdf/${pdf}`);
+  }
 }

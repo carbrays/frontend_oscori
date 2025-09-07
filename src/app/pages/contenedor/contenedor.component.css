@@ -1,75 +1,91 @@
-label, input {
-    display: inline-block;
-    vertical-align: middle;
-}
+label,
 input {
-    height: 35px;
+  display: inline-block;
+  vertical-align: middle;
 }
+
+input {
+  height: 35px;
+}
+
 label {
-    margin-right: 10px;
+  margin-right: 10px;
 }
+
 .input-container {
-    padding-top: 0.5%;
+  padding-top: 0.5%;
 }
+
 .checkbox-container {
-    display: flex;
-    gap: 15px;
-    align-items: center;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
+
 :host ::ng-deep .form-group {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
+
 :host ::ng-deep .form-group label {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
+
 :host ::ng-deep .form-group .p-checkbox {
-    margin: 0;
+  margin: 0;
 }
+
 :host ::ng-deep .radio-group {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
+
 :host ::ng-deep .radio-group label {
-    margin-left: 0.5rem;
+  margin-left: 0.5rem;
 }
+
 :host ::ng-deep .radio-group .p-radiobutton {
-    margin: 0;
+  margin: 0;
 }
+
 /*
 .card-body {
     max-height: 450px;
     overflow-y: auto;
 }*/
-#inputDescricpion{
-    width: 70%;
+#inputDescricpion {
+  width: 70%;
 }
 
 .p-dialog-content .p-formgrid {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .p-formgrid .p-field {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .p-dialog-content .p-field label {
-    font-weight: normal;
+  font-weight: normal;
 }
 
 .p-dialog-content .p-field input {
-    width: 100%;
+  width: 100%;
 }
 
 .responsive-calendar {
-    width: 100%;
-    max-width: 400px;
-    /* Ajusta esto según sea necesario */
+  width: 100%;
+  max-width: 400px;
+  /* Ajusta esto según sea necesario */
 }
 
 .p-inputtext {
   text-transform: uppercase;
+}
+
+.contenedor {
+  background-color: #ffffff !important;
 }
 
 .fecha-vencida {
@@ -100,15 +116,30 @@ label {
 }
 
 @keyframes vibrar {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  50% {
+    transform: translateX(5px);
+  }
+
+  75% {
+    transform: translateX(-5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
 ::ng-deep .ng-dropdown-panel {
-  z-index: 999999 !important; /* más alto que el p-dialog */
+  z-index: 999999 !important;
+  /* más alto que el p-dialog */
 }
 
 .faltante {
@@ -130,7 +161,8 @@ img {
 }
 
 .dialog-img-container {
-  max-height: 90vh; /* ocupa como máximo el 90% de la altura de la pantalla */
+  max-height: 90vh;
+  /* ocupa como máximo el 90% de la altura de la pantalla */
   max-width: 100%;
   display: flex;
   justify-content: center;
@@ -140,5 +172,54 @@ img {
 .dialog-img {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain; /* mantiene proporción sin recortar */
+  object-fit: contain;
+  /* mantiene proporción sin recortar */
+}
+
+/*PARA GENERAR IMAGEN PNG*/
+.overlay-carga {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8); /* semi-transparente */
+  z-index: 9999; /* encima de todo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.caja-carga {
+  text-align: center;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.modo-captura {
+  font-size: 1.2rem !important;
+  line-height: 1.4 !important;
+}
+
+.modo-captura .d-grid {
+  grid-template-columns: repeat(2, 1fr) !important; /* solo 2 columnas */
+  gap: 6px !important; /* compacta los espacios si quieres */
+}
+
+.modo-captura .d-flex {
+  flex-wrap: wrap !important; /* fuerza a que los flex hagan wrap y bajen */
+}
+
+.modo-captura div {
+  padding: 2px !important; /* reduce padding general si quieres */
+}
+
+.modo-captura .fs-5 {
+  font-size: 1.4rem !important; /* fuerza a que se aplique */
+  line-height: 1.4 !important;
+}
+
+.modo-captura .fs-4 {
+  font-size: 1.4rem !important; /* fuerza a que se aplique */
+  line-height: 1.4 !important;
 }

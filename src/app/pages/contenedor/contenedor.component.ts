@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ContenedorService } from 'src/app/services/contenedor/contenedor.service';
 import Swal from 'sweetalert2';
 import { forkJoin } from 'rxjs';
@@ -6,13 +6,20 @@ import { forkJoin } from 'rxjs';
 import axios from 'axios';
 import { URL_SERVICIOS } from 'src/app/config/config';
 
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
+(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+
+import * as htmlToImage from 'html-to-image';
+
 @Component({
   selector: 'app-contenedor',
   templateUrl: './contenedor.component.html',
   styleUrls: ['./contenedor.component.css']
 })
 export class ContenedoresComponent implements OnInit {
-URL = URL_SERVICIOS;
+  URL = URL_SERVICIOS;
   contenedores: any[] = [];
   contenedorSeleccionado: any = {};
   popupVisible = false;
@@ -20,8 +27,8 @@ URL = URL_SERVICIOS;
   mostrarGastos = false;
   mostrarImagen = false;
   mostrarDevolucion = false;
-   mostrarDialogVariosPDF = false;
-   mostrarDialogPDF = false;
+  mostrarDialogVariosPDF = false;
+  mostrarDialogPDF = false;
 
   tituloMostrarGastos = '';
   tituloPopup = 'Contenedor';
@@ -46,54 +53,66 @@ URL = URL_SERVICIOS;
   ];
 
   filtroContenedor: string = '';
-filtroVencimiento: string = '';
-filtroCliente: string = '';
-filtroMercancia: string = '';
-filtroTipoContenedor: string = '';
-filtroTamano: string = '';
-filtroAno: string = '';
-filtroTipo: string = '';
-filtroNaviera: string = '';
-filtroCategoria: string = '';
-filtroCiudadOrigen: string = '';
-filtroEstadoContenedor: string = '';
-filtroFechaLlegada: string = '';
-filtroFechaLimite: string = '';
-filtroEstado: string = '';
-filtroFechaDevolucion: string = '';
-filtroUbicacionDevolucion: string = '';
-filtroDias: string = '';
-filtroObservaciones: string = '';
-filtroBlMadre: string = '';
+  filtroVencimiento: string = '';
+  filtroCliente: string = '';
+  filtroMercancia: string = '';
+  filtroTipoContenedor: string = '';
+  filtroTamano: string = '';
+  filtroAno: string = '';
+  filtroTipo: string = '';
+  filtroNaviera: string = '';
+  filtroCategoria: string = '';
+  filtroCiudadOrigen: string = '';
+  filtroCiudadDestino: string = '';
+  filtroEstadoContenedor: string = '';
+  filtroFechaLlegada: string = '';
+  filtroFechaLimite: string = '';
+  filtroEstado: string = '';
+  filtroFechaDevolucion: string = '';
+  filtroUbicacionDevolucion: string = '';
+  filtroDias: string = '';
+  filtroObservaciones: string = '';
+  filtroBlMadre: string = '';
+  filtroDeuda: string = '';
 
-opcionesVencimiento = [
-  { label: 'Todos', value: '' },
-  { label: 'Vencidos', value: 'fecha-vencida' },
-  { label: 'Por vencer', value: 'fecha-pre-vencida' },
-  { label: 'Devueltos', value: 'fecha-devuelto' }
-];
+  opcionesVencimiento = [
+    { label: 'Todos', value: '' },
+    { label: 'Vencidos', value: 'fecha-vencida' },
+    { label: 'Por vencer', value: 'fecha-pre-vencida' },
+    { label: 'Devueltos', value: 'fecha-devuelto' }
+  ];
 
-tipo_contenedor = [
-  { label: 'DRY', value: 'DRY' },
-  { label: 'ESTANDAR', value: 'ESTANDAR' },
-  { label: 'HIGH CUBE', value: 'HIGH CUBE' },
-  { label: 'REEFER', value: 'REEFER' },
-  { label: 'OPEN TOP', value: 'OPEN TOP' },
-  { label: 'FLAT RACK', value: 'FLAT RACK' },
-  { label: 'TANK', value: 'TANK' }
-];
+  opcionesDeudas = [
+    { label: 'Todos', value: '' },
+    { label: 'ESTIBAJE', value: 'deuda_estibaje' },
+    { label: 'GRUAJE', value: 'deuda_grua' },
+    { label: 'MONTACARGA', value: 'deuda_montacarga' },
+    { label: 'URBANO', value: 'deuda_urbano' },
+    { label: 'TRASBORDO', value: 'deuda_trasbordo' },
+    { label: 'LAVADO', value: 'deuda_lavado' }
+  ]
 
-estado_contenedor = [
-  { label: 'BUENO', value: 'BUENO' },
-  { label: 'REGULAR', value: 'REGULAR' },
-  { label: 'MALO', value: 'MALO' }
-];
+  tipo_contenedor = [
+    { label: 'DRY', value: 'DRY' },
+    { label: 'ESTANDAR', value: 'ESTANDAR' },
+    { label: 'HIGH CUBE', value: 'HIGH CUBE' },
+    { label: 'REEFER', value: 'REEFER' },
+    { label: 'OPEN TOP', value: 'OPEN TOP' },
+    { label: 'FLAT RACK', value: 'FLAT RACK' },
+    { label: 'TANK', value: 'TANK' }
+  ];
 
-modalidad_pago = [
-  { label: 'AL CONTADO', value: 'AL CONTADO' },
-  { label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' },
-  { label: 'QR', value: 'QR' }
-];
+  estado_contenedor = [
+    { label: 'BUENO', value: 'BUENO' },
+    { label: 'REGULAR', value: 'REGULAR' },
+    { label: 'MALO', value: 'MALO' }
+  ];
+
+  modalidad_pago = [
+    { label: 'AL CONTADO', value: 'AL CONTADO' },
+    { label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' },
+    { label: 'QR', value: 'QR' }
+  ];
 
   ordenAscendente: boolean = true;
 
@@ -122,7 +141,22 @@ modalidad_pago = [
 
   pdfSeleccionadoURL: string = '';
 
-  constructor(private contenedorService: ContenedorService) {}
+  imagenesContenedor = [
+    { key: 'IZQUIERDA', label: 'Izquierda' },
+    { key: 'DERECHA', label: 'Derecha' },
+    { key: 'PUERTA', label: 'Puerta' },
+    { key: 'PRECINTO', label: 'Precinto' },
+    { key: 'ADENTRO', label: 'Adentro' },
+    { key: 'PLAQUETA', label: 'Plaqueta' },
+    { key: 'CONTENEDOR_VACIO', label: 'Contenedor vacío' },
+    { key: 'DESCARGUIO', label: 'Descarguío' }
+  ];
+
+  loading = false;
+
+   generando: boolean = false;
+
+  constructor(private contenedorService: ContenedorService) { }
 
   ngOnInit(): void {
     this.obtenerListado();
@@ -134,71 +168,78 @@ modalidad_pago = [
     this.obtenerGastosDeuda();
   }
 
-  
-alternarVista() {
-  this.mostrarTabla = !this.mostrarTabla;
-}
+
+  alternarVista() {
+    this.mostrarTabla = !this.mostrarTabla;
+  }
 
   obtenerListado(): void {
     this.contenedorService.getContenedores().subscribe({
       next: data => {
         this.contenedores = data;
-        
+
       },
       error: err => Swal.fire('Error', 'No se pudo cargar la lista de contenedores.', 'error')
     });
   }
 
   get contenedoresFiltrados() {
-  return this.contenedores.filter(contenedor => {
-    const contenedorStr = contenedor.numero_contenedor?.toLowerCase() || '';
-    const vencimientoStr = this.estiloFila(contenedor.fecha_limite, contenedor.estado).toLowerCase();
-    const clienteStr = this.getClienteNombre(contenedor.id_cliente)?.toLowerCase() || '';
-    const blMadreStr = contenedor.bl_madre?.toLowerCase() || '';
-    const mercanciaStr = this.getMercanciaNombre(contenedor.id_mercancia)?.toLowerCase() || '';
-    const tipoContenedorStr = contenedor.tipo_contenedor?.toLowerCase() || '';
-    const tamanoStr = contenedor.tamano?.toLowerCase() || '';
-    const anoStr = contenedor.ano?.toString() || '';
-    const tipoStr = contenedor.tipo?.toLowerCase() || '';
-    const navieraStr = this.getNavieraNombre(contenedor.id_naviera)?.toLowerCase() || '';
-    const categoriaStr = contenedor.categoria?.toLowerCase() || '';
-    const ciudadOrigenStr = this.getCiudadNombre(contenedor.id_ciudad_origen)?.toLowerCase() || '';
-    const estadoContenedorStr = contenedor.estado_contenedor?.toLowerCase() || '';
-    const fechaLlegadaStr = contenedor.fecha_llegada ? new Date(contenedor.fecha_llegada).toISOString().slice(0,10) : '';
-    const fechaLimiteStr = contenedor.fecha_limite ? new Date(contenedor.fecha_limite).toISOString().slice(0,10) : '';
-    const estadoStr = contenedor.estado?.toLowerCase() || '';
-    const fechaDevolucionStr = contenedor.fecha_devolucion ? new Date(contenedor.fecha_devolucion).toISOString().slice(0,10) : '';
-    const ubicacionDevolucionStr = contenedor.ubicacion_devolucion?.toLowerCase() || '';
-    const diasStr = contenedor.dias?.toString() || '';
-    const observacionesStr = contenedor.observaciones?.toLowerCase() || '';
+    return this.contenedores.filter(contenedor => {
+      const contenedorStr = contenedor.numero_contenedor?.toLowerCase() || '';
+      const vencimientoStr = this.estiloFila(contenedor.fecha_limite, contenedor.estado).toLowerCase();
+      const clienteStr = this.getClienteNombre(contenedor.id_cliente)?.toLowerCase() || '';
+      const blMadreStr = contenedor.bl_madre?.toLowerCase() || '';
+      const mercanciaStr = this.getMercanciaNombre(contenedor.id_mercancia)?.toLowerCase() || '';
+      const tipoContenedorStr = contenedor.tipo_contenedor?.toLowerCase() || '';
+      const tamanoStr = contenedor.tamano?.toLowerCase() || '';
+      const anoStr = contenedor.ano?.toString() || '';
+      const tipoStr = contenedor.tipo?.toLowerCase() || '';
+      const navieraStr = this.getNavieraNombre(contenedor.id_naviera)?.toLowerCase() || '';
+      const categoriaStr = contenedor.categoria?.toLowerCase() || '';
+      const ciudadOrigenStr = this.getCiudadNombre(contenedor.id_ciudad_origen)?.toLowerCase() || '';
+      const ciudadDestinoStr = this.getCiudadNombre(contenedor.id_ciudad_destino)?.toLowerCase() || '';
+      const estadoContenedorStr = contenedor.estado_contenedor?.toLowerCase() || '';
+      const fechaLlegadaStr = contenedor.fecha_llegada ? new Date(contenedor.fecha_llegada).toISOString().slice(0, 10) : '';
+      const fechaLimiteStr = contenedor.fecha_limite ? new Date(contenedor.fecha_limite).toISOString().slice(0, 10) : '';
+      const estadoStr = contenedor.estado?.toLowerCase() || '';
+      const fechaDevolucionStr = contenedor.fecha_devolucion ? new Date(contenedor.fecha_devolucion).toISOString().slice(0, 10) : '';
+      const ubicacionDevolucionStr = contenedor.ubicacion_devolucion?.toLowerCase() || '';
+      const diasStr = contenedor.dias?.toString() || '';
+      const observacionesStr = contenedor.observaciones?.toLowerCase() || '';
+      let deudaStr = true;
+    if (this.filtroDeuda) {
+      deudaStr = contenedor[this.filtroDeuda] && contenedor[this.filtroDeuda] > 0;
+    }
 
-    return (
-      contenedorStr.includes(this.filtroContenedor.toLowerCase()) &&
-      vencimientoStr.includes(this.filtroVencimiento.toLowerCase()) &&
-      clienteStr.includes(this.filtroCliente.toLowerCase()) &&
-      blMadreStr.includes(this.filtroBlMadre.toLowerCase()) &&
-      mercanciaStr.includes(this.filtroMercancia.toLowerCase()) &&
-      tipoContenedorStr.includes(this.filtroTipoContenedor.toLowerCase()) &&
-      tamanoStr.includes(this.filtroTamano.toLowerCase()) &&
-      anoStr.includes(this.filtroAno.toLowerCase()) &&
-      tipoStr.includes(this.filtroTipo.toLowerCase()) &&
-      navieraStr.includes(this.filtroNaviera.toLowerCase()) &&
-      categoriaStr.includes(this.filtroCategoria.toLowerCase()) &&
-      ciudadOrigenStr.includes(this.filtroCiudadOrigen.toLowerCase()) &&
-      estadoContenedorStr.includes(this.filtroEstadoContenedor.toLowerCase()) &&
-      fechaLlegadaStr.includes(this.filtroFechaLlegada.toLowerCase()) &&
-      fechaLimiteStr.includes(this.filtroFechaLimite.toLowerCase()) &&
-      estadoStr.includes(this.filtroEstado.toLowerCase()) &&
-      fechaDevolucionStr.includes(this.filtroFechaDevolucion.toLowerCase()) &&
-      ubicacionDevolucionStr.includes(this.filtroUbicacionDevolucion.toLowerCase()) &&
-      diasStr.includes(this.filtroDias.toLowerCase()) &&
-      observacionesStr.includes(this.filtroObservaciones.toLowerCase())
-    );
-  });
-}
+      return (
+        contenedorStr.includes(this.filtroContenedor.toLowerCase()) &&
+        vencimientoStr.includes(this.filtroVencimiento.toLowerCase()) &&
+        clienteStr.includes(this.filtroCliente.toLowerCase()) &&
+        blMadreStr.includes(this.filtroBlMadre.toLowerCase()) &&
+        mercanciaStr.includes(this.filtroMercancia.toLowerCase()) &&
+        tipoContenedorStr.includes(this.filtroTipoContenedor.toLowerCase()) &&
+        tamanoStr.includes(this.filtroTamano.toLowerCase()) &&
+        anoStr.includes(this.filtroAno.toLowerCase()) &&
+        tipoStr.includes(this.filtroTipo.toLowerCase()) &&
+        navieraStr.includes(this.filtroNaviera.toLowerCase()) &&
+        categoriaStr.includes(this.filtroCategoria.toLowerCase()) &&
+        ciudadOrigenStr.includes(this.filtroCiudadOrigen.toLowerCase()) &&
+        ciudadDestinoStr.includes(this.filtroCiudadDestino.toLowerCase()) &&
+        estadoContenedorStr.includes(this.filtroEstadoContenedor.toLowerCase()) &&
+        fechaLlegadaStr.includes(this.filtroFechaLlegada.toLowerCase()) &&
+        fechaLimiteStr.includes(this.filtroFechaLimite.toLowerCase()) &&
+        estadoStr.includes(this.filtroEstado.toLowerCase()) &&
+        fechaDevolucionStr.includes(this.filtroFechaDevolucion.toLowerCase()) &&
+        ubicacionDevolucionStr.includes(this.filtroUbicacionDevolucion.toLowerCase()) &&
+        diasStr.includes(this.filtroDias.toLowerCase()) &&
+        observacionesStr.includes(this.filtroObservaciones.toLowerCase()) &&
+        deudaStr
+      );
+    });
+  }
 
 
-obtenerCiudades(): void {
+  obtenerCiudades(): void {
     this.contenedorService.getCiudad().subscribe({
       next: (data) => {
         this.ciudades = data.map((ciudad) => ({
@@ -261,7 +302,7 @@ obtenerCiudades(): void {
           value: cliente.id_cliente,
         }));
 
-        this.verificarFechas(); 
+        this.verificarFechas();
         // this.generarClientesUnicos(); 
       },
       error: (err) => {
@@ -272,7 +313,7 @@ obtenerCiudades(): void {
   getClienteNombre(id: number): string {
 
     const cliente = this.clientes.find((c) => c.value === id);
-  
+
     return cliente ? cliente.label : 'Sin nombre';
   }
 
@@ -294,49 +335,50 @@ obtenerCiudades(): void {
     return vehiculo ? vehiculo.label : 'Sin nombre';
   }
 
-ordenarDatos() {
-  this.contenedores.sort((a, b) => {
-    const valorA = a.id_despacho; // Cambia 'campoOrdenar' al campo real
-    const valorB = b.id_despacho;
+  ordenarDatos() {
+    this.contenedores.sort((a, b) => {
+      const valorA = a.id_despacho; // Cambia 'campoOrdenar' al campo real
+      const valorB = b.id_despacho;
 
-    if (valorA < valorB) return this.ordenAscendente ? -1 : 1;
-    if (valorA > valorB) return this.ordenAscendente ? 1 : -1;
-    return 0;
-  });
+      if (valorA < valorB) return this.ordenAscendente ? -1 : 1;
+      if (valorA > valorB) return this.ordenAscendente ? 1 : -1;
+      return 0;
+    });
 
-  this.ordenAscendente = !this.ordenAscendente; // Cambia orden para próximo clic
-}
+    this.ordenAscendente = !this.ordenAscendente; // Cambia orden para próximo clic
+  }
 
-get registrosFiltrados() {
-  return this.contenedores.filter(reg => {
-    const estilo = this.estiloFila(reg.fecha_limite, reg.estado);
-    if (!this.filtroVencimiento) return true;
-    return estilo === this.filtroVencimiento;
-  });
-}
+  get registrosFiltrados() {
+    return this.contenedores.filter(reg => {
+      const estilo = this.estiloFila(reg.fecha_limite, reg.estado);
+      if (!this.filtroVencimiento) return true;
+      return estilo === this.filtroVencimiento;
+    });
+  }
 
-limpiarFiltros() {
-  this.filtroContenedor = '';
-  this.filtroBlMadre = '';
-  this.filtroVencimiento = '';
-  this.filtroCliente = '';
-  this.filtroMercancia = '';
-  this.filtroTipoContenedor = '';
-  this.filtroTamano = '';
-  this.filtroAno = '';
-  this.filtroTipo = '';
-  this.filtroNaviera = '';
-  this.filtroCategoria = '';
-  this.filtroCiudadOrigen = '';
-  this.filtroEstadoContenedor = '';
-  this.filtroFechaLlegada = '';
-  this.filtroFechaLimite = '';
-  this.filtroEstado = '';
-  this.filtroFechaDevolucion = '';
-  this.filtroUbicacionDevolucion = '';
-  this.filtroDias = '';
-  this.filtroObservaciones = '';
-}
+  limpiarFiltros() {
+    this.filtroContenedor = '';
+    this.filtroBlMadre = '';
+    this.filtroVencimiento = '';
+    this.filtroCliente = '';
+    this.filtroMercancia = '';
+    this.filtroTipoContenedor = '';
+    this.filtroTamano = '';
+    this.filtroAno = '';
+    this.filtroTipo = '';
+    this.filtroNaviera = '';
+    this.filtroCategoria = '';
+    this.filtroCiudadOrigen = '';
+    this.filtroCiudadDestino = '';
+    this.filtroEstadoContenedor = '';
+    this.filtroFechaLlegada = '';
+    this.filtroFechaLimite = '';
+    this.filtroEstado = '';
+    this.filtroFechaDevolucion = '';
+    this.filtroUbicacionDevolucion = '';
+    this.filtroDias = '';
+    this.filtroObservaciones = '';
+  }
 
   abrirNuevoContenedor(): void {
     this.contenedorSeleccionado = {
@@ -354,7 +396,13 @@ limpiarFiltros() {
       verificado: false,
       ano_plaqueta: null,
       fecha_devolucion: null,
-      ubicacion_devolucion: ''
+      ubicacion_devolucion: '',
+      tiene_estibaje: false,
+      tiene_gruaje: false,
+      tiene_montacarga: false,
+      tiene_urbano: false,
+      tiene_trasbordo: false,
+      tiene_lavado: false
     };
     this.popupVisible = true;
     this.modoEdicion = false;
@@ -414,154 +462,153 @@ limpiarFiltros() {
   }
 
   urlPdf(id: string) {
-  return `http://localhost:3000/despachos/verPdf/${id}`;
-}
-
-esFechaVencida(fechaStr: string | Date): boolean {
-  if (!fechaStr) return false;
-  const hoy = new Date();
-  const fecha = new Date(fechaStr);
-  
-  // Ajusta horas a 0 para comparar solo fechas (sin tiempo)
-  hoy.setHours(0, 0, 0, 0);
-  fecha.setHours(0, 0, 0, 0);
-
-  return fecha < hoy;
-}
-
-estiloFila(fechaStr: string | Date, estado: string): string {
-  if (!fechaStr) return '';
-  const hoy = new Date();
-  const fechaLimite = new Date(fechaStr);
-
-  // Ajustar para ignorar la hora y comparar solo fechas
-  hoy.setHours(0, 0, 0, 0);
-  fechaLimite.setHours(0, 0, 0, 0);
-
-  const diferenciaDias = Math.floor((fechaLimite.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diferenciaDias < 0 && estado !== 'DEVUELTO') {
-    return 'fecha-vencida'; // Ya venció
-  } else if (diferenciaDias <= 7 && estado !== 'DEVUELTO') {
-    return 'fecha-pre-vencida'; // Está por vencer
-  } else if(estado === 'DEVUELTO') {
-    return 'fecha-devuelto'; // No aplica estilo
-  } else {
-    return '';
+    return `http://localhost:3000/despachos/verPdf/${id}`;
   }
-}
 
-//2 SEMANAS
+  esFechaVencida(fechaStr: string | Date): boolean {
+    if (!fechaStr) return false;
+    const hoy = new Date();
+    const fecha = new Date(fechaStr);
 
-calcularDiasRestantes(fechaLimite: string): number {
-  const hoy = new Date();
-  const limite = new Date(fechaLimite);
+    // Ajusta horas a 0 para comparar solo fechas (sin tiempo)
+    hoy.setHours(0, 0, 0, 0);
+    fecha.setHours(0, 0, 0, 0);
 
-  hoy.setHours(0, 0, 0, 0);
-  limite.setHours(0, 0, 0, 0);
+    return fecha < hoy;
+  }
 
-  const diff = Math.floor((limite.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-  return diff;
-}
+  estiloFila(fechaStr: string | Date, estado: string): string {
+    if (!fechaStr) return '';
+    const hoy = new Date();
+    const fechaLimite = new Date(fechaStr);
 
-verificarFechas() {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+    // Ajustar para ignorar la hora y comparar solo fechas
+    hoy.setHours(0, 0, 0, 0);
+    fechaLimite.setHours(0, 0, 0, 0);
 
-  const alertas: string[] = [];
+    const diferenciaDias = Math.floor((fechaLimite.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Para los próximos 7 días
-  for (let i = 7; i >= 1; i--) {
-    const fechaComparar = new Date(hoy);
-    fechaComparar.setDate(hoy.getDate() + i);
+    if (diferenciaDias < 0 && estado !== 'DEVUELTO') {
+      return 'fecha-vencida'; // Ya venció
+    } else if (diferenciaDias <= 7 && estado !== 'DEVUELTO') {
+      return 'fecha-pre-vencida'; // Está por vencer
+    } else if (estado === 'DEVUELTO') {
+      return 'fecha-devuelto'; // No aplica estilo
+    } 
+    return 'contenedor';
+  }
 
-    const proximos = this.contenedores.filter(v => {
+  //2 SEMANAS
+
+  calcularDiasRestantes(fechaLimite: string): number {
+    const hoy = new Date();
+    const limite = new Date(fechaLimite);
+
+    hoy.setHours(0, 0, 0, 0);
+    limite.setHours(0, 0, 0, 0);
+
+    const diff = Math.floor((limite.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    return diff;
+  }
+
+  verificarFechas() {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const alertas: string[] = [];
+
+    // Para los próximos 7 días
+    for (let i = 7; i >= 1; i--) {
+      const fechaComparar = new Date(hoy);
+      fechaComparar.setDate(hoy.getDate() + i);
+
+      const proximos = this.contenedores.filter(v => {
+        const limite = new Date(v.fecha_limite);
+        limite.setHours(0, 0, 0, 0);
+        return limite.getTime() === fechaComparar.getTime() && v.estado != 'DEVUELTO';
+      });
+
+      if (proximos.length > 0) {
+        let detalles = proximos.map(v => `• ${this.getClienteNombre(v.id_cliente)} - ${v.numero_contenedor} - vence el ${new Date(v.fecha_limite).toLocaleDateString()}`).join('\n');
+        alertas.push(`🚨 Faltan ${i} día(s):\n${detalles}`);
+      }
+    }
+
+    // Para vencidos
+    const vencidos = this.contenedores.filter(v => {
+
       const limite = new Date(v.fecha_limite);
       limite.setHours(0, 0, 0, 0);
-      return limite.getTime() === fechaComparar.getTime()  && v.estado != 'DEVUELTO';
+      return limite.getTime() < hoy.getTime() && v.estado != 'DEVUELTO';
     });
 
-    if (proximos.length > 0) {
-      let detalles = proximos.map(v => `• ${this.getClienteNombre(v.id_cliente)} - ${v.numero_contenedor} - vence el ${new Date(v.fecha_limite).toLocaleDateString()}`).join('\n');
-      alertas.push(`🚨 Faltan ${i} día(s):\n${detalles}`);
+    if (vencidos.length > 0) {
+      let detalles = vencidos.map(v => `• ${this.getClienteNombre(v.id_cliente)} - ${v.numero_contenedor} - venció el ${new Date(v.fecha_limite).toLocaleDateString()}`).join('\n');
+      alertas.push(`❌ VENCIDOS:\n${detalles}`);
+    }
+
+    if (alertas.length > 0) {
+      const mensaje = alertas.join('\n\n');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Alerta de Fechas',
+        html: `<pre style="text-align:left;white-space:pre-wrap;">${mensaje}</pre>`,
+        confirmButtonText: 'Cerrar',
+        customClass: {
+          popup: 'swal-wide'
+        }
+      });
     }
   }
- 
-  // Para vencidos
-  const vencidos = this.contenedores.filter(v => {
 
-    const limite = new Date(v.fecha_limite);
-    limite.setHours(0, 0, 0, 0);
-    return limite.getTime() < hoy.getTime() && v.estado != 'DEVUELTO';
-  });
+  // generarClientesUnicos() {
+  //   const idsEnContenedores = new Set(this.clientes.map(d => d.id_cliente));
 
-  if (vencidos.length > 0) {
-    let detalles = vencidos.map(v => `• ${this.getClienteNombre(v.id_cliente)} - ${v.numero_contenedor} - venció el ${new Date(v.fecha_limite).toLocaleDateString()}`).join('\n');
-    alertas.push(`❌ VENCIDOS:\n${detalles}`);
+  //   this.clientesFiltro = this.clientes
+  //     .filter(c => idsEnContenedores.has(c.value))
+  //     .map(c => ({ label: c.label, value: c.value }));
+  // }
+
+  numeros(event: any, campo: string) {
+    const valor = event.target.value;
+
+    // Permite números y UN solo punto decimal
+    const soloNumeros = valor.replace(/[^0-9.]/g, '');
+
+    // Evitar más de un punto decimal
+    const partes = soloNumeros.split('.');
+    let valorFinal = partes[0];
+    if (partes.length > 1) {
+      valorFinal += '.' + partes[1].slice(0, 10); // Limita decimales opcional
+    }
+
+    event.target.value = valorFinal;
+    this.contenedorSeleccionado[campo] = valorFinal;
   }
 
-  if (alertas.length > 0) {
-    const mensaje = alertas.join('\n\n');
-    Swal.fire({
-      icon: 'warning',
-      title: 'Alerta de Fechas',
-      html: `<pre style="text-align:left;white-space:pre-wrap;">${mensaje}</pre>`,
-      confirmButtonText: 'Cerrar',
-      customClass: {
-        popup: 'swal-wide'
-      }
-    });
-  }
-}
-
-// generarClientesUnicos() {
-//   const idsEnContenedores = new Set(this.clientes.map(d => d.id_cliente));
-
-//   this.clientesFiltro = this.clientes
-//     .filter(c => idsEnContenedores.has(c.value))
-//     .map(c => ({ label: c.label, value: c.value }));
-// }
-
-numeros(event: any, campo: string) {
-  const valor = event.target.value;
-
-  // Permite números y UN solo punto decimal
-  const soloNumeros = valor.replace(/[^0-9.]/g, '');
-
-  // Evitar más de un punto decimal
-  const partes = soloNumeros.split('.');
-  let valorFinal = partes[0];
-  if (partes.length > 1) {
-    valorFinal += '.' + partes[1].slice(0, 10); // Limita decimales opcional
-  }
-
-  event.target.value = valorFinal;
-  this.contenedorSeleccionado[campo] = valorFinal;
-}
-
-guardarEstadoContenedor(contenedor: any, nuevoEstado: any): void {
-  console.log('Nuevo estado seleccionado:', nuevoEstado);
-  this.contenedorSeleccionado = { ...contenedor };
-  this.contenedorSeleccionado.estado = nuevoEstado;
-  this.contenedorSeleccionado.usumod = localStorage.getItem('login');
-  this.contenedorSeleccionado.fecmod = new Date();
-  this.contenedorService
-    .editarEstadoContenedor(
-      this.contenedorSeleccionado.id_contenedor,
-      this.contenedorSeleccionado
-    )
-    .subscribe({
-      next: () => {
-            this.popupVisible = false;
-            Swal.fire(
-              'Actualizado',
-              'Contenedor actualizado correctamente.',
-              'success'
-            );
-          },
-          error: (err) =>
-            Swal.fire('Error', 'No se pudo actualizar el contenedor.', 'error'),
-        });
+  guardarEstadoContenedor(contenedor: any, nuevoEstado: any): void {
+    console.log('Nuevo estado seleccionado:', nuevoEstado);
+    this.contenedorSeleccionado = { ...contenedor };
+    this.contenedorSeleccionado.estado = nuevoEstado;
+    this.contenedorSeleccionado.usumod = localStorage.getItem('login');
+    this.contenedorSeleccionado.fecmod = new Date();
+    this.contenedorService
+      .editarEstadoContenedor(
+        this.contenedorSeleccionado.id_contenedor,
+        this.contenedorSeleccionado
+      )
+      .subscribe({
+        next: () => {
+          this.popupVisible = false;
+          Swal.fire(
+            'Actualizado',
+            'Contenedor actualizado correctamente.',
+            'success'
+          );
+        },
+        error: (err) =>
+          Swal.fire('Error', 'No se pudo actualizar el contenedor.', 'error'),
+      });
   }
 
   verGasto(contenedor: any, gasto: any): void {
@@ -569,7 +616,7 @@ guardarEstadoContenedor(contenedor: any, nuevoEstado: any): void {
     this.obtenerGastos(gasto.nombre);
     this.mostrarGastos = true;
     this.tituloMostrarGastos = `${gasto.nombre}`;
-    
+
   }
 
   obtenerGastos(nombreGasto: string): void {
@@ -582,51 +629,51 @@ guardarEstadoContenedor(contenedor: any, nuevoEstado: any): void {
   }
 
   agregarGasto(): void {
-  this.gastos.push({
-    id_contenedor_gasto: null,
-    id_contenedor: this.contenedorSeleccionado.id_contenedor,
-    tipo: this.tituloMostrarGastos,
-    lugar: null,
-    monto: '',
-    cancelado: false,
-    estado: 'ACTIVO',
-    fecha_pago: null,
-    modalidad_pago: '',
-    persona_pago: ''
-  });
-}
-
-guardarGasto(): void {
-  const incompletos = this.gastos.filter(g => !g.lugar || !g.monto);
-
-  if (incompletos.length > 0) {
-    Swal.fire(
-      'Advertencia',
-      'Debes llenar al menos Lugar y Monto en todos los gastos antes de guardar, caso contrario borre los vacíos',
-      'warning'
-    );
-    return;
+    this.gastos.push({
+      id_contenedor_gasto: null,
+      id_contenedor: this.contenedorSeleccionado.id_contenedor,
+      tipo: this.tituloMostrarGastos,
+      lugar: null,
+      monto: '',
+      cancelado: false,
+      estado: 'ACTIVO',
+      fecha_pago: null,
+      modalidad_pago: '',
+      persona_pago: ''
+    });
   }
 
-  const requests = this.gastos.map(gasto => {
-    if (gasto.id_contenedor_gasto) {
-      return this.contenedorService.editarGasto(gasto.id_contenedor_gasto, gasto);
-    } else {
-      return this.contenedorService.insertarGasto(gasto);
-    }
-  });
+  guardarGasto(): void {
+    const incompletos = this.gastos.filter(g => !g.lugar || !g.monto);
 
-  forkJoin(requests).subscribe({
-    next: () => {
-      this.mostrarGastos = false;
-      this.obtenerListado();
-      Swal.fire('Éxito', 'Todos los gastos fueron guardados correctamente.', 'success');
-    },
-    error: () => {
-      Swal.fire('Error', 'Ocurrió un problema al guardar los gastos.', 'error');
+    if (incompletos.length > 0) {
+      Swal.fire(
+        'Advertencia',
+        'Debes llenar al menos Lugar y Monto en todos los gastos antes de guardar, caso contrario borre los vacíos',
+        'warning'
+      );
+      return;
     }
-  });
-}
+
+    const requests = this.gastos.map(gasto => {
+      if (gasto.id_contenedor_gasto) {
+        return this.contenedorService.editarGasto(gasto.id_contenedor_gasto, gasto);
+      } else {
+        return this.contenedorService.insertarGasto(gasto);
+      }
+    });
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.mostrarGastos = false;
+        this.obtenerListado();
+        Swal.fire('Éxito', 'Todos los gastos fueron guardados correctamente.', 'success');
+      },
+      error: () => {
+        Swal.fire('Error', 'Ocurrió un problema al guardar los gastos.', 'error');
+      }
+    });
+  }
 
   eliminarGasto(index: number) {
     const gasto = this.gastos[index];
@@ -662,78 +709,78 @@ guardarGasto(): void {
   }
 
   verImagen(nombre: any) {
-    this.imagenSeleccionadaURL = `${URL_SERVICIOS}/contenedor/verImagen/${nombre}`; 
+    this.imagenSeleccionadaURL = `${URL_SERVICIOS}/contenedor/verImagen/${nombre}`;
     console.log('Imagen URL:', this.imagenSeleccionadaURL);
     this.mostrarDialogImagen = true;
   }
 
   abrirSelectorImagen(contenedor: any, nombre: string): void {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/png, image/jpeg'; // ✅ Ahora acepta JPG y PNG
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png, image/jpeg'; // ✅ Ahora acepta JPG y PNG
 
-  input.onchange = (event: any) => {
-    this.onFileSelected(event, contenedor, nombre);
-  };
+    input.onchange = (event: any) => {
+      this.onFileSelected(event, contenedor, nombre);
+    };
 
-  input.click();
-}
-
-onFileSelected(event: Event, contenedor: any, nombre: string) {
-  const input = event.target as HTMLInputElement;
-  if (!input.files || input.files.length === 0) return;
-
-  const file = input.files[0];
-
-  // ✅ Validar que sea imagen
-  if (!['image/jpeg', 'image/png'].includes(file.type)) {
-    Swal.fire('Error', 'Debe seleccionar una imagen válida (JPG o PNG).', 'error');
-    input.value = '';
-    return;
+    input.click();
   }
 
-  // ✅ Generar el nuevo nombre automáticamente
-  const extension = file.type === 'image/png' ? 'png' : 'jpg';
-  const nuevoNombre = `${contenedor.id_contenedor}-${nombre}.${extension}`;
+  onFileSelected(event: Event, contenedor: any, nombre: string) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: `¿Deseas subir la imagen con el nombre: "${nuevoNombre}"?`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, subir',
-    cancelButtonText: 'No, cancelar'
-  }).then((confirmResult) => {
-    if (confirmResult.isConfirmed) {
-      const formData = new FormData();
+    const file = input.files[0];
 
-      // ✅ Crear nuevo File con nombre automático
-      const nuevoArchivo = new File([file], nuevoNombre, { type: file.type });
-
-      formData.append('archivo', nuevoArchivo);
-      formData.append('id_contenedor', contenedor.id_contenedor.toString());
-      formData.append('nombre', nombre);
-
-      axios.post(`${URL_SERVICIOS}/contenedor/subir_imagen`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-        .then(response => {
-          Swal.fire('¡Subido!', 'La imagen se subió correctamente.', 'success');
-          this.obtenerImagenes();  
-          this.obtenerListado();
-        })
-        .catch(error => {
-          console.error('Error al subir la imagen', error);
-          Swal.fire('Error', 'Error al subir la imagen. Intenta nuevamente.', 'error');
-        });
-    } else {
+    // ✅ Validar que sea imagen
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      Swal.fire('Error', 'Debe seleccionar una imagen válida (JPG o PNG).', 'error');
       input.value = '';
+      return;
     }
-  });
-}
 
- verDevoluciones(contenedor: any): void {
-  this.contenedorSeleccionado = contenedor;
+    // ✅ Generar el nuevo nombre automáticamente
+    const extension = file.type === 'image/png' ? 'png' : 'jpg';
+    const nuevoNombre = `${contenedor.id_contenedor}-${nombre}.${extension}`;
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Deseas subir la imagen con el nombre: "${nuevoNombre}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, subir',
+      cancelButtonText: 'No, cancelar'
+    }).then((confirmResult) => {
+      if (confirmResult.isConfirmed) {
+        const formData = new FormData();
+
+        // ✅ Crear nuevo File con nombre automático
+        const nuevoArchivo = new File([file], nuevoNombre, { type: file.type });
+
+        formData.append('archivo', nuevoArchivo);
+        formData.append('id_contenedor', contenedor.id_contenedor.toString());
+        formData.append('nombre', nombre);
+
+        axios.post(`${URL_SERVICIOS}/contenedor/subir_imagen`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+          .then(response => {
+            Swal.fire('¡Subido!', 'La imagen se subió correctamente.', 'success');
+            this.obtenerImagenes();
+            this.obtenerListado();
+          })
+          .catch(error => {
+            console.error('Error al subir la imagen', error);
+            Swal.fire('Error', 'Error al subir la imagen. Intenta nuevamente.', 'error');
+          });
+      } else {
+        input.value = '';
+      }
+    });
+  }
+
+  verDevoluciones(contenedor: any): void {
+    this.contenedorSeleccionado = contenedor;
     this.obtenerDevoluciones();
     this.mostrarDevolucion = true;
 
@@ -753,47 +800,47 @@ onFileSelected(event: Event, contenedor: any, nombre: string) {
   }
 
   agregarDevolucion(): void {
-  this.devoluciones.push({
-    id_contenedor_devolucion: null,
-    id_contenedor: this.contenedorSeleccionado.id_contenedor,
-    id_vehiculo: null,
-    urbano: false,
-    fecha_devolucion: null,
-    estado: 'ACTIVO'
-  });
-}
-
-guardarDevolucion(): void {
-  const incompletos = this.devoluciones.filter(d => !d.id_vehiculo || !d.fecha_devolucion);
-
-  if (incompletos.length > 0) {
-    Swal.fire(
-      'Advertencia',
-      'Debes llenar los datos, caso contrario borre los vacíos',
-      'warning'
-    );
-    return;
+    this.devoluciones.push({
+      id_contenedor_devolucion: null,
+      id_contenedor: this.contenedorSeleccionado.id_contenedor,
+      id_vehiculo: null,
+      urbano: false,
+      fecha_devolucion: null,
+      estado: 'ACTIVO'
+    });
   }
 
-  const requests = this.devoluciones.map(devolucion => {
-    if (devolucion.id_contenedor_devolucion) {
-      return this.contenedorService.editarDevolucion(devolucion.id_contenedor_devolucion, devolucion);
-    } else {
-      return this.contenedorService.insertarDevolucion(devolucion);
-    }
-  });
+  guardarDevolucion(): void {
+    const incompletos = this.devoluciones.filter(d => !d.id_vehiculo || !d.fecha_devolucion);
 
-  forkJoin(requests).subscribe({
-    next: () => {
-      this.mostrarDevolucion = false;
-      this.obtenerListado();
-      Swal.fire('Éxito', 'Todos los devoluciones fueron guardados correctamente.', 'success');
-    },
-    error: () => {
-      Swal.fire('Error', 'Ocurrió un problema al guardar los devoluciones.', 'error');
+    if (incompletos.length > 0) {
+      Swal.fire(
+        'Advertencia',
+        'Debes llenar los datos, caso contrario borre los vacíos',
+        'warning'
+      );
+      return;
     }
-  });
-}
+
+    const requests = this.devoluciones.map(devolucion => {
+      if (devolucion.id_contenedor_devolucion) {
+        return this.contenedorService.editarDevolucion(devolucion.id_contenedor_devolucion, devolucion);
+      } else {
+        return this.contenedorService.insertarDevolucion(devolucion);
+      }
+    });
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.mostrarDevolucion = false;
+        this.obtenerListado();
+        Swal.fire('Éxito', 'Todos los devoluciones fueron guardados correctamente.', 'success');
+      },
+      error: () => {
+        Swal.fire('Error', 'Ocurrió un problema al guardar los devoluciones.', 'error');
+      }
+    });
+  }
 
   eliminarDevolucion(index: number) {
     const devolucion = this.devoluciones[index];
@@ -823,34 +870,34 @@ guardarDevolucion(): void {
   }
 
   asignarCategoria(): void {
-  const ano = Number(this.contenedorSeleccionado.ano);
-  const naviera = (this.getNavieraNombre(this.contenedorSeleccionado.id_naviera) || '').toUpperCase();
-  if (!ano) { this.contenedorSeleccionado.id_categoria = ''; return; }
+    const ano = Number(this.contenedorSeleccionado.ano);
+    const naviera = (this.getNavieraNombre(this.contenedorSeleccionado.id_naviera) || '').toUpperCase();
+    if (!ano) { this.contenedorSeleccionado.id_categoria = ''; return; }
 
-  const CY = new Date().getFullYear(); // p.ej. 2025
+    const CY = new Date().getFullYear(); // p.ej. 2025
 
-  // Rangos dinámicos
-  const isA     = ano >= (CY - 1) && ano <= CY;       // 2024–2025 (hoy)
-  const isB     = ano >= (CY - 3) && ano <= (CY - 2); // 2022–2023
-  const isC     = ano >= (CY - 14) && ano <= (CY - 4);// 2011–2021
-  const isCraft = ano <= (CY - 15);                   // <= 2010
+    // Rangos dinámicos
+    const isA = ano >= (CY - 1) && ano <= CY;       // 2024–2025 (hoy)
+    const isB = ano >= (CY - 3) && ano <= (CY - 2); // 2022–2023
+    const isC = ano >= (CY - 14) && ano <= (CY - 4);// 2011–2021
+    const isCraft = ano <= (CY - 15);                   // <= 2010
 
-  if (naviera === 'MAERSK') {
-    if (isA)      this.contenedorSeleccionado.id_categoria = 'S-M "A"';
-    else if (isB) this.contenedorSeleccionado.id_categoria = 'K "B"';
-    else if (isC) this.contenedorSeleccionado.id_categoria = 'E "C"';
-    else if (isCraft) this.contenedorSeleccionado.id_categoria = 'Q "craft"';
-    else this.contenedorSeleccionado.id_categoria = 'Desconocido';
-  } else {
-    if (isA)      this.contenedorSeleccionado.id_categoria = 'A';
-    else if (isB) this.contenedorSeleccionado.id_categoria = 'B';
-    else if (isC) this.contenedorSeleccionado.id_categoria = 'C';
-    else if (isCraft) this.contenedorSeleccionado.id_categoria = 'CRAFT';
-    else this.contenedorSeleccionado.id_categoria = 'Desconocido';
+    if (naviera === 'MAERSK') {
+      if (isA) this.contenedorSeleccionado.id_categoria = 'S-M "A"';
+      else if (isB) this.contenedorSeleccionado.id_categoria = 'K "B"';
+      else if (isC) this.contenedorSeleccionado.id_categoria = 'E "C"';
+      else if (isCraft) this.contenedorSeleccionado.id_categoria = 'Q "craft"';
+      else this.contenedorSeleccionado.id_categoria = 'Desconocido';
+    } else {
+      if (isA) this.contenedorSeleccionado.id_categoria = 'A';
+      else if (isB) this.contenedorSeleccionado.id_categoria = 'B';
+      else if (isC) this.contenedorSeleccionado.id_categoria = 'C';
+      else if (isCraft) this.contenedorSeleccionado.id_categoria = 'CRAFT';
+      else this.contenedorSeleccionado.id_categoria = 'Desconocido';
+    }
   }
-}
 
-obtenerGastosDeuda(): void {
+  obtenerGastosDeuda(): void {
     this.contenedorService.getGastosDeuda().subscribe({
       next: data => {
         this.gastosDeuda = data;
@@ -860,41 +907,41 @@ obtenerGastosDeuda(): void {
   }
 
   obtenerImagenes(): void {
-        this.contenedorService.getImagenes(this.contenedorSeleccionado.id_contenedor).subscribe({
-          next: data => {
-            this.imagenes = data.map((x: any) => x.nombre);
-            console.log('Imágenes obtenidas:', this.imagenes);
-          },
-          error: err => Swal.fire('Error', 'No se pudo cargar la lista de imágenes.', 'error')
-        });
-      }
+    this.contenedorService.getImagenes(this.contenedorSeleccionado.id_contenedor).subscribe({
+      next: data => {
+        this.imagenes = data.map((x: any) => x.nombre);
+        console.log('Imágenes obtenidas:', this.imagenes);
+      },
+      error: err => Swal.fire('Error', 'No se pudo cargar la lista de imágenes.', 'error')
+    });
+  }
 
-      existe(nombre: string): boolean {
-  if (!this.imagenes || this.imagenes.length === 0) return false;
+  existe(nombre: string): boolean {
+    if (!this.imagenes || this.imagenes.length === 0) return false;
 
-  const existe = this.imagenes.some(img => img.includes(nombre));
-  return existe;
-}
+    const existe = this.imagenes.some(img => img.includes(nombre));
+    return existe;
+  }
 
-getImagen(nombre: string): string | null {
-  const encontrada = this.imagenes.find(img => img.includes(nombre));
-  return encontrada || null;
-}
+  getImagen(nombre: string): string | null {
+    const encontrada = this.imagenes.find(img => img.includes(nombre));
+    return encontrada || null;
+  }
 
-verPdfs(contenedor: any, documento: any){
+  verPdfs(contenedor: any, documento: any) {
     this.mostrarDialogVariosPDF = true;
     this.contenedorSeleccionado = contenedor;
     this.obtenerPdfs(documento);
   }
 
   obtenerPdfs(nombrePdf: string): void {
-        this.contenedorService.getPdfs(this.contenedorSeleccionado.id_contenedor, nombrePdf).subscribe({
-          next: data => {
-            this.pdfs = data;
-          },
-          error: err => Swal.fire('Error', 'No se pudo cargar la lista de PDFs.', 'error')
-        });
-      }
+    this.contenedorService.getPdfs(this.contenedorSeleccionado.id_contenedor, nombrePdf).subscribe({
+      next: data => {
+        this.pdfs = data;
+      },
+      error: err => Swal.fire('Error', 'No se pudo cargar la lista de PDFs.', 'error')
+    });
+  }
 
   abrirSelectorArchivo(contenedor: any) {
 
@@ -916,103 +963,256 @@ verPdfs(contenedor: any, documento: any){
   }
 
   onFileSelectedPDF(event: Event, contenedor: any, documento: any) {
-  const input = event.target as HTMLInputElement;
-  if (!input.files || input.files.length === 0) return;
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-  const file = input.files[0];
-  if (file.type !== 'application/pdf') {
-    Swal.fire('Error', 'Debe seleccionar un archivo PDF válido.', 'error');
-    input.value = '';
-    return;
-  }
-
-  // 🔹 Pedir al usuario un nuevo nombre antes de confirmar
-  Swal.fire({
-    title: 'Renombrar archivo',
-    input: 'text',
-    inputLabel: 'Escribe el nuevo nombre para el archivo (sin .pdf)',
-    inputValue: file.name.replace('.pdf', ''), // por defecto el nombre original
-    showCancelButton: true,
-    confirmButtonText: 'Continuar',
-    cancelButtonText: 'Cancelar',
-    preConfirm: (nuevoNombre) => {
-      if (!nuevoNombre || nuevoNombre.trim() === '') {
-        Swal.showValidationMessage('Debes ingresar un nombre válido');
-      }
-      return nuevoNombre.trim();
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      let nuevoNombre = result.value;
-          nuevoNombre = nuevoNombre.replace(/\.pdf$/, "");
-          nuevoNombre = nuevoNombre.replace(/\s+/g, "_");
-
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: `¿Deseas subir el archivo con el nombre: "${nuevoNombre}.pdf"?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, subir',
-        cancelButtonText: 'No, cancelar'
-      }).then((confirmResult) => {
-        if (confirmResult.isConfirmed) {
-          const formData = new FormData();
-
-          // 🔹 Crear un nuevo File con el nombre editado
-          const nuevoArchivo = new File(
-            [file],
-            `${contenedor.id_contenedor}-${documento}-${nuevoNombre}.pdf`,
-            { type: file.type }
-          );
-
-          formData.append('archivo', nuevoArchivo);
-          formData.append('id_despacho', contenedor.id_contenedor.toString());
-          formData.append('documento', documento.toString());
-
-          axios.post(`${URL_SERVICIOS}/contenedor/subir_pdf`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          })
-            .then(response => {
-              Swal.fire('¡Subido!', 'El archivo se subió correctamente.', 'success');
-              this.obtenerPdfs(documento); 
-              this.obtenerListado(); 
-            })
-            .catch(error => {
-              console.error('Error al subir el PDF', error);
-              Swal.fire('Error', 'Error al subir el archivo PDF. Intenta nuevamente.', 'error');
-            });
-        } else {
-          input.value = '';
-        }
-      });
-    } else {
+    const file = input.files[0];
+    if (file.type !== 'application/pdf') {
+      Swal.fire('Error', 'Debe seleccionar un archivo PDF válido.', 'error');
       input.value = '';
+      return;
     }
-  });
-}
 
- eliminarPDF(pdf: any) {
-    // Swal.fire({
-    //   title: '¿Estás seguro?',
-    //   text: `¿Deseas eliminar el PDF: "${pdf.nombre}"?`,
-    //   icon: 'warning',
-    //   showCancelButton: true,
-    //   confirmButtonText: 'Sí, eliminar',
-    //   cancelButtonText: 'No, cancelar'
-    // }).then((result) => {
-    //   if (result.isConfirmed) {
-    //     this.contenedorService.eliminarPdf(pdf.id).subscribe({
-    //       next: () => {
-    //         Swal.fire('¡Eliminado!', 'El archivo PDF se eliminó correctamente.', 'success');
-    //         this.obtenerPdfs(this.documentoSeleccionado);
-    //       },
-    //       error: () => {
-    //         Swal.fire('Error', 'Error al eliminar el archivo PDF. Intenta nuevamente.', 'error');
-    //       }
-    //     });
-    //   }
-    // });
+    // 🔹 Pedir al usuario un nuevo nombre antes de confirmar
+    Swal.fire({
+      title: 'Renombrar archivo',
+      input: 'text',
+      inputLabel: 'Escribe el nuevo nombre para el archivo (sin .pdf)',
+      inputValue: file.name.replace('.pdf', ''), // por defecto el nombre original
+      showCancelButton: true,
+      confirmButtonText: 'Continuar',
+      cancelButtonText: 'Cancelar',
+      preConfirm: (nuevoNombre) => {
+        if (!nuevoNombre || nuevoNombre.trim() === '') {
+          Swal.showValidationMessage('Debes ingresar un nombre válido');
+        }
+        return nuevoNombre.trim();
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        let nuevoNombre = result.value;
+        nuevoNombre = nuevoNombre.replace(/\.pdf$/, "");
+        nuevoNombre = nuevoNombre.replace(/\s+/g, "_");
+
+        Swal.fire({
+          title: '¿Estás seguro?',
+          text: `¿Deseas subir el archivo con el nombre: "${nuevoNombre}.pdf"?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, subir',
+          cancelButtonText: 'No, cancelar'
+        }).then((confirmResult) => {
+          if (confirmResult.isConfirmed) {
+            const formData = new FormData();
+
+            // 🔹 Crear un nuevo File con el nombre editado
+            const nuevoArchivo = new File(
+              [file],
+              `${contenedor.id_contenedor}-${documento}-${nuevoNombre}.pdf`,
+              { type: file.type }
+            );
+
+            formData.append('archivo', nuevoArchivo);
+            formData.append('id_despacho', contenedor.id_contenedor.toString());
+            formData.append('documento', documento.toString());
+
+            axios.post(`${URL_SERVICIOS}/contenedor/subir_pdf`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            })
+              .then(response => {
+                Swal.fire('¡Subido!', 'El archivo se subió correctamente.', 'success');
+                this.obtenerPdfs(documento);
+                this.obtenerListado();
+              })
+              .catch(error => {
+                console.error('Error al subir el PDF', error);
+                Swal.fire('Error', 'Error al subir el archivo PDF. Intenta nuevamente.', 'error');
+              });
+          } else {
+            input.value = '';
+          }
+        });
+      } else {
+        input.value = '';
+      }
+    });
   }
 
+  eliminarPDF(pdf: any) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Deseas eliminar el archivo "${pdf}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'No, cancelar'
+    }).then((confirmResult) => {
+      if (confirmResult.isConfirmed) {
+        this.contenedorService.deleteFile(pdf).subscribe({
+          next: (res) => {
+            console.log(res);
+            Swal.fire(
+              'Eliminado',
+              'El archivo se eliminó correctamente.',
+              'success'
+            );
+
+            this.obtenerPdfs('EIR');
+            this.obtenerListado();
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Error', 'Error al eliminar archivo.', 'error');
+          }
+        });
+      }
+    });
+  }
+
+
+  generarPDF(contenedor: any, tipo: 'CARGUIO' | 'DESCARGUIO' | 'DEVOLUCION') {
+    this.loading = true;
+
+    const filtros: Record<typeof tipo, string[]> = {
+      CARGUIO: ["IZQUIERDA", "DERECHA", "PUERTA", "PRECINTO", "PLAQUETA"],
+      DESCARGUIO: ["DESCARGUIO"],
+      DEVOLUCION: ["IZQUIERDA", "DERECHA", "PUERTA", "ADENTRO", "PLAQUETA"]
+    };
+
+    const logo = 'assets/images/logo.png';
+    const empresa = 'TRANSPORTES OSCORI';
+    const cliente = {
+      contenedor: contenedor.numero_contenedor,
+      fecha: new Date().toLocaleDateString()
+    };
+
+    // Filtrar imágenes válidas según tipo
+    const imagenesC1 = this.imagenes
+      .filter(img => filtros[tipo].some(f => img.toUpperCase().includes(f)))
+      .map(img => {
+        const encontrado = filtros[tipo].find(f => img.toUpperCase().includes(f)) || img;
+        return {
+          url: `${URL_SERVICIOS}/contenedor/verImagen/${img}`,
+          label: encontrado
+        };
+      });
+
+    if (imagenesC1.length === 0) {
+      this.loading = false;
+      Swal.fire('Error', 'No tienes imagenes aun', 'error');
+      return;
+    }
+
+    // Convertir imágenes a base64
+    Promise.allSettled(
+      imagenesC1.map(async c => {
+        const dataUrl = await this.getBase64ImageFromURL(c.url);
+        return { label: c.label, dataUrl };
+      })
+    ).then(results => {
+      const imagenesOk = results
+        .filter(r => r.status === 'fulfilled' && (r as PromiseFulfilledResult<any>).value.dataUrl)
+        .map(r => (r as PromiseFulfilledResult<{ label: string; dataUrl: string }>).value);
+
+      // Convertir logo a base64
+      this.getBase64ImageFromURL(logo).then(logoBase64 => {
+        const docDefinition: any = {
+          pageMargins: [40, 0, 40, 40],
+          content: [
+            { image: logoBase64, width: 100, alignment: 'center', margin: [0, 0, 0, 10] },
+            // { text: empresa, style: 'header', alignment: 'center', margin: [0, 0, 0, 20] },
+            {
+              columns: [
+                [
+                  { text: `Contenedor: ${cliente.contenedor}`, style: 'subheader' },
+                  { text: `Fecha: ${cliente.fecha}`, style: 'subheader' }
+                ]
+              ],
+              margin: [0, 0, 0, 20]
+            },
+            imagenesOk.length
+              ? this.chunkImages(imagenesOk, 2).map(row => {
+                return {
+                  columns: row.map(cell =>
+                    cell.dataUrl
+                      ? {
+                        stack: [
+                          { text: cell.label, alignment: 'center', margin: [0, 0, 0, 5] },
+                          { image: cell.dataUrl, fit: [240, 180], alignment: 'center', margin: [0, 4, 0, 0] }
+                        ],
+                        margin: [0, 0, 0, 0]
+                      }
+                      : { text: '' }
+                  )
+                };
+              })
+              : { text: 'Sin imágenes disponibles.', italics: true, alignment: 'center' }
+
+          ],
+          styles: {
+            header: { fontSize: 18, bold: true },
+            subheader: { fontSize: 12, margin: [0, 2, 0, 2] }
+          }
+        };
+        const placa = this.getVehiculoNombre(contenedor.id_asignacion_vehiculo_carga).split(' - ')[0] || 'SP';
+        pdfMake.createPdf(docDefinition).download(`${contenedor.numero_contenedor}_${this.getClienteNombre(contenedor.id_cliente)}_${placa}_${tipo}.pdf`);
+      });
+    }).finally(() => (this.loading = false));
+  }
+
+
+  /** Carga una imagen (misma-origin o CORS habilitado) y devuelve dataURL base64 */
+  getBase64ImageFromURL(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = err => reject(err);
+      img.src = url;
+    });
+  }
+
+  /** Divide un array en filas de `size` elementos (para la tabla) */
+  chunkImages<T>(arr: T[], size: number): T[][] {
+    const res: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+      const chunk = arr.slice(i, i + size);
+      while (chunk.length < size) {
+        // Rellenar con objeto vacío si faltan celdas
+        chunk.push({} as T);
+      }
+      res.push(chunk);
+    }
+    return res;
+  }
+
+  async generarImagenContenedor(contenedor: any, index: number) {
+    const element = document.getElementById(`contenedor-${index}`);
+    if (!element) return;
+  
+    this.generando = true;
+  
+    element.classList.add('modo-captura');
+  
+    try {
+      const dataUrl = await htmlToImage.toPng(element, { quality: 0.95 });
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `contenedor_${contenedor.id_contenedor}.png`;
+      link.click();
+    } catch (err) {
+      console.error("Error al generar imagen", err);
+    } finally {
+      element.classList.remove('modo-captura');
+      this.generando = false;
+    }
+  }
 
 }

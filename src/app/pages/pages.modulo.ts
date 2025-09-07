@@ -27,6 +27,7 @@ import { DataViewModule } from 'primeng/dataview';
 import { StepsModule } from 'primeng/steps';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ImageModule } from 'primeng/image';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 import { NgxDocViewerModule } from 'ngx-doc-viewer';
 import { NgxSpinnerModule } from 'ngx-spinner';
@@ -110,7 +111,8 @@ import { CotizacionComponent } from "./cotizacion/cotizacion.component";
         DataViewModule,
         StepsModule,
         AutoCompleteModule,
-        ImageModule
+        ImageModule,
+        ProgressSpinnerModule
     ]
 })
 

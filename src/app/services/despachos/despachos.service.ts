@@ -64,4 +64,8 @@ export class DespachosService {
   return this.http.post(`${URL_SERVICIOS}/despachos/subir_pdf`, formData);
 }
 
+  deleteFile(pdf: string): Observable<any> {
+    return this.http.delete(`${URL_SERVICIOS}/despachos/eliminar_pdf/${pdf}`);
+  }
+
 }

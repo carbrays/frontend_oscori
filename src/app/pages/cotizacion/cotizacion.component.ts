@@ -30,7 +30,7 @@ export class CotizacionComponent implements OnInit {
   ciudades: { label: string; value: number }[] = [];
   navieras: { label: string; value: number, gate_in: number }[] = [];
   mercancias: { label: string; value: number }[] = [];
-  clientes: { value: number, nombre_comercial: string; persona_contacto: string, telefono_contacto: string, correo_contacto: string, ciudad: string }[] = [];
+  clientes: { value: number, nombre_comercial: string; persona_contacto: string, telefono_contacto: string, correo_contacto: string, ciudad: number }[] = [];
   forwaders: { label: string; value: number, razon_social: string, correo: string, telefono: string, ciudad: string }[] = [];
 
   modo_cliente = [
@@ -139,6 +139,9 @@ export class CotizacionComponent implements OnInit {
   dialogCliente: boolean = false;
   nuevoCliente: any = {};
 
+  dialogForwader: boolean = false;
+  nuevoForwader: any = {};
+
   constructor(private cotizacionService: CotizacionService) { }
 
   ngOnInit(): void {
@@ -238,6 +241,7 @@ export class CotizacionComponent implements OnInit {
   }
 
   guardarCambios(): void {
+    console.log('guardando cambios, cotizacion:', this.cotizacionSeleccionada);
     if (this.modoEdicion) {
       this.cotizacionSeleccionada.usumod = localStorage.getItem('login');
       this.cotizacionSeleccionada.fecmod = new Date();
@@ -281,11 +285,11 @@ export class CotizacionComponent implements OnInit {
   editarCotizacion(cotizacion: any): void {
     this.cotizacionSeleccionada = { ...cotizacion };
     this.actualizarTipoCliente(this.cotizacionSeleccionada.tipo_cliente);
-    this.actualizarRazonSocial(this.cotizacionSeleccionada.categoria_cliente);
     this.actualizarTipoCarga(this.cotizacionSeleccionada.id_tipo_carga);
     this.actualizarGateIn(this.cotizacionSeleccionada.id_navieria);
     this.actualizarTotal();
     this.mostrarFormulario = true;
+    this.modoEdicion = true;
   }
 
   eliminarCotizacion(cotizacion: any): void {
@@ -330,6 +334,7 @@ export class CotizacionComponent implements OnInit {
           this.cotizacionSeleccionada = {};
           this.modoEdicion = false;
           this.activeIndex = 0;
+          this.obtenerListado();
         } else if (result.isDismissed) {
           this.mostrarFormulario = false;
           this.cotizacionSeleccionada = {};
@@ -463,8 +468,8 @@ export class CotizacionComponent implements OnInit {
           value: cliente.id_cliente,
           nombre_comercial: cliente.nombre_comercial,
           persona_contacto: cliente.persona_contacto,
-          telefono_contacto: cliente.telefono,
-          correo_contacto: cliente.correo,
+          telefono_contacto: cliente.telefono_contacto,
+          correo_contacto: cliente.correo_contacto,
           ciudad: cliente.ciudad
         }));
         console.log('Clientes cargados:', this.clientes);
@@ -483,6 +488,7 @@ export class CotizacionComponent implements OnInit {
   }
 
   clienteSeleccionado(event: any) {
+    console.log('clientes', this.clientes)
     const cliente = this.clientes.find(c => c.nombre_comercial === event);
     if (cliente) {
       // this.cotizacionSeleccionada.nombre_comercial = cliente.nombre_comercial;
@@ -503,19 +509,6 @@ export class CotizacionComponent implements OnInit {
         break;
       default:
         this.bloquearTipoCliente = false;
-    }
-  }
-
-  actualizarRazonSocial(razon_social: string) {
-    switch (razon_social) {
-      case 'UNIPERSONAL':
-        this.bloquearRazonSocial = true;
-        setTimeout(() => {
-          this.cotizacionSeleccionada.razon_social = '';
-        }, 0);
-        break;
-      default:
-        this.bloquearRazonSocial = false;
     }
   }
 
@@ -615,15 +608,164 @@ export class CotizacionComponent implements OnInit {
   crearCliente() {
     this.nuevoCliente = {
       nombre_comercial: '',
+      razon_social: '',
       nit: '',
-      persona_contacto: '',
-      correo_contacto: '',
-      telefono_contacto: '',
+      correo: '',
+      telefono: '',
+      whatsapp: '',
       direccion: '',
-      ciudad: ''
+      pais: '',
+      ciudad: '',
+      id_forwarder: null,
+      persona_contacto: '',
+      telefono_contacto: '',
+      correo_contacto: '',
+      estado: 'ACTIVO',
+      usucre: localStorage.getItem('login'),
+      feccre: new Date()
     };
     this.dialogCliente = true;
   }
+
+  guardarCliente() {
+    this.cotizacionService.insertarCliente(this.nuevoCliente).subscribe({
+      next: () => {
+        this.dialogCliente = false;
+        this.obtenerClientes();
+        Swal.fire('Insertado', 'Cliente creado correctamente', 'success');
+      },
+      error: err => {
+        console.error('Error al insertar cliente:', err);
+        Swal.fire('Error', 'No se pudo insertar el cliente.', 'error');
+      }
+    });
+  }
+
+  crearForwader() {
+    this.nuevoForwader = {
+      nombre_comercial: '',
+      persona_contacto: '',
+      correo: '',
+      telefono: '',
+      pais: '',
+      direccion: '',
+      ciudad: '',
+      estado: 'ACTIVO',
+      usucre: localStorage.getItem('login'),
+      feccre: new Date()
+    };
+    this.dialogForwader = true;
+  }
+
+  guardarForwader() {
+    this.cotizacionService.insertarForwader(this.nuevoForwader).subscribe({
+      next: () => {
+        this.dialogForwader = false;
+        this.obtenerForwaders();
+        Swal.fire('Insertado', 'Forwader creado correctamente', 'success');
+      },
+      error: err => {
+        console.error('Error al insertar forwader:', err);
+        Swal.fire('Error', 'No se pudo insertar el forwader.', 'error');
+      }
+    });
+  }
+
+  generarCotizacion() {
+  const c = this.cotizacionSeleccionada;
+
+  const docDefinition: any = {
+    content: [
+      { text: 'COTIZACIÓN', style: 'header', alignment: 'center', margin: [0, 0, 0, 20] },
+
+      // Datos del cliente
+      { text: 'Datos del Cliente', style: 'subheader' },
+      {
+        table: {
+          widths: ['30%', '70%'],
+          body: [
+            ['Nombre Comercial', c.nombre_comercial || ''],
+            ['NIT', c.nit || ''],
+            ['Persona de Contacto', c.persona_contacto || ''],
+            ['Correo', c.correo_contacto || ''],
+            ['Teléfono', c.telefono_contacto || ''],
+            ['Ciudad', c.ciudad || ''],
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      },
+
+      // Datos del contacto (Forwarder)
+      { text: 'Datos del Contacto', style: 'subheader' },
+      {
+        table: {
+          widths: ['30%', '70%'],
+          body: [
+            ['Nombre Comercial', c.c_nombre_comercial || ''],
+            ['Persona de Contacto', c.c_persona_contacto || ''],
+            ['Correo', c.c_correo || ''],
+            ['Teléfono', c.c_telefono || ''],
+            ['Ciudad', c.c_ciudad || ''],
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      },
+
+      // Datos de la carga
+      { text: 'Datos de la Carga', style: 'subheader' },
+      {
+        table: {
+          widths: ['30%', '70%'],
+          body: [
+            ['Tipo Documento', c.tipo_documento || ''],
+            ['Tipo BL', c.tipo_bl || ''],
+            ['Número BL', c.numero_bl || ''],
+            ['Tipo de Carga', c.id_tipo_carga || ''],
+            ['Número de Contenedor', c.numero_contenedor || ''],
+            ['Tamaño', c.tamano || ''],
+            ['Peso (kg)', c.peso_kg || ''],
+            ['Mercancía', c.id_mercancia || ''],
+            ['Embalaje', c.embalaje || ''],
+            ['Volumen (m3)', c.volumen_m3 || ''],
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      },
+
+      // Datos de logística
+      { text: 'Datos de Logística', style: 'subheader' },
+      {
+        table: {
+          widths: ['30%', '70%'],
+          body: [
+            ['Naviera', c.id_navieria || ''],
+            ['Fecha Llegada', c.fecha_llegada ? new Date(c.fecha_llegada).toLocaleDateString() : ''],
+            ['Ciudad Origen', c.id_ciudad_origen || ''],
+            ['Ciudad Destino', c.id_ciudad_destino || ''],
+            ['Despacho Aduanero', c.id_despacho_aduanero || ''],
+            ['Lugar Descarga', c.lugar_descarga || ''],
+            ['Despacho Portuario', c.id_despacho_portuario || ''],
+            ['Devolución', c.devolucion ? 'Sí' : 'No'],
+            ['Gate In', c.gate_in ? 'Sí' : 'No'],
+            ['Flete', c.flete ? `${c.flete} $` : ''],
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      },
+
+      // Pie de página
+      { text: `Estado: ${c.estado || ''}`, style: 'footer' },
+      { text: `Creado por: ${c.usucre || ''} - ${new Date(c.feccre).toLocaleString()}`, style: 'footer' }
+    ],
+    styles: {
+      header: { fontSize: 18, bold: true },
+      subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] },
+      footer: { fontSize: 10, italics: true, margin: [0, 5, 0, 0] }
+    }
+  };
+
+  pdfMake.createPdf(docDefinition).open();
+}
 
 
 }

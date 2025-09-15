@@ -49,6 +49,7 @@ import { VehiculosComponent } from "./vehiculos/vehiculos.component";
 import { NavierasComponent } from "./navieras/navieras.component";
 import { MercanciaComponent } from "./mercancia/mercancia.component";
 import { CotizacionComponent } from "./cotizacion/cotizacion.component";
+import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos_seguimiento.component";
 
 @NgModule({
     declarations: [
@@ -67,7 +68,8 @@ import { CotizacionComponent } from "./cotizacion/cotizacion.component";
     CodSeleccionarComponent,
     CodVerificacionComponent,
     AdmUsuariosComponent,
-    CotizacionComponent
+    CotizacionComponent,
+    VehiculosSeguimientoComponent
     ],
     exports: [
         DashboardComponent,

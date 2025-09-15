@@ -19,6 +19,7 @@ import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+
 @Component({
   selector: 'app-despachos',
   templateUrl: './despachos.component.html',
@@ -583,7 +584,11 @@ export class DespachosComponent implements OnInit {
       fecha_bl_nieto: null,
       id_preasignacion_vehiculo_carga: null,
       autorizado: false,
-      pago_dam: false
+      dim: '',
+      fecha_dim: null,
+      despacho_agencia: '',
+      despacho_nombre: '',
+      despacho_telefono: ''
     };
     this.popupVisible = true;
     this.modoEdicion = false;
@@ -1032,38 +1037,146 @@ export class DespachosComponent implements OnInit {
     pdfMake.createPdf(docDefinition).download('archivo.pdf');
   }
 
-  exportarDespachosPDF() {
-    const content: any[] = [];
+exportarDespachosPDF() {
+  const content: any[] = [];
 
-    this.despachosFiltrados.forEach((d, i) => {
-      content.push(
-        { text: `Despacho #${i + 1}`, style: 'header' },
-        { text: `Cliente: ${this.getClienteNombre(d.id_cliente)}` },
-        { text: `Tipo Carga: ${d.id_tipo_carga}` },
-        { text: `Contenedor: ${d.numero_contenedor}` },
-        { text: `Peso (kg): ${d.peso_kg}` },
-        { text: `Origen: ${this.getCiudadNombre(d.id_ciudad_origen)}` },
-        { text: `Destino: ${this.getCiudadNombre(d.id_ciudad_destino)}` },
-        { text: `Fecha Llegada: ${this.formatFecha(d.fecha_llegada)}` },
-        { text: `Fecha Límite: ${this.formatFecha(d.fecha_limite)}` },
-        { text: `Descripción Adicional: ${d.descripcion}`, margin: [0, 0, 0, 10] },
-        { text: '----------------------------------------------', margin: [0, 0, 0, 10] }
-      );
+  this.despachosFiltrados.forEach((d, i) => {
+    // Determinar color de fondo por estado
+    let bgColor = '#ffffff'; // despacho normal
+    const estilo = this.estiloFila(d);
+    if (estilo === 'despacho-culminado') bgColor = '#d7f8da';
+    if (estilo === 'despacho-observado') bgColor = '#f8f5d7';
+    if (estilo === 'despacho-faltante') bgColor = '#ffe5e5';
+
+    // Construcción de filas (simulando ngIf)
+    const col1: any[] = [];
+    const col2: any[] = [];
+
+    col1.push({ text: `Cliente: ${this.getClienteNombre(d.id_cliente)}`, style: 'cardTitle' });
+    col2.push({ text: `Estado: ${d.estado || '-'}`, style: 'cardText' });
+
+    if (d.id_tipo_carga) col1.push({ text: `Tipo Carga: ${d.id_tipo_carga}`, style: 'cardText' });
+    if (d.numero_contenedor) col2.push({ text: `Contenedor: ${d.numero_contenedor}`, style: 'cardText' });
+
+    if (d.descripcion_carga) col1.push({ text: `Tamaño: ${d.descripcion_carga}`, style: 'cardText' });
+    if (d.id_naviera) col2.push({ text: `Naviera: ${this.getNavieraNombre(d.id_naviera)}`, style: 'cardText' });
+
+    if (this.getNavieraNombre(d.id_naviera) === 'MSC') {
+      col1.push({ text: `Autorizado MSC: ${d.autorizado ? 'Sí' : 'No'}`, style: 'cardText' });
+    }
+
+    if (d.peso_kg) col1.push({ text: `Peso (kg): ${d.peso_kg}`, style: 'cardText' });
+    if (d.volumen_m3) col2.push({ text: `Volumen (m³): ${d.volumen_m3}`, style: 'cardText' });
+
+    if (d.id_mercancia) col1.push({ text: `Mercancía: ${this.getMercanciaNombre(d.id_mercancia)}`, style: 'cardText' });
+    if (d.embalaje) col2.push({ text: `Embalaje: ${d.embalaje}`, style: 'cardText' });
+
+    if (d.id_ciudad_origen) col1.push({ text: `Origen: ${this.getCiudadNombre(d.id_ciudad_origen)}`, style: 'cardText' });
+    if (d.id_ciudad_destino) col2.push({ text: `Destino: ${this.getCiudadNombre(d.id_ciudad_destino)}`, style: 'cardText' });
+
+    if (d.fecha_llegada) col1.push({ text: `Fecha Llegada: ${this.formatFecha(d.fecha_llegada)}`, style: 'cardText' });
+    if (d.fecha_limite) col2.push({ text: `Fecha Límite: ${this.formatFecha(d.fecha_limite)}`, style: 'cardText' });
+
+    if (this.getCiudadNombre(d.id_ciudad_origen) === 'ARICA' && d.id_despacho_portuario) {
+      col1.push({ text: `Despacho Portuario: ${d.id_despacho_portuario}`, style: 'cardText' });
+    }
+
+    if (d.id_despacho_aduanero) col2.push({ text: `Despacho Aduanero: ${d.id_despacho_aduanero}`, style: 'cardText' });
+    if (d.id_despacho_aduanero === 'GENERAL' && d.id_despacho_aduanero_general) {
+      col1.push({ text: `Despacho Aduanero General: ${d.id_despacho_aduanero_general}`, style: 'cardText' });
+    }
+
+    if (d.id_deposito_aduanero) col2.push({ text: `Depósito Aduanero: ${d.id_deposito_aduanero}`, style: 'cardText' });
+
+    // BL Madre
+    if (d.bl_madre && !d.bl_hijo && !d.bl_nieto) {
+      col1.push({ text: `BL Madre: ${d.bl_madre}`, style: 'cardText' });
+      if (d.fecha_bl_madre) col2.push({ text: `Fecha BL Madre: ${this.formatFecha(d.fecha_bl_madre)}`, style: 'cardText' });
+    }
+
+    // BL Hijo
+    if (d.bl_hijo && !d.bl_nieto) {
+      col1.push({ text: `BL Hijo: ${d.bl_hijo}`, style: 'cardText' });
+      if (d.fecha_bl_hijo) col2.push({ text: `Fecha BL Hijo: ${this.formatFecha(d.fecha_bl_hijo)}`, style: 'cardText' });
+    }
+
+    // BL Nieto
+    if (d.bl_nieto) {
+      col1.push({ text: `BL Nieto: ${d.bl_nieto}`, style: 'cardText' });
+      if (d.fecha_bl_nieto) col2.push({ text: `Fecha BL Nieto: ${this.formatFecha(d.fecha_bl_nieto)}`, style: 'cardText' });
+    }
+
+    if (d.dam) col1.push({ text: `DAM: ${d.dam}`, style: 'cardText' });
+    if (d.fecha_dam) col2.push({ text: `Fecha DAM: ${this.formatFecha(d.fecha_dam)}`, style: 'cardText' });
+
+    if (d.id_preasignacion_vehiculo_carga) {
+      col1.push({ text: `Preasignación Carga: ${this.getVehiculoNombre(d.id_preasignacion_vehiculo_carga)}`, style: 'cardText' });
+    }
+    if (d.id_asignacion_vehiculo_carga) {
+      col2.push({ text: `Asignación Carga: ${this.getVehiculoNombre(d.id_asignacion_vehiculo_carga)}`, style: 'cardText' });
+    }
+
+    if (d.fecha_carga) col1.push({ text: `Fecha Carga: ${this.formatFecha(d.fecha_carga)}`, style: 'cardText' });
+
+    // Descripción y precintos ocupan fila completa
+    if (d.descripcion) {
+      col1.push({ text: `Descripción: ${d.descripcion}`, style: 'cardText', colSpan: 2 });
+    }
+    if (d.precinto) col2.push({ text: `Precinto: ${d.precinto}`, style: 'cardText' });
+    if (d.precinto_dress) col1.push({ text: `Precinto DRES: ${d.precinto_dress}`, style: 'cardText' });
+    if (d.precinto_gog) col2.push({ text: `Precinto GOG: ${d.precinto_gog}`, style: 'cardText' });
+    if (d.dim) col1.push({ text: `DIM: ${d.dim}`, style: 'cardText' });
+    if (d.fecha_dim) col2.push({ text: `Fecha DIM: ${this.formatFecha(d.fecha_dim)}`, style: 'cardText' });
+
+    if (d.despacho_agencia) col1.push({ text: `Despacho Agencia: ${d.despacho_agencia}`, style: 'cardText' });
+    if (d.despacho_nombre) col2.push({ text: `Contacto: ${d.despacho_nombre}`, style: 'cardText' });
+    if (d.despacho_telefono) col1.push({ text: `Teléfono: ${d.despacho_telefono}`, style: 'cardText' });
+
+    // Armar la tarjeta
+    content.push({
+      table: {
+        widths: ['50%', '50%'],
+        body: [[
+          { stack: col1 },
+          { stack: col2 }
+        ]]
+      },
+      layout: {
+        hLineWidth: () => 0,
+        vLineWidth: () => 0,
+        paddingLeft: () => 8,
+        paddingRight: () => 8,
+        paddingTop: () => 4,
+        paddingBottom: () => 4,
+        fillColor: () => bgColor
+      },
+      margin: [0, 0, 0, 15],
+      pageBreak: 'auto'
     });
+  });
 
-    const docDefinition: TDocumentDefinitions = {
-      content: content,
-      styles: {
-        header: {
-          fontSize: 14,
-          bold: true,
-          margin: [0, 5, 0, 10]
-        }
+  const docDefinition: TDocumentDefinitions = {
+    pageSize: 'LETTER',
+    pageMargins: [30, 30, 30, 30],
+    content,
+    styles: {
+      cardTitle: {
+        fontSize: 13,
+        bold: true,
+        margin: [0, 0, 0, 6],
+        color: '#2255e4'
+      },
+      cardText: {
+        fontSize: 10,
+        margin: [0, 2, 0, 2],
+        color: '#000'
       }
-    };
+    }
+  };
 
-    pdfMake.createPdf(docDefinition).download('despachos.pdf');
-  }
+  pdfMake.createPdf(docDefinition).download('despachos.pdf');
+}
+
 
   exportarDespachosExcel() {
     // Transformar datos a un array plano para Excel
@@ -1186,50 +1299,6 @@ export class DespachosComponent implements OnInit {
       });
   }
 
-  // async generarImagenDespacho(despacho: any, index: number) {
-  //   this.generando = true;
-  // const element = document.getElementById(`despacho-${index}`);
-  // if (!element) return;
-
-  // setTimeout(async () => {
-  // try {
-  //   // const canvas = await html2canvas(element, { scale: 1 });
-  //   const canvas = await html2canvas(element);
-  //   const imgData = canvas.toDataURL('image/png');
-
-  //   // Descargar la imagen
-  //   const link = document.createElement('a');
-  //   link.href = imgData;
-  //   link.download = `despacho_${despacho.id_despacho}.png`;
-  //   link.click();
-
-  //   // También podrías enviarla al backend aquí
-  //   // this.enviarImagenWhatsApp(despacho, imgData);
-
-  // } catch (err) {
-  //   console.error("Error al generar la imagen", err);
-  // } finally {
-  //   this.generando = false; // 👉 desactiva overlay
-  // }
-  // }, 100);
-
-  // if (element) {
-  //   html2canvas(element).then(canvas => {
-  //     const imgData = canvas.toDataURL('image/png'); // Base64
-
-  //     // 👉 Aquí ya tienes la imagen lista
-  //     // Puedes descargarla o mandarla al backend
-  //     console.log(imgData);
-
-  //     // Opción: descargar local
-  //     const link = document.createElement('a');
-  //     link.href = imgData;
-  //     link.download = `despacho_${despacho.id_despacho}.png`;
-  //     link.click();
-  //   });
-  // }
-  // }
-
   async generarImagenDespacho(despacho: any, index: number) {
     const element = document.getElementById(`despacho-${index}`);
     if (!element) return;
@@ -1251,22 +1320,5 @@ export class DespachosComponent implements OnInit {
       this.generando = false;
     }
   }
-
-  generarPdfCards() {
-  const data = document.getElementById('contenedor-despachos'); // el div que envuelve todas tus cards
-  if (!data) return;
-
-  html2canvas(data, { scale: 2 }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`despachos_${new Date().toISOString().split('T')[0]}.pdf`);
-  });
-}
 
 }

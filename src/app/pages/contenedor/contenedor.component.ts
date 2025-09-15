@@ -127,7 +127,8 @@ export class ContenedoresComponent implements OnInit {
     { id: 'MONTACARGA', nombre: 'MONTACARGA' },
     { id: 'URBANO', nombre: 'URBANO' },
     { id: 'TRASBORDO', nombre: 'TRASBORDO' },
-    { id: 'LAVADO', nombre: 'LAVADO' }
+    { id: 'LAVADO', nombre: 'LAVADO' },
+    { id: 'REPARACION_CONTENEDOR', nombre: 'REPARACION_CONTENEDOR' }
   ];
 
   mostrarTabla = true;
@@ -402,7 +403,8 @@ export class ContenedoresComponent implements OnInit {
       tiene_montacarga: false,
       tiene_urbano: false,
       tiene_trasbordo: false,
-      tiene_lavado: false
+      tiene_lavado: false,
+      tiene_reparacion_contenedor: false,
     };
     this.popupVisible = true;
     this.modoEdicion = false;

@@ -9,7 +9,7 @@ import { clearStorage } from 'mapbox-gl';
 })
 export class DespachosService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getDespachos(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/despachos`);
@@ -61,8 +61,8 @@ export class DespachosService {
   }
 
   subirPdf(formData: FormData): Observable<any> {
-  return this.http.post(`${URL_SERVICIOS}/despachos/subir_pdf`, formData);
-}
+    return this.http.post(`${URL_SERVICIOS}/despachos/subir_pdf`, formData);
+  }
 
   deleteFile(pdf: string): Observable<any> {
     return this.http.delete(`${URL_SERVICIOS}/despachos/eliminar_pdf/${pdf}`);

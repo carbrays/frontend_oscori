@@ -60,4 +60,12 @@ export class CotizacionService {
   return this.http.post(`${URL_SERVICIOS}/cotizacion/subir_pdf`, formData);
 }
 
+  insertarCliente(cliente: any): Observable<any> {
+    return this.http.post(`${URL_SERVICIOS}/cliente/crear_cliente`, cliente);
+  }
+
+  insertarForwader(forwader: any): Observable<any> {
+    return this.http.post(`${URL_SERVICIOS}/forwader/crear_forwarder`, forwader);
+  }
+
 }

@@ -30,4 +30,9 @@ export class VehiculosService {
     };
     return this.http.put(`${URL_SERVICIOS}/vehiculo/eliminar_vehiculo/${id}`, body);
   }
+
+  getVehiculosPropios(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/vehiculos_propios`);
+  }
+  
 }

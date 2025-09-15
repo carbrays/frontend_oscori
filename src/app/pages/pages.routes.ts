@@ -18,6 +18,7 @@ import { VehiculosComponent } from "./vehiculos/vehiculos.component";
 import { MercanciaComponent } from "./mercancia/mercancia.component";
 import { CotizacionComponent } from "./cotizacion/cotizacion.component";
 import { NavierasComponent } from "./navieras/navieras.component";
+import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos_seguimiento.component";
 
 const pagesRoutes: Routes = [
     {
@@ -37,6 +38,7 @@ const pagesRoutes: Routes = [
             { path: 'navieras', component: NavierasComponent, data: { titulo: 'Navieras' } },
             { path: 'mercancias', component: MercanciaComponent, data: { titulo: 'Mercancias' } },
             { path: 'cotizacion', component: CotizacionComponent, data: { titulo: 'Cotizacion' } },
+            { path: 'vehiculos_seguimiento', component: VehiculosSeguimientoComponent, data: { titulo: 'Vehiculos Seguimiento' } },
 
             /* MEMORANDUM */
             { path: 'cod-asignar', component: CodAsignarComponent, data: { titulo: 'Nuevo Memorandum' }},

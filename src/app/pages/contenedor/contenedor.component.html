@@ -464,6 +464,13 @@
           </p-checkbox>
         </div>
 
+        <div class="p-2 flex-fill d-flex flex-column align-items-center">
+          <label for="tiene_reparacion_contenedor" class="mb-1">Reparación Contenedor</label>
+          <p-checkbox [(ngModel)]="contenedorSeleccionado.tiene_reparacion_contenedor" [binary]="true" inputId="tiene_reparacion_contenedor"
+            name="tiene_reparacion_contenedor">
+          </p-checkbox>
+        </div>
+
       </div>
       <div class="p-dialog-footer mt-3">
         <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>

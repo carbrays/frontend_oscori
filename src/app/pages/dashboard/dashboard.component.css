@@ -7,3 +7,57 @@
   transform: translateY(-5px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
+
+.despacho {
+  background-color: #ffffff !important;
+  color: #2255e4 !important;
+  font-weight: bold;
+}
+
+.despacho-culminado {
+  background-color: #d7f8da !important;
+  color: #2255e4 !important;
+  font-weight: bold;
+}
+
+.despacho-observado {
+  background-color: #f8f5d7 !important;
+  color: #2255e4 !important;
+  font-weight: bold;
+}
+
+.despacho-faltante {
+  background-color: #ffe5e5 !important;
+  /* Fondo rosado claro */
+  /*  border: 1px solid #d32f2f !important;*/
+  /* Borde rojo */
+  color: #2255e4 !important;
+  /* Texto rojo */
+}
+
+.faltante {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}
+
+.contenedor {
+  background-color: #ffffff !important;
+}
+
+.fecha-vencida {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  font-weight: bold;
+}
+
+.fecha-pre-vencida {
+  background-color: #f8f5d7 !important;
+  color: #71721c !important;
+  font-weight: bold;
+}
+
+.fecha-devuelto {
+  background-color: #d7f8e5 !important;
+  color: #1c7236 !important;
+  font-weight: bold;
+}

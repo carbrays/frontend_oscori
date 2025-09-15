@@ -1,12 +1,311 @@
 <div class="row g-3">
-  <div class="col-md-2" *ngFor="let card of cards">
-    <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': card.color}">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <div class="fs-4">{{ card.titulo }}</div>
-        <i [class]="card.icono" style="font-size: 1.5rem;"></i>
+  <!-- Bloque de los primeros grupos -->
+  <div class="col-12" *ngFor="let grupo of ['DESPACHOS', 'CONTENEDORES', 'CARGA SUELTA']">
+    <h5>{{ grupo }}</h5>
+    <div class="row g-3">
+      <div class="col-md-2" *ngFor="let card of agrupados[grupo]"
+        (click)="grupo === 'CONTENEDORES' ? abrirDialogContenedor(card) : abrirDialogDespachos(card)"
+        style="cursor: pointer;">
+        <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': card.color}">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="fs-4">{{ card.titulo }}</div>
+            <i [class]="card.icono" style="font-size: 1.5rem;"></i>
+          </div>
+          <div class="display-5 fw-bold">{{ card.cantidad }}</div>
+          <!-- <div class="small">{{ card.descripcion }}</div> -->
+        </div>
       </div>
-      <div class="display-5 fw-bold">{{ card.cantidad }}</div>
-      <div class="small">{{ card.descripcion }}</div>
     </div>
   </div>
 </div>
+
+<!-- Bloque de vehículos abajo -->
+<div class="row g-3">
+  <div class="col-12">
+    <h5>VEHICULOS</h5>
+    <div class="row g-3">
+      <div class="col-md-2" *ngFor="let card of agrupados['VEHICULOS']">
+        <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': card.color}">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="fs-4">{{ card.titulo }}</div>
+            <i [class]="card.icono" style="font-size: 1.5rem;"></i>
+          </div>
+          <div class="display-6 fw-bold">{{ getPlaca(card) }}</div>
+          <!-- <div class="small">{{ card.descripcion }}</div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-dialog [(visible)]="dialogDespachos" [modal]="true" [style]="{ width: '90%' }" header="DESPACHOS">
+  <div id="contenedor-despachos">
+    <div class="div">
+      <button pButton type="button" icon="pi pi-file-pdf" label="Generar PDF" class="p-button-secondary"
+        (click)="exportarDespachosPDF()"></button>
+    </div>
+    <p-dataView [value]="despachos" layout="list" [rows]="5">
+      <ng-template #cardDespacho let-despacho let-index="rowIndex" pTemplate="listItem">
+        <div id="despacho-{{index}}" class="p-3 border rounded mb-3 shadow-sm" [ngClass]="estiloFila(despacho)">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(despacho.id_cliente) }}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+
+              <div class="fs-5">
+                <b>ESTADO:</b> {{ despacho.estado }}
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-2" />
+          <div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px;">
+
+            <div [ngClass]="{'faltante': !despacho.id_tipo_carga}"><b>Tipo Carga:</b> {{ despacho.id_tipo_carga }}</div>
+            <div><b>Contenedor:</b> {{ despacho.numero_contenedor }}</div>
+            <div [ngClass]="{'faltante': !despacho.descripcion_carga}"><b>Tamaño:</b> {{ despacho.descripcion_carga }}
+            </div>
+            <div [ngClass]="{'faltante': !despacho.id_naviera}"><b>Naviera:</b> {{ getNavieraNombre(despacho.id_naviera)
+              }}
+            </div>
+            <div *ngIf="getNavieraNombre(despacho.id_naviera) === 'MSC'" [ngClass]="{'faltante': !despacho.id_naviera}">
+              <b>Autorizado:</b> {{ despacho.autorizado ? 'Sí' : 'No' }}
+            </div>
+
+            <div [ngClass]="{'faltante': !despacho.peso_kg}"><b>Peso (kg):</b> {{ despacho.peso_kg }}</div>
+            <div [ngClass]="{'faltante': !despacho.volumen_m3}"><b>Volumen (m³):</b> {{ despacho.volumen_m3 }}</div>
+            <div [ngClass]="{'faltante': !despacho.id_mercancia}"><b>Mercancía:</b> {{
+              getMercanciaNombre(despacho.id_mercancia) }}</div>
+
+            <div [ngClass]="{'faltante': !despacho.embalaje}"><b>Embalaje:</b> {{ despacho.embalaje }}</div>
+            <div [ngClass]="{'faltante': !despacho.id_ciudad_origen}"><b>Origen:</b> {{
+              getCiudadNombre(despacho.id_ciudad_origen) }}</div>
+            <div [ngClass]="{'faltante': !despacho.id_ciudad_destino}"><b>Destino:</b> {{
+              getCiudadNombre(despacho.id_ciudad_destino) }}</div>
+
+            <div [ngClass]="{'faltante': !despacho.fecha_llegada}"><b>Fecha Llegada:</b> {{ despacho.fecha_llegada |
+              date:'yyyy-MM-dd' }}</div>
+            <div [ngClass]="{'faltante': !despacho.fecha_limite}"><b>Fecha Límite:</b> {{ despacho.fecha_limite |
+              date:'yyyy-MM-dd' }}</div>
+
+            <div *ngIf="getCiudadNombre(despacho.id_ciudad_origen) === 'ARICA' "
+              [ngClass]="{'faltante': !despacho.id_despacho_portuario}"><b>Despacho Portuario:</b> {{
+              despacho.id_despacho_portuario }}</div>
+            <div [ngClass]="{'faltante': !despacho.id_despacho_aduanero}"><b>Despacho Aduanero:</b> {{
+              despacho.id_despacho_aduanero }}</div>
+            <div *ngIf="despacho.id_despacho_aduanero === 'GENERAL'"
+              [ngClass]="{'faltante': !despacho.id_despacho_aduanero_general}"><b>Despacho Aduanero General:</b> {{
+              despacho.id_despacho_aduanero_general }}</div>
+            <div [ngClass]="{'faltante': !despacho.id_deposito_aduanero}"><b>Deposito Aduanero:</b> {{
+              despacho.id_deposito_aduanero }}</div>
+
+            <!-- BL Madre -->
+            <div *ngIf="despacho.bl_madre && !despacho.bl_hijo && !despacho.bl_nieto"
+              [ngClass]="{'faltante': !despacho.bl_madre}">
+              <b>BL Madre:</b> {{ despacho.bl_madre }}
+            </div>
+            <div *ngIf="despacho.bl_madre && !despacho.bl_hijo && !despacho.bl_nieto"
+              [ngClass]="{'faltante': !despacho.fecha_bl_madre}">
+              <b>Fecha BL Madre:</b> {{ despacho.fecha_bl_madre | date:'yyyy-MM-dd' }}
+            </div>
+
+            <!-- BL Hijo -->
+            <div *ngIf="despacho.bl_hijo && !despacho.bl_nieto" [ngClass]="{'faltante': !despacho.bl_hijo}">
+              <b>BL Hijo:</b> {{ despacho.bl_hijo }}
+            </div>
+            <div *ngIf="despacho.bl_hijo && !despacho.bl_nieto" [ngClass]="{'faltante': !despacho.fecha_bl_hijo}">
+              <b>Fecha BL Hijo:</b> {{ despacho.fecha_bl_hijo | date:'yyyy-MM-dd' }}
+            </div>
+
+            <!-- BL Nieto -->
+            <div *ngIf="despacho.bl_nieto" [ngClass]="{'faltante': !despacho.bl_nieto}">
+              <b>BL Nieto:</b> {{ despacho.bl_nieto }}
+            </div>
+            <div *ngIf="despacho.bl_nieto" [ngClass]="{'faltante': !despacho.fecha_bl_nieto}">
+              <b>Fecha BL Nieto:</b> {{ despacho.fecha_bl_nieto | date:'yyyy-MM-dd' }}
+            </div>
+
+            <div [ngClass]="{'faltante': !despacho.dam}"><b>DAM:</b> {{ despacho.dam }}</div>
+            <div [ngClass]="{'faltante': !despacho.fecha_dam}"><b>Fecha DAM:</b> {{ despacho.fecha_dam |
+              date:'yyyy-MM-dd'
+              }}</div>
+
+            <div *ngIf="!despacho.id_asignacion_vehiculo_carga"
+              [ngClass]="{'faltante': !despacho.id_preasignacion_vehiculo_carga}"><b>Preasignación Carga:</b> {{
+              getVehiculoNombre(despacho.id_preasignacion_vehiculo_carga) }}</div>
+            <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_carga}"><b>Asignación Carga:</b> {{
+              getVehiculoNombre(despacho.id_asignacion_vehiculo_carga) }}</div>
+            <div [ngClass]="{'faltante': !despacho.fecha_carga}"><b>Fecha Carga:</b> {{ despacho.fecha_carga |
+              date:'yyyy-MM-dd' }}</div>
+            <!-- <div [ngClass]="{'faltante': !despacho.id_asignacion_vehiculo_descarga}"><b>Asignación Descarga:</b> {{ getVehiculoNombre(despacho.id_asignacion_vehiculo_descarga) }}</div>
+  <div [ngClass]="{'faltante': !despacho.fecha_descarga}"><b>Fecha Descarga:</b> {{ despacho.fecha_descarga | date:'yyyy-MM-dd' }}</div> -->
+
+
+            <!-- Descripción Adicional ocupa toda la fila -->
+            <div style="grid-column: span 2; white-space: pre-wrap; word-break: break-word;">
+              <b>Descripción Adicional:</b> {{ despacho.descripcion }}
+            </div>
+            <div *ngIf="despacho.precinto">
+              <b>Precinto:</b> {{ despacho.precinto }}
+            </div>
+            <div *ngIf="despacho.precinto_dress">
+              <b>Precinto DRES:</b> {{ despacho.precinto_dress }}
+            </div>
+            <div *ngIf="despacho.precinto_gog">
+              <b>Precinto GOG:</b> {{ despacho.precinto_gog }}
+            </div>
+            <div *ngIf="getNavieraNombre(despacho.id_naviera) === 'MSC'"><b>Autorizado MSC:</b> {{ despacho.autorizado?
+              'Sí' : 'No' }}</div>
+            <div *ngIf="despacho.id_despacho_aduanero === 'ANTICIPADO'" [ngClass]="{'faltante': !despacho.dim}">
+              <b>DIM:</b> {{ despacho.dim }}
+            </div>
+            <div *ngIf="despacho.id_despacho_aduanero === 'ANTICIPADO'" [ngClass]="{'faltante': !despacho.fecha_dim}">
+              <b>Fecha DIM:</b> {{ despacho.fecha_dim | date:'yyyy-MM-dd'
+              }}
+            </div>
+            <div *ngIf="despacho.despacho_agencia">
+              <b>Agencia:</b> {{ despacho.despacho_agencia }}
+            </div>
+            <div *ngIf="despacho.despacho_nombre">
+              <b>Agencia Nombre:</b> {{ despacho.despacho_nombre }}
+            </div>
+            <div *ngIf="despacho.despacho_telefono">
+              <b>Agencia Teléfono:</b> {{ despacho.despacho_telefono }}
+            </div>
+          </div>
+          <div class="d-flex justify-content-end mt-2">
+            <span class="text-muted small">{{ observacionDespacho(despacho) }}</span>
+          </div>
+        </div>
+
+      </ng-template>
+    </p-dataView>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="dialogContenedores" [modal]="true" [style]="{ width: '90%' }" header="CONTENEDORES">
+  <div class="div">
+      <button pButton type="button" icon="pi pi-file-pdf" label="Generar PDF" class="p-button-secondary"
+        (click)="exportarContenedoresPDF()"></button>
+    </div>
+  <p-dataView [value]="contenedores" layout="list" [rows]="5">
+    <ng-template let-contenedor let-index="rowIndex" pTemplate="listItem">
+      <div id="contenedor-{{index}}" class="p-3 border rounded mb-3 shadow-sm"
+        [ngClass]="estiloFilaContenedor(contenedor.fecha_limite, contenedor.estado)">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <!-- Columna Izquierda: Textos uno encima del otro -->
+          <div>
+            <div class="text-primary fs-5"><b>#:</b> {{ contenedor.id_contenedor }}</div>
+            <div class="text-primary fs-4"><b>N° Contenedor:</b> {{ contenedor.numero_contenedor }}</div>
+            <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(contenedor.id_cliente) }}</div>
+          </div>
+
+          <!-- Columna Derecha: Botones lado a lado -->
+          <div class="d-flex align-items-center gap-2">
+            <div class="text-primary fs-5">
+              <b>ESTADO:</b> {{ contenedor.estado }}
+            </div>
+          </div>
+
+        </div>
+
+        <hr class="my-1" />
+        <!-- Contenedor Grid -->
+        <div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px;">
+
+          <!-- Fecha Llegada -->
+          <div [ngClass]="{'faltante': !contenedor.fecha_llegada}">
+            <b>Fecha Llegada:</b> {{ contenedor.fecha_llegada | date:'yyyy-MM-dd' }}
+          </div>
+
+          <!-- Mercancía -->
+          <div [ngClass]="{'faltante': !contenedor.id_mercancia}">
+            <b>Mercancía:</b> {{ getMercanciaNombre(contenedor.id_mercancia) }}
+          </div>
+
+          <!-- Días -->
+          <div style="grid-column: span 1;">
+            <b>Días:</b>
+            <span *ngIf="calcularDiasRestantes(contenedor.fecha_limite) >= 0">
+              Faltan {{ calcularDiasRestantes(contenedor.fecha_limite) }} días
+            </span>
+            <span *ngIf="contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_limite) < 0">
+              Vencido hace {{ calcularDiasRestantes(contenedor.fecha_limite) * -1 }} días
+            </span>
+            <span *ngIf="contenedor.estado === 'DEVUELTO'">Entregado</span>
+          </div>
+
+          <!-- Fecha Límite -->
+          <div [ngClass]="estiloFilaContenedor(contenedor.fecha_limite, contenedor.estado)">
+            <b>Fecha Límite:</b> {{ contenedor.fecha_limite | date:'yyyy-MM-dd' }}
+          </div>
+
+          <!-- Tamaño -->
+          <div [ngClass]="{'faltante': !contenedor.tamano}">
+            <b>Tamaño:</b> {{ contenedor.tamano }}
+          </div>
+
+          <!-- Estado Contenedor -->
+          <div [ngClass]="{'faltante': !contenedor.estado_contenedor}">
+            <b>Estado Contenedor:</b> {{ contenedor.estado_contenedor }}
+          </div>
+
+          <!-- Naviera -->
+          <div [ngClass]="{'faltante': !contenedor.id_naviera}">
+            <b>Naviera:</b> {{ getNavieraNombre(contenedor.id_naviera) }}
+          </div>
+
+          <!-- Categoría -->
+          <div [ngClass]="{'faltante': !contenedor.id_categoria}">
+            <b>Categoría:</b> {{ contenedor.id_categoria }}
+          </div>
+
+          <!-- Año -->
+          <div [ngClass]="{'faltante': !contenedor.ano}">
+            <b>Año:</b> {{ contenedor.ano }}
+          </div>
+
+          <!-- Ubicación Devolución -->
+          <div [ngClass]="{'faltante': !contenedor.ubicacion_devolucion}">
+            <b>Ubicación Devolución:</b> {{ contenedor.ubicacion_devolucion }}
+          </div>
+
+          <!-- BL Madre -->
+          <div [ngClass]="{'faltante': !contenedor.bl_madre}">
+            <b>BL Madre:</b> {{ contenedor.bl_madre }}
+          </div>
+
+          <!-- Fecha Devolución -->
+          <div [ngClass]="{'faltante': !contenedor.fec_devolucion}">
+            <b>Fecha Devolución:</b> {{ contenedor.fec_devolucion | date:'yyyy-MM-dd' }}
+          </div>
+
+          <!-- Ciudad Origen -->
+          <div [ngClass]="{'faltante': !contenedor.id_ciudad_origen}">
+            <b>Ciudad Origen:</b> {{ getCiudadNombre(contenedor.id_ciudad_origen) }}
+          </div>
+
+          <div [ngClass]="{'faltante': !contenedor.id_ciudad_destino}">
+            <b>Ciudad Destino:</b> {{ getCiudadNombre(contenedor.id_ciudad_destino) }}
+          </div>
+
+          <!-- Observaciones -->
+          <div style="grid-column: span 2; white-space: pre-wrap; word-break: break-word;">
+            <b>Observaciones:</b> {{ contenedor.observaciones }}
+          </div>
+
+          <!-- Tipo Contenedor -->
+          <div [ngClass]="{'faltante': !contenedor.tipo_contenedor}">
+            <b>Tipo Contenedor:</b> {{ contenedor.tipo_contenedor }}
+          </div>
+          <div [ngClass]="{'faltante': !contenedor.id_asignacion_vehiculo_carga}"><b>Asignación Carga:</b> {{
+            getVehiculoNombre(contenedor.id_asignacion_vehiculo_carga) }}</div>
+          <div *ngIf="getNavieraNombre(contenedor.id_naviera) === 'MSC'"><b>Autorizado MSC:</b> {{
+            contenedor.autorizado? 'Sí' : 'No' }}</div>
+
+        </div>
+      </div>
+    </ng-template>
+  </p-dataView>
+</p-dialog>

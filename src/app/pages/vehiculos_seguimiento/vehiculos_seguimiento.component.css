@@ -1,0 +1,24 @@
+::ng-deep .fila-libre {
+  background-color: #e0ffe0 !important;
+}
+
+.card {
+  cursor: pointer;
+  border-radius: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+/* Hover: al pasar el mouse */
+.card:hover {
+  transform: translateY(-5px) scale(1.05);  /* levanta un poco la card */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  filter: brightness(1.1); /* aclara el color */
+}
+
+/* Active: cuando se hace click */
+.card:active {
+  transform: translateY(2px) scale(0.98); /* efecto de “presionar” */
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  filter: brightness(0.9); /* oscurece el color */
+}
+

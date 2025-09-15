@@ -11,37 +11,37 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  getUsuario() {
-    return this.http.get(`${URL_SERVICIOS}/usuario/usuarios`);
-  }
-
-  eliminarUsuario(id_usuario: number): Observable<any> {
-  const body = {
-    estado: 'INACTIVO',
-    usumod: 'prueba',
-    fecmod: new Date()
-  };
-  return this.http.put(`${URL_SERVICIOS}/usuario/eliminar/${id_usuario}`, body);
-}
-
-  editarUsuario(id_usuario: number, datos: any): Observable<any> {
-  return this.http.put(`${URL_SERVICIOS}/usuario/editar/${id_usuario}`, datos);
-}
-
-insertarUsuario(usuario: any): Observable<any> {
-  return this.http.post(`${URL_SERVICIOS}/usuario/crear_usuario`, usuario);
-}
-
   getTotal(): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/dashboard/total`);
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cliente/totales`);
   }
 
-  getTotalDeptoAprobado(): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/dashboard/totalDeptoAprobado`);
+  getClientes(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/clientes`);
   }
 
-  gettotalDeptoReprobado(): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/dashboard/totalDeptoReprobado`);
+  getMercancia(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/mercancias`);
   }
+
+  getNaviera(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/navieras`);
+  }
+
+  getCiudad(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/ciudades`);
+  }
+
+  getVehiculos(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/vehiculos`);
+  }
+
+  getDespachos(grupo: string, estado: string): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/despachos_estado/${grupo}/${estado}`);
+  }
+
+   getContenedores(estado: string): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/contenedores_estado/${estado}`);
+  }
+
   
 }

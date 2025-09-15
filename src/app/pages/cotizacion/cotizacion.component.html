@@ -76,7 +76,6 @@
               <label for="categoria_cliente">Categoría Cliente</label>
               <p-selectButton [options]="categoria_cliente" [(ngModel)]="cotizacionSeleccionada.categoria_cliente"
                 optionLabel="label" optionValue="value" [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="actualizarRazonSocial($event)"
                 [disabled]="!((cotizacionSeleccionada.modo_cliente == 'TERCERO' && cotizacionSeleccionada.tipo_cliente) || cotizacionSeleccionada.modo_cliente == 'CONSIGNATARIO')"
                 name="categoria_cliente" />
             </div>
@@ -87,16 +86,17 @@
                 <label>CONSIGNATARIO</label>
                 <!-- Nombre Empresa -->
                 <div class="col-12 md:col-6">
-                  <label for="razon_social">Nombre Empresa</label>
+                  <label for="nombre_comercial">Nombre Empresa</label>
                   <div class="divadd">
-                    <p-autoComplete class="input-full" name="razon_social"
-                      [(ngModel)]="cotizacionSeleccionada.razon_social" [suggestions]="filteredClientes"
+                    <p-autoComplete class="input-full" name="nombre_comercial"
+                      [(ngModel)]="cotizacionSeleccionada.nombre_comercial" [suggestions]="filteredClientes"
                       (completeMethod)="buscarClientes($event)" (onSelect)="clienteSeleccionado($event)"
-                      placeholder="Seleccione o escriba un cliente">
+                      placeholder="Seleccione o escriba un cliente"
+                      [disabled]="!cotizacionSeleccionada.categoria_cliente">
                     </p-autoComplete>
 
                     <button pButton type="button" icon="ri-adds-line" class="p-button-success p-button-sm"
-                      (click)="crearCliente()">
+                      (click)="crearCliente()" [disabled]="!cotizacionSeleccionada.categoria_cliente">
                       <i class="ri-add-line" style="font-size: 1.5rem;"></i>
                     </button>
                   </div>
@@ -113,15 +113,15 @@
                 <!-- Correo -->
                 <div class="col-12 md:col-6">
                   <label for="correo_contacto">Correo</label>
-                  <input pInputText id="correo_contacto" [(ngModel)]="cotizacionSeleccionada.correo_contacto" name="correo_contacto"
-                    [disabled]="true" />
+                  <input pInputText id="correo_contacto" [(ngModel)]="cotizacionSeleccionada.correo_contacto"
+                    name="correo_contacto" [disabled]="true" />
                 </div>
 
                 <!-- Telefono -->
                 <div class="col-12 md:col-6">
                   <label for="telefono_contacto">Telefono</label>
-                  <input pInputText id="telefono_contacto" [(ngModel)]="cotizacionSeleccionada.telefono_contacto" name="telefono_contacto"
-                    [disabled]="true" />
+                  <input pInputText id="telefono_contacto" [(ngModel)]="cotizacionSeleccionada.telefono_contacto"
+                    name="telefono_contacto" [disabled]="true" />
                 </div>
 
                 <!-- Ciudad -->
@@ -139,30 +139,38 @@
                 <label>CONTACTO</label>
                 <div class="col-12 md:col-6">
                   <label for="c_nombre_comercial">Nombre Empresa</label>
-                  <p-autoComplete name="c_nombre_comercial" [(ngModel)]="cotizacionSeleccionada.c_nombre_comercial"
-                    [suggestions]="filteredForwaders" (completeMethod)="buscarForwaders($event)"
-                    placeholder="Seleccione o escriba un cliente" (onSelect)="contactoSeleccionado($event)">
-                  </p-autoComplete>
+                  <div class="divadd">
+                    <p-autoComplete class="input-full" name="c_nombre_comercial"
+                      [(ngModel)]="cotizacionSeleccionada.c_nombre_comercial" [suggestions]="filteredForwaders"
+                      (completeMethod)="buscarForwaders($event)" placeholder="Seleccione o escriba un Contacto"
+                      (onSelect)="contactoSeleccionado($event)" [disabled]="!cotizacionSeleccionada.categoria_cliente">
+                    </p-autoComplete>
+                    <button pButton type="button" icon="ri-adds-line" class="p-button-success p-button-sm"
+                      (click)="crearForwader()" [disabled]="!cotizacionSeleccionada.categoria_cliente">
+                      <i class="ri-add-line" style="font-size: 1.5rem;"></i>
+                    </button>
+                  </div>
+
                 </div>
                 <!-- Nombre Encargado -->
                 <div class="col-12 md:col-6">
                   <label for="c_persona_contacto">Nombre Encargado</label>
-                  <input pInputText id="c_persona_contacto"
-                    [(ngModel)]="cotizacionSeleccionada.c_persona_contacto" name="c_persona_contacto" [disabled]="true" />
+                  <input pInputText id="c_persona_contacto" [(ngModel)]="cotizacionSeleccionada.c_persona_contacto"
+                    name="c_persona_contacto" [disabled]="true" />
                 </div>
 
                 <!-- Correo -->
                 <div class="col-12 md:col-6">
                   <label for="c_correo">Correo</label>
-                  <input pInputText id="c_correo" [(ngModel)]="cotizacionSeleccionada.c_correo"
-                    name="c_correo" [disabled]="true" />
+                  <input pInputText id="c_correo" [(ngModel)]="cotizacionSeleccionada.c_correo" name="c_correo"
+                    [disabled]="true" />
                 </div>
 
                 <!-- Celular -->
                 <div class="col-12 md:col-6">
                   <label for="c_telefono">Celular</label>
-                  <input pInputText id="c_telefono" [(ngModel)]="cotizacionSeleccionada.c_telefono"
-                    name="c_telefono" [disabled]="true" />
+                  <input pInputText id="c_telefono" [(ngModel)]="cotizacionSeleccionada.c_telefono" name="c_telefono"
+                    [disabled]="true" />
                 </div>
 
                 <!-- Ciudad -->
@@ -180,7 +188,7 @@
 
           <div class="d-flex justify-content-end mt-3">
             <button pButton label="Siguiente" (click)="nextStep()" style="width: auto;"
-              [disabled]="!cotizacionSeleccionada.razon_social" class="p-button-primary w-full md:w-auto"></button>
+              [disabled]="!cotizacionSeleccionada.nombre_comercial" class="p-button-primary w-full md:w-auto"></button>
           </div>
         </div>
       </div>
@@ -324,43 +332,38 @@
       <div *ngSwitchCase="2" class="mx-lg-4">
 
         <!-- Checkboxes -->
-        <div *ngSwitchCase="2" class="mx-lg-4">
-          <h3>Paso 3: Cotizar Flete</h3>
+        <h3>Paso 3: Cotizar Flete</h3>
 
-          <!-- Checkboxes uno encima del otro alineados a la izquierda -->
-          <div class="d-flex flex-column gap-2 mb-3">
-            <div class="d-flex flex-column">
-              <label for="devolucion" class="mb-1">Devolución</label>
-              <p-checkbox [(ngModel)]="cotizacionSeleccionada.devolucion" [binary]="true" inputId="devolucion"
-                name="devolucion">
-              </p-checkbox>
-            </div>
-
-            <!-- Gate In -->
-            <div class="d-flex flex-column mb-2">
-              <label for="gate_in" class="mb-1">Gate In</label>
-              <p-checkbox [(ngModel)]="cotizacionSeleccionada.gate_in" [binary]="true" inputId="gate_in" name="gate_in"
-                (onChange)="actualizarTotal()">
-              </p-checkbox>
-            </div>
-          </div>
-          <!-- Flete -->
-          <div class="p-2 w-100 mb-3 d-flex align-items-center gap-3">
-            <input pInputText type="number" id="flete" [(ngModel)]="cotizacionSeleccionada.flete" name="flete"
-              (input)="actualizarTotal()" style="flex: 1; max-width: 200px;" />
-
-            <span style="font-size: 1.2rem; font-weight: 600;">
-              Total: {{ total | number:'1.2-2' }} $.
-            </span>
+        <!-- Checkboxes centrados -->
+        <div class="d-flex flex-column gap-2 mb-3 align-items-center">
+          <div class="d-flex flex-column align-items-center">
+            <label for="devolucion" class="mb-1">Devolución</label>
+            <p-checkbox [(ngModel)]="cotizacionSeleccionada.devolucion" [binary]="true" inputId="devolucion"
+              name="devolucion">
+            </p-checkbox>
           </div>
 
-
-
-          <!-- Botón Ver Cotización -->
-          <div class="d-flex justify-content-start mb-3">
-            <button pButton label="Ver Cotización" class="p-button-secondary"></button>
+          <div class="d-flex flex-column align-items-center mb-2">
+            <label for="gate_in" class="mb-1">Gate In</label>
+            <p-checkbox [(ngModel)]="cotizacionSeleccionada.gate_in" [binary]="true" inputId="gate_in" name="gate_in"
+              (onChange)="actualizarTotal()">
+            </p-checkbox>
           </div>
+        </div>
 
+        <!-- Flete centrado -->
+        <div class="p-2 w-100 mb-3 d-flex flex-column align-items-center gap-2">
+          <input pInputText type="number" id="flete" [(ngModel)]="cotizacionSeleccionada.flete" name="flete"
+            (input)="actualizarTotal()" style="max-width: 200px;" />
+
+          <span style="font-size: 1.2rem; font-weight: 600;">
+            Total: {{ total | number:'1.2-2' }} $.
+          </span>
+        </div>
+
+        <!-- Botón centrado -->
+        <div class="d-flex justify-content-center mb-3">
+          <button pButton label="Ver Cotización" class="p-button-secondary" (click)="generarCotizacion()"></button>
         </div>
 
         <!-- Botones Anterior / Siguiente -->
@@ -380,10 +383,6 @@
             name="estado">
           </p-selectButton>
         </div>
-
-        <p-selectButton [options]="estado" [(ngModel)]="cotizacionSeleccionada.estado" optionLabel="label"
-          optionValue="value" [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
-          name="estado" />
         <br /><br />
         <div class="d-flex justify-content-between mt-3">
           <button pButton label="Anterior" class="p-button-secondary" (click)="prevStep()"></button>
@@ -418,13 +417,12 @@
 
 
 <!-- CREAR CLIENTE -->
-<p-dialog [(visible)]="dialogCliente" [modal]="true" [style]="{ width: '80%' }">
-  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+<p-dialog [(visible)]="dialogCliente" [modal]="true" [style]="{ width: '60%' }" header="Crear Nuevo Cliente">
+  <form (ngSubmit)="guardarCliente()" #form="ngForm">
     <div class="p-fluid p-grid p-formgrid">
       <div class="p-field p-col-6">
         <label for="nombre_comercial">Nombre Cliente</label>
-        <input pInputText id="nombre_comercial" [(ngModel)]="nuevoCliente.nombre_comercial"
-          name="nombre_comercial" />
+        <input pInputText id="nombre_comercial" [(ngModel)]="nuevoCliente.nombre_comercial" name="nombre_comercial" />
       </div>
 
       <div class="p-field p-col-4">
@@ -434,14 +432,12 @@
 
       <div class="p-field p-col-6">
         <label for="persona_contacto">Persona de Contacto</label>
-        <input pInputText id="persona_contacto" [(ngModel)]="nuevoCliente.persona_contacto"
-          name="persona_contacto" />
+        <input pInputText id="persona_contacto" [(ngModel)]="nuevoCliente.persona_contacto" name="persona_contacto" />
       </div>
-      
+
       <div class="p-field p-col-6">
-        <label for="correo_contacto">Correo Contado</label>
-        <input pInputText id="correo_contacto" [(ngModel)]="nuevoCliente.correo_contacto"
-          name="correo_contacto" />
+        <label for="correo_contacto">Correo Contacto</label>
+        <input pInputText id="correo_contacto" [(ngModel)]="nuevoCliente.correo_contacto" name="correo_contacto" />
       </div>
 
       <div class="p-field p-col-6">
@@ -457,13 +453,56 @@
 
       <div class="p-field p-col-6">
         <label for="ciudad">Ciudad</label>
-        <input pInputText id="ciudad" [(ngModel)]="nuevoCliente.ciudad" name="ciudad" />
+        <ng-select [items]="ciudades" bindLabel="label" bindValue="value" [(ngModel)]="nuevoCliente.ciudad"
+          [ngModelOptions]="{ standalone: true }" placeholder="Seleccione una ciudad">
+        </ng-select>
       </div>
     </div>
 
     <div class="p-dialog-footer">
       <button pButton type="submit" label="Guardar" class="p-button-success"></button>
-      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="dialogCliente = false"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary"
+        (click)="dialogCliente = false"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- CREAR CLIENTE -->
+<p-dialog [(visible)]="dialogForwader" [modal]="true" [style]="{ width: '60%' }" header="Crear Nuevo Forwader">
+  <form (ngSubmit)="guardarForwader()" #form="ngForm">
+    <div class="p-fluid p-grid p-formgrid">
+      <div class="p-field p-col-6">
+        <label for="nombre_comercial">Nombre Contacto</label>
+        <input pInputText id="nombre_comercial" [(ngModel)]="nuevoForwader.nombre_comercial" name="nombre_comercial" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="persona_contacto">Persona de Contacto</label>
+        <input pInputText id="persona_contacto" [(ngModel)]="nuevoForwader.persona_contacto" name="persona_contacto" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="correo_correocontacto">Correo Contacto</label>
+        <input pInputText id="correo" [(ngModel)]="nuevoForwader.correo" name="correo" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="telefono">Teléfono Contacto</label>
+        <input pInputText id="telefono" [(ngModel)]="nuevoForwader.telefono" name="telefono" />
+      </div>
+
+      <div class="p-field p-col-6">
+        <label for="ciudad">Ciudad</label>
+        <ng-select [items]="ciudades" bindLabel="label" bindValue="value" [(ngModel)]="nuevoForwader.ciudad"
+          [ngModelOptions]="{ standalone: true }" placeholder="Seleccione una ciudad">
+        </ng-select>
+      </div>
+    </div>
+
+    <div class="p-dialog-footer">
+      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary"
+        (click)="dialogForwader = false"></button>
     </div>
   </form>
 </p-dialog>

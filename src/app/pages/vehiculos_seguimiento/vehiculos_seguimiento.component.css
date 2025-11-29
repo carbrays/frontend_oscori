@@ -22,3 +22,28 @@
   filter: brightness(0.9); /* oscurece el color */
 }
 
+::ng-deep .p-dialog .p-dialog-header {
+  background: #0b5822;
+  color: #fff;
+  font-weight: bold;
+}
+
+::ng-deep .p-dialog .p-dialog-content {
+  padding-top: 1rem;
+}
+
+::ng-deep .p-datatable th {
+  text-align: center !important;
+}
+
+::ng-deep .p-datatable td {
+  text-align: center !important;
+}
+
+/* Cambiar color de la X a blanco */
+::ng-deep .p-dialog .p-dialog-header .p-dialog-header-icon {
+  color: #fff !important;        /* Blanco */
+  opacity: 1 !important;
+  font-size: 1.2rem !important;  /* Más grande */
+}
+

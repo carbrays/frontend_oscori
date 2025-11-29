@@ -3,20 +3,48 @@
           (click)="abrirNuevoContenedor()"></button>
 </div> -->
 
+<div class="d-flex gap-2">
+  <button pButton type="button" (click)="ordenarDatos()"
+    [label]="ordenAscendente ? 'Orden Ascendente' : 'Orden Descendente'"
+    [icon]="ordenAscendente ?  'ri-arrow-up-line' : 'ri-arrow-down-line'" class="p-button-sm">
+  </button>
+
+  <button pButton type="button" label="Limpiar filtros" icon="pi pi-filter-slash" class="p-button-sm"
+    (click)="limpiarFiltros()">
+  </button>
+
+  <button pButton type="button" [label]="mostrarTabla ? 'Ver como tabla' : 'Ver como tarjetas'"
+    [icon]="mostrarTabla ? 'pi pi-th-large' : 'pi pi-table'" class="p-button-sm" (click)="alternarVista()">
+  </button>
+</div>
+
 <div *ngIf="mostrarTabla" class="card p-3 mb-3 shadow-sm">
 
   <div class="form-grid mb-3">
 
-    <input type="text" id="filtroContenedor" pInputText [(ngModel)]="filtroContenedor" placeholder="Contenedor">
+    <p-autoComplete [(ngModel)]="contenedor" [suggestions]="contenedorFiltrados"
+      (completeMethod)="filtrarContenedores($event)" (onSelect)="filtroContenedor = $event" [dropdown]="true"
+      [showClear]="true" (onClear)="filtroContenedor = ''" [forceSelection]="false" placeholder="CONTENEDOR"
+      styleClass="w-150">
+    </p-autoComplete>
 
-    <input type="text" id="filtroCliente" pInputText [(ngModel)]="filtroCliente" placeholder="Cliente">
+    <p-autoComplete [(ngModel)]="clienteSeleccionado" [suggestions]="clientesFiltrados"
+      (completeMethod)="filtrarClientes($event)" (onSelect)="filtroCliente = $event.label" field="label"
+      [dropdown]="true" [showClear]="true" (onClear)="filtroCliente = ''" [forceSelection]="false" placeholder="CLIENTE"
+      styleClass="w-150">
+    </p-autoComplete>
 
-    <input type="text" id="filtroDeuda" pInputText [(ngModel)]="filtroDeuda" placeholder="Deuda">
-    <div class="col-md-4">
-      <label for="filtroDeuda">Deudas</label>
-      <ng-select [items]="opcionesDeudas" bindLabel="label" bindValue="value" [(ngModel)]="filtroDeuda"
-        [ngModelOptions]="{ standalone: true }" placeholder="Filtrar por deuda">
-      </ng-select>
+    <div *ngIf="gastosDeuda.length > 0" class="col-md-4">
+      <label for="filtroDeuda" class="mb-2 d-block">Deudas</label>
+
+      <div class="d-flex flex-wrap gap-2">
+        <ng-container *ngFor="let gasto of gastosDeuda">
+          <label class="btn btn-outline-secondary d-inline-flex" style="cursor: pointer; width: auto;"
+            (click)="getDeuda(gasto.tipo)">
+            {{ gasto.tipo }} - {{ gasto.sum }} Bs.
+          </label>
+        </ng-container>
+      </div>
     </div>
 
     <div class="col-md-4">
@@ -28,36 +56,7 @@
 
   </div>
 
-  <div class="d-flex gap-2">
-    <button pButton type="button" (click)="ordenarDatos()"
-      [label]="ordenAscendente ? 'Orden Ascendente' : 'Orden Descendente'"
-      [icon]="ordenAscendente ?  'ri-arrow-up-line' : 'ri-arrow-down-line'" class="p-button-sm">
-    </button>
-
-    <button pButton type="button" label="Limpiar filtros" icon="pi pi-filter-slash" class="p-button-sm"
-      (click)="limpiarFiltros()">
-    </button>
-
-    <button pButton type="button" [label]="mostrarTabla ? 'Ver como tarjetas' : 'Ver como tabla'"
-      [icon]="mostrarTabla ? 'pi pi-th-large' : 'pi pi-table'" class="p-button-sm" (click)="alternarVista()">
-    </button>
-  </div>
-
 </div>
-
-<div *ngIf="gastosDeuda.length > 0" class="mt-3">
-
-  <h5>DEUDAS</h5>
-  <div class="d-flex justify-content align-items-start mb-2">
-    <ng-container *ngFor="let gasto of gastosDeuda">
-      <label class="btn btn-outline-secondary d-inline-flex" style="cursor: pointer; width: auto;">
-        {{ gasto.tipo }} - {{ gasto.sum }} Bs.
-      </label>
-    </ng-container>
-  </div>
-
-</div>
-
 
 
 <p-table *ngIf="!mostrarTabla" [value]="contenedoresFiltrados" [tableStyle]="{ 'min-width': '80rem' }"
@@ -160,9 +159,10 @@
 </p-table>
 
 
-<p-dataView *ngIf="mostrarTabla" [value]="contenedoresFiltrados" layout="list" [rows]="5">
+<p-dataView *ngIf="mostrarTabla" [value]="contenedoresFiltrados" layout="list">
   <ng-template let-contenedor let-index="rowIndex" pTemplate="listItem">
-    <div id="contenedor-{{index}}" class="p-3 border rounded mb-3 shadow-sm" [ngClass]="estiloFila(contenedor.fecha_limite, contenedor.estado)">
+    <div id="contenedor-{{index}}" class="p-3 border rounded mb-3 shadow-sm"
+      [ngClass]="estiloFila(contenedor.fecha_limite, contenedor.estado)">
       <div class="d-flex justify-content-between align-items-start mb-2">
         <!-- Columna Izquierda: Textos uno encima del otro -->
         <div>
@@ -172,27 +172,56 @@
         </div>
 
         <!-- Columna Derecha: Botones lado a lado -->
-        <div class="d-flex align-items-center gap-2">
-          <div class="text-primary fs-5">
-            <b>ESTADO:</b> {{ contenedor.estado }}
-          </div>
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="text-primary fs-5">
+              <b>ESTADO:</b> {{ contenedor.estado }}
+            </div>
 
-          <button class="btn btn-sm btn-outline-info" (click)="editarContenedor(contenedor)">
-            <i class="pi pi-pencil"></i> Editar
-          </button>
-          <!-- <button class="btn btn-sm btn-outline-danger" (click)="eliminarContenedor(contenedor)">
+            <button class="btn btn-sm btn-outline-info" (click)="editarContenedor(contenedor)">
+              <i class="pi pi-pencil"></i> Editar
+            </button>
+            <!-- <button class="btn btn-sm btn-outline-danger" (click)="eliminarContenedor(contenedor)">
             <i class="pi pi-trash"></i> Eliminar
           </button> -->
-          <button class="btn btn-sm btn-outline-success" (click)="generarImagenContenedor(contenedor, index)">
-            <i class="pi pi-trash"></i> Imprimir
-          </button>
-        </div>
+            <button class="btn btn-sm btn-outline-success" (click)="generarImagenContenedor(contenedor, index)">
+              <i class="pi pi-trash"></i> Imprimir
+            </button>
 
+          </div>
+          <div *ngIf="contenedor.estado !== 'DEVUELTO'" [ngClass]="{'nofaltante': calcularDiasRestantes(contenedor.fecha_limite) >= 0,
+          'faltante': contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_limite) < 0}" class="fs-4">
+            
+            <span *ngIf="calcularDiasRestantes(contenedor.fecha_limite) >= 0">
+              Faltan {{ calcularDiasRestantes(contenedor.fecha_limite) }} días
+            </span>
+            <span *ngIf="contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_limite) < 0">
+              Vencido hace {{ calcularDiasRestantes(contenedor.fecha_limite) * -1 }} días
+            </span>
+            <span *ngIf="contenedor.estado === 'DEVUELTO'">Entregado</span>
+          </div>
+
+          <div *ngIf="contenedor.fecha_devolucion_naviera && contenedor.estado !== 'DEVUELTO'" [ngClass]="{'nofaltante': calcularDiasRestantes(contenedor.fecha_devolucion_naviera) >= 0,
+          'faltante': contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_devolucion_naviera) < 0}" class="fs-4">
+            <b>Naviera:</b>
+            <span *ngIf="calcularDiasRestantes(contenedor.fecha_devolucion_naviera) >= 0">
+              Faltan {{ calcularDiasRestantes(contenedor.fecha_devolucion_naviera) }} días
+            </span>
+            <span *ngIf="contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_devolucion_naviera) < 0">
+              Vencido hace {{ calcularDiasRestantes(contenedor.fecha_devolucion_naviera) * -1 }} días
+            </span>
+            <span *ngIf="contenedor.estado === 'DEVUELTO'">Entregado</span>
+          </div>
+        </div>
       </div>
 
       <hr class="my-1" />
       <!-- Contenedor Grid -->
       <div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px;">
+
+        <div [ngClass]="{'faltante': !contenedor.id_tipo_carga}">
+          <b>Tipo Carga:</b> {{ contenedor.id_tipo_carga }}
+        </div>
 
         <!-- Fecha Llegada -->
         <div [ngClass]="{'faltante': !contenedor.fecha_llegada}">
@@ -202,18 +231,6 @@
         <!-- Mercancía -->
         <div [ngClass]="{'faltante': !contenedor.id_mercancia}">
           <b>Mercancía:</b> {{ getMercanciaNombre(contenedor.id_mercancia) }}
-        </div>
-
-        <!-- Días -->
-        <div style="grid-column: span 1;">
-          <b>Días:</b>
-          <span *ngIf="calcularDiasRestantes(contenedor.fecha_limite) >= 0">
-            Faltan {{ calcularDiasRestantes(contenedor.fecha_limite) }} días
-          </span>
-          <span *ngIf="contenedor.estado != 'DEVUELTO' && calcularDiasRestantes(contenedor.fecha_limite) < 0">
-            Vencido hace {{ calcularDiasRestantes(contenedor.fecha_limite) * -1 }} días
-          </span>
-          <span *ngIf="contenedor.estado === 'DEVUELTO'">Entregado</span>
         </div>
 
         <!-- Fecha Límite -->
@@ -281,8 +298,11 @@
         </div>
         <div [ngClass]="{'faltante': !contenedor.id_asignacion_vehiculo_carga}"><b>Asignación Carga:</b> {{
           getVehiculoNombre(contenedor.id_asignacion_vehiculo_carga) }}</div>
-        <div *ngIf="getNavieraNombre(contenedor.id_naviera) === 'MSC'"><b>Autorizado MSC:</b> {{ contenedor.autorizado? 'Sí' : 'No' }}</div>
-
+        <div *ngIf="getNavieraNombre(contenedor.id_naviera) === 'MSC'"><b>Autorizado MSC:</b> {{ contenedor.autorizado?
+          'Sí' : 'No' }}</div>
+        <div>
+          <b>Fecha Devolución Naviera:</b> {{ contenedor.fecha_devolucion_naviera | date:'yyyy-MM-dd' }}
+        </div>
       </div>
       <hr class="my-1" />
 
@@ -410,12 +430,19 @@
          dateFormat="yy-mm-dd" [showIcon]="true"
           [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
       </div> -->
+        <div class="p-1 flex-fill" style="min-width: 250px;">
+          <label for="fecha_devolucion_naviera">Fecha Devolución Naviera</label>
+          <p-calendar inputId="fecha_devolucion_naviera" [(ngModel)]="contenedorSeleccionado.fecha_devolucion_naviera"
+            name="fecha_devolucion_naviera" dateFormat="yy-mm-dd" [showIcon]="true"
+            [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+        </div>
 
         <div class="p-field p-col-12">
           <label for="observaciones">Observaciones</label>
           <textarea pInputTextarea id="observaciones" rows="3" [(ngModel)]="contenedorSeleccionado.observaciones"
             name="observaciones"></textarea>
         </div>
+
       </div>
 
       <hr class="my-2" />
@@ -466,8 +493,8 @@
 
         <div class="p-2 flex-fill d-flex flex-column align-items-center">
           <label for="tiene_reparacion_contenedor" class="mb-1">Reparación Contenedor</label>
-          <p-checkbox [(ngModel)]="contenedorSeleccionado.tiene_reparacion_contenedor" [binary]="true" inputId="tiene_reparacion_contenedor"
-            name="tiene_reparacion_contenedor">
+          <p-checkbox [(ngModel)]="contenedorSeleccionado.tiene_reparacion_contenedor" [binary]="true"
+            inputId="tiene_reparacion_contenedor" name="tiene_reparacion_contenedor">
           </p-checkbox>
         </div>
 
@@ -478,30 +505,6 @@
           (click)="popupVisible = false"></button>
       </div>
     </form>
-
-    <!-- <div style="flex: 1; height: 600px; border: 1px solid #ccc;">
-  <ng-container *ngFor="let pdf of pdfs">
-    <label
-      class="btn btn-sm"
-      [ngClass]="
-        'btn-success'
-      "
-      style="cursor: pointer;"
-      for="file-{{contenedorSeleccionado.id_despacho}}-BL"
-      title="Subir bl"
-      (click)="verPdfs(contenedorSeleccionado.id_despacho, pdf)"
-    >
-      {{ pdf.nombre }}
-    </label>
-  </ng-container>
-      <ngx-doc-viewer
-        [url]="urlPdf(contenedorSeleccionado.id_despacho)"
-        viewer="url"
-        style="width:100%;height:100%;"
-        filename="contenedorSeleccionado.id_despacho+ '.pdf'"
-        disabledDownload="false">
-      </ngx-doc-viewer> -->
-    <!-- </div> -->
   </div>
 
 </p-dialog>
@@ -519,7 +522,7 @@
           <th>Fecha Pago</th>
           <th>Modalidad Pago</th>
           <th>Persona Pago</th>
-          <!-- <th>Boucher</th> -->
+          <th>Comprobante</th>
           <th>Acciones</th>
         </tr>
       </ng-template>
@@ -560,14 +563,21 @@
           <td>
             <input type="text" pInputText [(ngModel)]="gasto.persona_pago" placeholder="Persona que pagó" />
           </td>
-          <!-- <td>
-          <button class="btn btn-sm btn-outline-secondary me-2" (click)="verImagenes(contenedor)">
-      <i class="pi pi-pencil"></i> FOTOS
-    </button>
-</td> -->
+          <!-- Comprobante -->
+          <td>
+            <button class="btn btn-sm" [ngClass]="{
+                'btn-success': gasto.archivos?.length > 0,
+                'btn-outline-danger': !(gasto.archivos?.length > 0)
+                }"
+              (click)="gasto.archivos?.length > 0 ? verComprobante(gasto.archivos[0]) : gasto.modalidad_pago == 'AL CONTADO' ? generarComprobante(gasto) : subirComprobante(gasto)">
+              <i class="pi" [ngClass]="gasto.archivos?.length > 0 ? 'pi-eye' : 'pi-upload'"></i>
+              {{ gasto.archivos?.length > 0 ? 'Ver' : gasto.modalidad_pago == 'AL CONTADO' ? 'Generar' : 'Subir' }}
+            </button>
+          </td>
           <!-- Eliminar -->
           <td>
-            <button pButton icon="pi pi-trash" class="p-button-danger p-button-sm" (click)="eliminarGasto(rowIndex)">
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminarGasto(rowIndex)">
+              <i class="pi pi-trash"></i> Eliminar
             </button>
           </td>
         </tr>
@@ -580,6 +590,23 @@
     </div>
   </div>
 
+</p-dialog>
+
+<p-dialog header="Vista previa del recibo" [(visible)]="mostrarVistaPreviaRecibo" [modal]="true"
+  [style]="{ width: '500px' }">
+  <ng-container *ngIf="pdfSrc; else cargandoPDF">
+    <iframe [src]="pdfSrc" width="100%" height="500px" style="border: none;"></iframe>
+  </ng-container>
+
+  <ng-template #cargandoPDF>
+    <p>Cargando recibo...</p>
+  </ng-template>
+
+  <div class="flex justify-content-end gap-2 mt-3">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
+      (click)="mostrarVistaPreviaRecibo = false"></button>
+    <button pButton label="Subir recibo" icon="pi pi-upload" (click)="subirReciboPDF()"></button>
+  </div>
 </p-dialog>
 
 <p-dialog header="Devolución" [(visible)]="mostrarDevolucion" [modal]="true" [style]="{ width: '80%' }">
@@ -617,9 +644,10 @@
 
           <!-- Eliminar -->
           <td>
-            <button pButton icon="pi pi-trash" class="p-button-danger p-button-sm"
-              (click)="eliminarDevolucion(rowIndex)">
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminarDevolucion(rowIndex)">
+              <i class="pi pi-trash"></i> Eliminar
             </button>
+
           </td>
         </tr>
       </ng-template>
@@ -640,7 +668,7 @@
     <!-- Grupo 1: Botón al centro -->
     <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
       <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
-        <p class="mb-2 font-semibold" style="font-size: 25px;">CONTENEDOR 1</p>
+        <p class="mb-2 font-semibold" style="font-size: 25px;">CONTENEDOR: {{ contenedorSeleccionado.numero_contenedor }}</p>
       </div>
     </div>
     <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
@@ -717,7 +745,6 @@
   <div class="p-dialog-footer mt-3">
     <button pButton type="button" label="+ Agregar" class="p-button-secondary"
       (click)=" abrirSelectorArchivo(contenedorSeleccionado)"></button>
-
   </div>
 
 </p-dialog>
@@ -731,4 +758,32 @@
     </div>
   </div>
 
+</p-dialog>
+
+<p-dialog [(visible)]="cropperVisible" [modal]="true" [style]="{ width: '80%' }" [closable]="false"
+  header="Recortar Imagen">
+  <div style="display: grid; grid-template-columns: 1fr 250px; gap: 16px;">
+    <div> <image-cropper [imageChangedEvent]="imagenOriginal" [maintainAspectRatio]="false" [resizeToWidth]="800"
+        [cropperMinWidth]="100" [cropperMinHeight]="100" [roundCropper]="false" format="jpeg"
+        (imageCropped)="imageCropped($event)"></image-cropper></div>
+    <div>
+      <div class="text-center" *ngIf="imagenRecortada">
+        <h4>Vista previa:</h4>
+        <img [src]="imagenRecortada" style="max-width: 250px; border: 1px solid #ccc;">
+      </div>
+      <div class="flex justify-content-center gap-2 mt-3">
+        <button pButton label="Guardar" icon="pi pi-check" class="p-button-success"
+          (click)="guardarImagenRecortada()"></button>
+        <button pButton label="Cancelar" icon="pi pi-times" class="p-button-danger" (click)="cerrarCropper()"></button>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-column gap-2">
+
+
+
+
+
+
+  </div>
 </p-dialog>

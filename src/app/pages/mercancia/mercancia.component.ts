@@ -59,7 +59,7 @@ export class MercanciaComponent implements OnInit {
 
   eliminarMercancia(mercancia: any): void {
     Swal.fire({
-      title: `¿Eliminar la mercancía con ID "${mercancia.id_mercancia}"?`,
+      title: `¿Eliminar la mercancía: "${mercancia.mercancia}"?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',

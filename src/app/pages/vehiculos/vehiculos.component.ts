@@ -15,10 +15,9 @@ export class VehiculosComponent implements OnInit {
   modoEdicion = false;
   tituloPopup = 'Vehículo';
 
-  estados = [
-    { label: 'Activo', value: 'ACTIVO' },
-    { label: 'Inactivo', value: 'INACTIVO' },
-    { label: 'Anulado', value: 'ANULADO' }
+  tipo = [
+    { label: 'PROPIO', value: 'PROPIO' },
+    { label: 'APOYO', value: 'APOYO' }
   ];
 
   filtroPlaca: string = '';
@@ -33,12 +32,34 @@ export class VehiculosComponent implements OnInit {
   filtroVolumen: string = '';
   filtroCombustible: string = '';
   filtroKilometraje: string = '';
-  filtroEstado: string = '';
+  filtroConductor: string = '';
+
+  conductores: { label: string; value: number }[] = [];
 
   constructor(private vehiculoService: VehiculosService) { }
 
   ngOnInit(): void {
+    this.obtenerConductores();
     this.obtenerListado();
+  }
+
+  obtenerConductores(): void {
+    this.vehiculoService.getConductores().subscribe({
+      next: (data) => {
+        this.conductores = data.map((conductor) => ({
+          label: conductor.nombre,
+          value: conductor.id_usuario,
+        }));
+      },
+      error: (err) => {
+        console.error('Error al cargar conductores', err);
+      },
+    });
+  }
+
+  getConductor(id: number): string {
+    const conductor = this.conductores.find((v) => v.value === id);
+    return conductor ? conductor.label : 'Sin nombre';
   }
 
   obtenerListado(): void {
@@ -68,7 +89,14 @@ export class VehiculosComponent implements OnInit {
       foto: '',
       estado: 'ACTIVO',
       usucre: localStorage.getItem('login'),
-      feccre: new Date()
+      feccre: new Date(),
+      conductor: null,
+      nombre: '',
+      paterno: '',
+      materno: '',
+      ci: null,
+      telefono: '',
+      direccion: ''      
     };
     this.tituloPopup = 'Nuevo Vehículo';
     this.popupVisible = true;
@@ -153,7 +181,7 @@ export class VehiculosComponent implements OnInit {
       const volumenStr = v.volumen_carga_m3?.toString().toLowerCase() || '';
       const combustibleStr = v.tipo_combustible?.toString().toLowerCase() || '';
       const kmStr = v.kilometraje?.toString().toLowerCase() || '';
-      const estadoStr = v.despachos_en_proceso?.toString().toLowerCase() || '';
+      const conductorStr = v.conductor ? this.getConductor(v.conductor).toString().toLowerCase() || '' : v.nombre ? v.nombre.toString().toLowerCase() + ' ' + v.paterno.toString().toLowerCase() + ' ' + v.materno.toString().toLowerCase() || '' : '';
 
       return (
         placaStr.includes(this.filtroPlaca.toLowerCase()) &&
@@ -168,7 +196,7 @@ export class VehiculosComponent implements OnInit {
         volumenStr.includes(this.filtroVolumen.toLowerCase()) &&
         combustibleStr.includes(this.filtroCombustible.toLowerCase()) &&
         kmStr.includes(this.filtroKilometraje.toLowerCase()) &&
-        estadoStr.includes(this.filtroEstado.toLowerCase())
+        conductorStr.includes(this.filtroConductor.toLowerCase())
       );
     });
   }
@@ -186,7 +214,7 @@ export class VehiculosComponent implements OnInit {
     this.filtroVolumen = '';
     this.filtroCombustible = '';
     this.filtroKilometraje = '';
-    this.filtroEstado = '';
+    this.filtroConductor = '';
   }
 }
 

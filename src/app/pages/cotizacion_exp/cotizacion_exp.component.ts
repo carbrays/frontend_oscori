@@ -1,22 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { CotizacionService } from 'src/app/services/cotizacion/cotizacion.service';
+import { Cotizacion_ExpService } from 'src/app/services/cotizacion_exp/cotizacion_exp.service';
 import Swal from 'sweetalert2';
-
-import axios from 'axios';
-import { URL_SERVICIOS } from 'src/app/config/config';
 
 import { MenuItem } from 'primeng/api';
 
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
 (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
-  selector: 'app-cotizacion',
-  templateUrl: './cotizacion.component.html',
-  styleUrls: ['./cotizacion.component.css'],
+  selector: 'app-cotizacion_exp',
+  templateUrl: './cotizacion_exp.component.html',
+  styleUrls: ['./cotizacion_exp.component.css'],
 })
-export class CotizacionComponent implements OnInit {
+export class Cotizacion_ExpComponent implements OnInit {
 
   steps: MenuItem[] = [];
   activeIndex: number = 0;
@@ -29,7 +27,6 @@ export class CotizacionComponent implements OnInit {
 
   ciudades: { label: string; value: number }[] = [];
   navieras: { label: string; value: number, gate_in: number, dias: number, url: string }[] = [];
-  mercancias: { label: string; value: number }[] = [];
   clientes: { value: number, nombre_comercial: string; persona_contacto: string, telefono_contacto: string, correo_contacto: string, ciudad: number }[] = [];
   forwaders: { label: string; value: number, razon_social: string, correo: string, telefono: string, ciudad: string }[] = [];
 
@@ -51,61 +48,15 @@ export class CotizacionComponent implements OnInit {
 
   ];
 
-  tipo_documento = [
-    { label: 'BL', value: 'BL' },
-    { label: 'DATOS REFERENCIALES', value: 'DATOS REFERENCIALES' }
-  ];
-
-  tipo_bl = [
-    { label: 'MBL', value: 'MBL' },
-    { label: 'HBL', value: 'HBL' },
-    { label: 'NBL', value: 'NBL' }
-  ];
-
   tipo_carga = [
     { label: 'DESCONSOLIDADO', value: 'DESCONSOLIDADO' },
     { label: 'CARGA SUELTA', value: 'CARGA_SUELTA' },
     { label: 'CONTENEDOR', value: 'CONTENEDOR' },
   ];
 
-  tipo_despacho_portuario = [
-    { label: 'DIRECTO', value: 'DIRECTO' },
-    { label: 'INDIRECTO ANTICIPADO', value: 'INDIRECTO ANTICIPADO' },
-    { label: 'INDIRECTO', value: 'INDIRECTO' },
-  ];
-
-  tipo_despacho_aduanero = [
-    { label: 'GENERAL', value: 'GENERAL' },
-    { label: 'ANTICIPADO', value: 'ANTICIPADO' },
-    { label: 'INMEDIATO', value: 'INMEDIATO' },
-  ];
   estado = [
     { label: 'ACEPTADO', value: 'ACEPTADO' },
     { label: 'RECHAZADO', value: 'RECHAZADO' }
-  ];
-
-  documentosRequeridosArica = [
-    { id: 'BL', nombre: 'BL' },
-    { id: 'FACTURA_COMERCIAL', nombre: 'FACTURA COMERCIAL' },
-    { id: 'LISTA_EMPAQUE', nombre: 'LISTA EMPAQUE' },
-    { id: 'DAM', nombre: 'DAM' },
-    { id: 'DIM', nombre: 'DIM' },
-    { id: 'GOC_ASPB', nombre: 'GOC ASPB' },
-    { id: 'PERMISOS', nombre: 'PERMISOS' },
-    { id: 'LIBERACION', nombre: 'LIBERACION' },
-  ];
-
-  documentosRequeridosIquique = [
-    { id: 'BL', nombre: 'BL' },
-    { id: 'FACTURA_COMERCIAL', nombre: 'FACTURA COMERCIAL' },
-    { id: 'LISTA_EMPAQUE', nombre: 'LISTA EMPAQUE' },
-    { id: 'DAM', nombre: 'DAM' },
-    { id: 'DIM', nombre: 'DIM' },
-    { id: 'CERTIFICADO_COSTO_0_ITI', nombre: 'COSTO 0 ITI' },
-    { id: 'PERMISOS', nombre: 'PERMISOS' },
-    { id: 'LIBERACION', nombre: 'LIBERACION' },
-    { id: 'DRESS', nombre: 'DRESS' },
-    { id: 'CONVENIO_ITI', nombre: 'CONVENIO ITI' },
   ];
 
   camion = [
@@ -147,22 +98,12 @@ export class CotizacionComponent implements OnInit {
   dialogForwader: boolean = false;
   nuevoForwader: any = {};
 
-  dialogMercancia: boolean = false;
-  nuevaMercancia: any = {};
-
   filtroCliente: string = '';
   cliente: any = null;
   clientesFiltrados: any[] = [];
   opcionesClientes: { label: string; value: number }[] = [];
 
-  bloquearOrigen = false;
-
-  contenedorVisible = false;
-  contenedores: any[] = [];
-  contenedorActual: any = {};
-  editIndex: any = null;
-
-  constructor(private cotizacionService: CotizacionService) { }
+  constructor(private cotizacionService: Cotizacion_ExpService) { }
 
   ngOnInit(): void {
     this.steps = [
@@ -174,7 +115,6 @@ export class CotizacionComponent implements OnInit {
     this.obtenerClientes();
     this.obtenerCiudades();
     this.obtenerNavieras();
-    this.obtenerMercancias();
     this.obtenerForwaders();
     this.obtenerListado();
   }
@@ -221,24 +161,18 @@ export class CotizacionComponent implements OnInit {
       c_correo: '',
       c_telefono: '',
       c_ciudad: null,
-      tipo_documento: '',
-      tipo_bl: '',
-      numero_bl: '',
+      mercancia: '',
+      crt: '',
       id_tipo_carga: null,
-      // numero_contenedor: '',
-      // tamano: '',
-      // peso_kg: '',
-      // id_mercancia: null,
-      // embalaje: '',
-      // volumen_m3: null,
+      numero_contenedor: '',
+      tamano: '',
+      peso_kg: '',
       id_naviera: null,
-      fecha_llegada: null,
+      fecha_carga: null,
+      fecha_descarga: null,
+      fecha_stack: null,
       id_ciudad_origen: null,
       id_ciudad_destino: null,
-      id_despacho_aduanero: '',
-      lugar_descarga: '',
-      id_despacho_portuario: '',
-      devolucion: false,
       gate_in: false,
       flete: null,
       estado: '',
@@ -247,10 +181,7 @@ export class CotizacionComponent implements OnInit {
       usumod: null,
       fecmod: null,
       categoria_cliente: '',
-      observacion: '',
-      fecha_limite: null,
-      camion: '',
-      contenedores: '[]'
+      observacion: ''
     };
 
     this.cotizacionInicial = JSON.parse(JSON.stringify(this.cotizacionSeleccionada));
@@ -270,7 +201,6 @@ export class CotizacionComponent implements OnInit {
       console.log('Editando cotización existente');
       this.cotizacionSeleccionada.usumod = localStorage.getItem('login');
       this.cotizacionSeleccionada.fecmod = new Date();
-      this.cotizacionSeleccionada.contenedores = JSON.stringify(this.contenedores);
       this.cotizacionService
         .editarCotizacion(
           this.cotizacionSeleccionada.id_cotizacion,
@@ -313,16 +243,14 @@ export class CotizacionComponent implements OnInit {
   }
 
   editarCotizacion(cotizacion: any): void {
-    this.cotizacionSeleccionada = {
-      ...cotizacion, fecha_llegada: cotizacion.fecha_llegada ? new Date(cotizacion.fecha_llegada) : null,
-      fecha_limite: cotizacion.fecha_limite ? new Date(cotizacion.fecha_limite) : null
-    };
-    this.contenedores = this.cotizacionSeleccionada.contenedores;
+    this.cotizacionSeleccionada = { ...cotizacion, fecha_carga: cotizacion.fecha_carga ? new Date(cotizacion.fecha_carga) : null,
+    fecha_descarga: cotizacion.fecha_descarga ? new Date(cotizacion.fecha_descarga) : null,
+    fecha_stack: cotizacion.fecha_stack ? new Date(cotizacion.fecha_stack) : null
+     };
     this.actualizarTipoCliente(this.cotizacionSeleccionada.modo_cliente);
     this.actualizarTipoCarga(this.cotizacionSeleccionada.id_tipo_carga);
     this.actualizarGateIn(this.cotizacionSeleccionada.id_naviera);
     this.actualizarTotal();
-    this.actualizarOrigen(this.cotizacionSeleccionada.id_ciudad_origen);
     this.mostrarFormulario = true;
     this.modoEdicion = true;
   }
@@ -391,10 +319,6 @@ export class CotizacionComponent implements OnInit {
     this.cotizacionService.getCotizaciones().subscribe({
       next: (data) => {
         this.cotizaciones = data;
-        this.cotizaciones.forEach(cotizacion => {
-          cotizacion.contenedores = JSON.parse(cotizacion.contenedores || '[]');
-        });
-
         console.log('Cotizaciones cargadas:', this.cotizaciones);
       },
       error: (err) =>
@@ -450,25 +374,6 @@ export class CotizacionComponent implements OnInit {
   getNavieraUrl(id: number): string {
     const naviera = this.navieras.find((n) => n.value === id);
     return naviera ? naviera.url : 'Sin URL';
-  }
-
-  obtenerMercancias(): void {
-    this.cotizacionService.getMercancia().subscribe({
-      next: (data) => {
-        this.mercancias = data.map((mercancia) => ({
-          label: mercancia.mercancia,
-          value: mercancia.id_mercancia,
-        }));
-        console.log('Mercancías cargadas:', this.mercancias);
-      },
-      error: (err) => {
-        console.error('Error al cargar mercancías:', err);
-      },
-    });
-  }
-  getMercanciaNombre(id: number): string {
-    const mercancia = this.mercancias.find((m) => m.value === id);
-    return mercancia ? mercancia.label : 'Sin nombre';
   }
 
   obtenerForwaders(): void {
@@ -554,13 +459,6 @@ export class CotizacionComponent implements OnInit {
     }
   }
 
-  clienteLimpio() {
-    this.cotizacionSeleccionada.persona_contacto = '';
-    this.cotizacionSeleccionada.telefono_contacto = '';
-    this.cotizacionSeleccionada.correo_contacto = '';
-    this.cotizacionSeleccionada.ciudad = null;
-  }
-
   actualizarTipoCliente(modo_cliente: string) {
     console.log('Actualizando tipo de cliente a:', modo_cliente);
     switch (modo_cliente) {
@@ -601,70 +499,6 @@ export class CotizacionComponent implements OnInit {
     const gateIn = Number(this.cotizacionSeleccionada.gate_in ? this.valorGateIn : 0);
 
     this.total = flete + gateIn;
-  }
-
-  async generarPDF() {
-    const logoBase64 = await this.loadBase64Image('assets/images/logo.png');
-    const fecha = new Date().toLocaleDateString();
-
-    const docDefinition: any = {
-      pageSize: 'LETTER', // Carta vertical
-      pageMargins: [40, 60, 40, 60],
-      content: [
-        {
-          image: logoBase64,
-          width: 100,
-          alignment: 'left'
-        },
-        { text: 'COTIZACIÓN', style: 'header', alignment: 'center' },
-        { text: `Cliente: ${this.getClienteNombre(this.cotizacionSeleccionada.nombre_comercial)}`, style: 'subheader' },
-        { text: `Fecha: ${fecha}`, style: 'subheader', margin: [0, 0, 0, 20] },
-
-        {
-          table: {
-            widths: ['*', 'auto'],
-            body: [
-              [
-                { text: 'Servicio', style: 'tableHeader' },
-                { text: 'Monto (USD)', style: 'tableHeader' }
-              ],
-              ["FLETE", this.cotizacionSeleccionada.flete]
-            ]
-          }
-        }
-      ],
-      styles: {
-        header: { fontSize: 18, bold: true, margin: [0, 10, 0, 20] },
-        subheader: { fontSize: 12, margin: [0, 5, 0, 5] },
-        tableHeader: { bold: true, fontSize: 12, fillColor: '#eeeeee' }
-      }
-    };
-
-    const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-    pdfDocGenerator.getBlob((blob: Blob) => {
-      this.pdfSrc = URL.createObjectURL(blob);
-      this.mostrarPDF = true;
-    });
-  }
-
-  loadBase64Image(url: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = url;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL('image/png'));
-        } else {
-          reject('Error al convertir imagen');
-        }
-      };
-    });
   }
 
   //CLIENTE
@@ -734,62 +568,11 @@ export class CotizacionComponent implements OnInit {
     });
   }
 
-  //MERCANCIA
-  crearMercancia() {
-    this.nuevaMercancia = {
-      mercancia: '',
-      descripcion: '',
-      usucre: localStorage.getItem('login'),
-      feccre: new Date()
-    };
-    this.dialogMercancia = true;
-  }
-
-  guardarMercancia() {
-    this.cotizacionService.insertarMercancia(this.nuevaMercancia).subscribe({
-      next: () => {
-        this.dialogMercancia = false;
-        this.obtenerMercancias();
-        Swal.fire('Insertado', 'Mercancia creada correctamente', 'success');
-      },
-      error: err => {
-        console.error('Error al insertar cliente:', err);
-        Swal.fire('Error', 'No se pudo insertar el cliente.', 'error');
-      }
-    });
-  }
-
   async generarCotizacion() {
     const c = this.cotizacionSeleccionada;
     const hojaMembrete = 'assets/images/membretado.jpg';
 
     const fondoBase64 = await this.getBase64ImageFromURL(hojaMembrete);
-
-    const tablasContenedores = this.contenedores.map((c, index) => ([
-      // ⭐ Título del contenedor
-      {
-        text: `Contenedor ${index + 1}`,
-        style: 'tituloContenedor',
-        margin: [0, 10, 0, 5]
-      },
-
-      // ⭐ Tabla del contenedor
-      {
-        style: 'tablaContenedor',
-        table: {
-          widths: ['30%', '70%'],
-          body: [
-            ['Número de Contenedor', c.numero_contenedor || ''],
-            ['Tamaño', c.tamano || ''],
-            ['Peso (kg)', c.peso_kg || ''],
-            ['Mercancía', this.getMercanciaNombre(c.id_mercancia) || ''],
-            ['Embalaje', c.embalaje || ''],
-            ['Volumen (m3)', c.volumen_m3 || '']
-          ]
-        },
-        margin: [0, 0, 0, 10]
-      }
-    ]));
 
     const docDefinition: any = {
       background: function (_currentPage: number) {
@@ -847,17 +630,17 @@ export class CotizacionComponent implements OnInit {
           table: {
             widths: ['30%', '70%'],
             body: [
-              ['Tipo Documento', c.tipo_documento || ''],
-              ['Tipo BL', c.tipo_bl || ''],
-              ['Número BL', c.numero_bl || ''],
+              ['CRT', c.crt || ''],
               ['Tipo de Carga', c.id_tipo_carga || ''],
+              ['Número de Contenedor', c.numero_contenedor || ''],
+              ['Tamaño', c.tamano || ''],
+              ['Peso (kg)', c.peso_kg || ''],
+              ['Mercancía', c.mercancia || ''],
               ['Observaciones', c.observacion || '']
             ]
           },
           margin: [0, 0, 0, 20]
         },
-        { text: 'Contenedores', style: 'header' },
-        ...tablasContenedores,
 
         // Datos de logística
         { text: 'Datos de Logística', style: 'subheader' },
@@ -866,15 +649,11 @@ export class CotizacionComponent implements OnInit {
             widths: ['30%', '70%'],
             body: [
               ['Naviera', c.id_naviera ? this.getNavieraNombre(c.id_naviera) || '' : ''],
-              ['Fecha Llegada', c.fecha_llegada ? new Date(c.fecha_llegada).toLocaleDateString() : ''],
-              ['Fecha Limite', c.fecha_limite ? new Date(c.fecha_limite).toLocaleDateString() : ''],
+              ['Fecha Carga', c.fecha_carga ? new Date(c.fecha_carga).toLocaleDateString() : ''],
+              ['Fecha Descarga', c.fecha_descarga ? new Date(c.fecha_descarga).toLocaleDateString() : ''],
+              ['Fecha Stack', c.fecha_stack ? new Date(c.fecha_stack).toLocaleDateString() : ''],
               ['Ciudad Origen', c.id_ciudad_origen ? this.getCiudadNombre(c.id_ciudad_origen) || '' : ''],
               ['Ciudad Destino', c.id_ciudad_destino ? this.getCiudadNombre(c.id_ciudad_destino) || '' : ''],
-              ['Despacho Aduanero', c.id_despacho_aduanero || ''],
-              ['Lugar Descarga', c.lugar_descarga || ''],
-              ['Despacho Portuario', c.id_despacho_portuario || ''],
-              ['Camion', c.camion || ''],
-              ['Devolución', c.devolucion ? 'Sí' : 'No'],
               ['Gate In', c.gate_in ? 'Sí' : 'No'],
               ['Flete', c.flete ? `${c.flete} $` : ''],
             ]
@@ -940,36 +719,9 @@ export class CotizacionComponent implements OnInit {
     );
   }
 
-  calcularFechaLimite(fechaLlegada: Date) {
-    if (!fechaLlegada) return;
-
-    const fechaLimite = new Date(fechaLlegada);
-    console.log('Días para fecha límite:', this.getNavieraDias(this.cotizacionSeleccionada.id_naviera));
-    fechaLimite.setDate(fechaLimite.getDate() + this.getNavieraDias(this.cotizacionSeleccionada.id_naviera));
-
-    this.cotizacionSeleccionada.fecha_limite = fechaLimite;
-  }
-
   getNavieraDias(id: number): number {
     const naviera = this.navieras.find((n) => n.value === id);
     return naviera ? naviera.dias : 20;
-  }
-
-  actualizarOrigen(despacho: string) {
-    const origen = this.getCiudadNombre(Number(despacho));
-    switch (origen) {
-      case 'IQUIQUE':
-        this.bloquearOrigen = false;
-        break;
-      default:
-        this.bloquearOrigen = true;
-        if (!this.modoEdicion) {
-          setTimeout(() => {
-            this.cotizacionSeleccionada.id_despacho_portuario = '';
-          }, 0);
-        }
-
-    }
   }
 
   onRowClick(cotizacion: any) {
@@ -999,40 +751,5 @@ export class CotizacionComponent implements OnInit {
       return '';
     }
   }
-
-  nuevoContenedor() {
-    this.contenedorActual = {
-      numero_contenedor: '',
-      tamano: '',
-      peso_kg: '',
-      id_mercancia: null,
-      embalaje: '',
-      volumen_m3: null
-    };
-    this.editIndex = null;
-    this.contenedorVisible = true;
-  }
-
-  guardarContenedor() {
-    if (this.editIndex != null) {
-      this.contenedores[this.editIndex] = this.contenedorActual;
-    } else {
-      this.contenedores.push(this.contenedorActual);
-    }
-    this.cotizacionSeleccionada.contenedores = JSON.stringify(this.contenedores);;
-    this.contenedorVisible = false;
-  }
-
-  editarContenedor(i: number) {
-    this.editIndex = i;
-    this.contenedorActual = { ...this.contenedores[i] }; // clonar
-    this.contenedorVisible = true;
-  }
-
-  eliminarContenedor(i: number) {
-    this.contenedores.splice(i, 1);
-    this.cotizacionSeleccionada.contenedores = JSON.stringify(this.contenedores);;
-  }
-
 
 }

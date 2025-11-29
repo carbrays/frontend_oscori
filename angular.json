@@ -31,9 +31,12 @@
             ],
             "styles": [
               "node_modules/ngx-spinner/animations/ball-scale-multiple.css",
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+               "node_modules/leaflet/dist/leaflet.js"
+            ]
           },
           "configurations": {
             "production": {

@@ -8,7 +8,6 @@
     <tr>
       <th>Mercancía</th>
       <th>Descripción</th>
-      <th>Estado</th>
       <th>Acciones</th>
     </tr>
   </ng-template>
@@ -17,7 +16,7 @@
     <tr>
       <td>{{ mercancia.mercancia }}</td>
       <td>{{ mercancia.descripcion }}</td>
-      <td>{{ mercancia.estado }}</td>
+      
       <td>
         <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarMercancia(mercancia)"><i class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
         <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="editarMercancia(mercancia)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
@@ -38,15 +37,6 @@
       <div class="p-field p-col-4">
         <label for="marca">Descripción</label>
         <input pInputText id="marca" [(ngModel)]="mercanciaSeleccionada.descripcion" name="marca" />
-      </div>
-
-      <div class="p-field p-col-4">
-        <label for="estado">Estado</label>
-        <ng-select [items]="estados" placeholder="Selecciona un estado" bindLabel="label" 
-            bindValue="value" 
-            [(ngModel)]="mercanciaSeleccionada.estado" name="cargo">
-        </ng-select>
-        
       </div>
 
     </div>

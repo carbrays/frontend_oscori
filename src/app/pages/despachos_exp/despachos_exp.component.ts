@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DespachosService } from 'src/app/services/despachos/despachos.service';
+import { Despachos_ExpService } from 'src/app/services/despachos_exp/despachos_exp.service';
 import Swal from 'sweetalert2';
 
 import * as pdfMake from 'pdfmake/build/pdfmake';
@@ -13,11 +13,8 @@ import { saveAs } from 'file-saver';
 
 import axios from 'axios';
 import { URL_SERVICIOS } from 'src/app/config/config';
-import { identifierName } from '@angular/compiler';
 
 import * as htmlToImage from 'html-to-image';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 interface ObservacionItem {
   id_despacho: number;
@@ -31,11 +28,11 @@ interface ObservacionGrupo {
 }
 
 @Component({
-  selector: 'app-despachos',
-  templateUrl: './despachos.component.html',
-  styleUrls: ['./despachos.component.css'],
+  selector: 'app-despachos_exp',
+  templateUrl: './despachos_exp.component.html',
+  styleUrls: ['./despachos_exp.component.css'],
 })
-export class DespachosComponent implements OnInit {
+export class Despachos_ExpComponent implements OnInit {
 
   observacionesAgrupadas: ObservacionGrupo[] = [];
   mostrarDialogObservaciones: boolean = false;
@@ -48,7 +45,6 @@ export class DespachosComponent implements OnInit {
 
   ciudades: { label: string; value: number }[] = [];
   navieras: { label: string; value: number; dias: number }[] = [];
-  mercancias: { label: string; value: number }[] = [];
   clientes: { label: string; value: number }[] = [];
   clientesFiltro: { label: string; value: number }[] = [];
   vehiculos: { label: string; value: number }[] = [];
@@ -60,55 +56,11 @@ export class DespachosComponent implements OnInit {
   ];
 
   documentosRequeridosArica = [
-    { id: 'BL', nombre: 'BL' },
-    { id: 'FACTURA_COMERCIAL', nombre: 'FACTURA COMERCIAL' },
-    { id: 'LISTA_EMPAQUE', nombre: 'LISTA EMPAQUE' },
-    { id: 'DAM', nombre: 'DAM' },
-    { id: 'DIM', nombre: 'DIM' },
-    { id: 'GOC_ASPB', nombre: 'GOC ASPB' },
-    { id: 'PERMISOS', nombre: 'PERMISOS' },
-    { id: 'LIBERACION', nombre: 'LIBERACION' },
-    { id: 'MCC', nombre: 'MCC' },
-    { id: 'MIC_CRT', nombre: 'MIC-CRT' },
+    { id: 'CRT', nombre: 'CRT' },
   ];
 
   documentosRequeridosIquique = [
-    { id: 'BL', nombre: 'BL' },
-    { id: 'FACTURA_COMERCIAL', nombre: 'FACTURA COMERCIAL' },
-    { id: 'LISTA_EMPAQUE', nombre: 'LISTA EMPAQUE' },
-    { id: 'DAM', nombre: 'DAM' },
-    { id: 'DIM', nombre: 'DIM' },
-    { id: 'CERTIFICADO_COSTO_0_ITI', nombre: 'COSTO 0 ITI' },
-    { id: 'PERMISOS', nombre: 'PERMISOS' },
-    { id: 'LIBERACION', nombre: 'LIBERACION' },
-    { id: 'DRESS', nombre: 'DRESS' },
-    { id: 'CONVENIO_ITI', nombre: 'CONVENIO ITI' },
-    { id: 'MCC', nombre: 'MCC' },
-    { id: 'MIC_CRT', nombre: 'MIC-CRT' },
-  ];
-
-  tipo_despacho_aduanero = [
-    { label: 'GENERAL', value: 'GENERAL' },
-    { label: 'ANTICIPADO', value: 'ANTICIPADO' },
-    { label: 'INMEDIATO', value: 'INMEDIATO' },
-  ];
-
-  tipo_despacho_aduanero_general = [
-    { label: 'SOBRE CARRO', value: 'SOBRE_CARRO' },
-    { label: 'CON DESCARGA', value: 'CON_DESCARGA' },
-    { label: 'ABREVIADO', value: 'ABREVIADO' },
-  ];
-
-  tipo_despacho_portuario = [
-    { label: 'DIRECTO', value: 'DIRECTO' },
-    { label: 'INDIRECTO ANTICIPADO', value: 'INDIRECTO ANTICIPADO' },
-    { label: 'INDIRECTO', value: 'INDIRECTO' },
-  ];
-
-  tipo_deposito_aduanero = [
-    { label: 'TEMPORAL', value: 'TEMPORAL' },
-    { label: 'TRANSITORIO', value: 'TRANSITORIO' },
-    { label: 'ESPECIAL', value: 'ESPECIAL' },
+    { id: 'CRT', nombre: 'CRT' },
   ];
 
   estados = [
@@ -125,41 +77,25 @@ export class DespachosComponent implements OnInit {
   mercanciaSeleccionada: any = null;
   contenedorSeleccionado: any = null;
   tipoCargaSeleccionada: any = null;
-  descripcionSeleccionada: any = null;
+  tamanoSeleccionado: any = null;
   navieraSeleccionada: any = null;
   origenSeleccionado: any = null;
   destinoSeleccionado: any = null;
-  despachoPortuarioSeleccionado: any = null;
-  despachoAduaneroSeleccionado: any = null;
-  despachoAduaneroGeneralSeleccionado: any = null;
-  depositoAduaneroSeleccionado: any = null;
   asignacionCargaSeleccionada: any = null;
   estadoSeleccionado: any = null;
 
   filtroCliente: string = '';
   filtroMercancia: string = '';
+  filtroCrt: string = '';
   filtroContenedor: string = '';
   filtroTipoCarga: string = '';
-  filtroDescripcion: string = '';
-  filtroBlMadre: string = '';
-  filtroFechaBlMadre: string = '';
-  filtroBlHijo: string = '';
-  filtroFechaBlHijo: string = '';
-  filtroDam: string = '';
-  filtroFechaDam: string = '';
-  filtroEmbalaje: string = '';
+  filtroTamano: string = '';
   filtroPeso: string = '';
-  filtroVolumen: string = '';
   filtroNaviera: string = '';
   filtroOrigen: string = '';
   filtroDestino: string = '';
-  filtroDespachoPortuario: string = '';
-  filtroDespachoAduanero: string = '';
-  filtroDespachoAduaneroGeneral: string = '';
-  filtroDepositoAduanero: string = '';
   filtroAsignacionCarga: string = '';
   filtroFechaCarga: string = '';
-  filtroAsignacionDescarga: string = '';
   filtroFechaDescarga: string = '';
   filtroEstado: string = '';
 
@@ -167,24 +103,14 @@ export class DespachosComponent implements OnInit {
   mercanciasFiltradas: any[] = [];
   contenedoresFiltrados: any[] = [];
   tiposCargaFiltrados: any[] = [];
-  descripcionesFiltradas: any[] = [];
+  tamanosFiltrados: any[] = [];
   navierasFiltradas: any[] = [];
   origenesFiltrados: any[] = [];
   destinosFiltrados: any[] = [];
-  despachosPortuariosFiltrados: any[] = [];
-  despachosAduanerosFiltrados: any[] = [];
-  despachosAduanerosGeneralesFiltrados: any[] = [];
-  depositosAduanerosFiltrados: any[] = [];
   asignacionesCargaFiltradas: any[] = [];
   estadosFiltrados: any[] = [];
 
   ordenAscendente: boolean = true;
-
-  bloquearOrigen = false;
-  bloquearPrecintoArica = false;
-  bloquearPrecintoIquique = false;
-  bloquearDespachoGeneral = false;
-  bloquearDespachoPortuario = false;
 
   mostrarDialogPDF = false;
   mostrarDialogImagen: boolean = false;
@@ -203,17 +129,13 @@ export class DespachosComponent implements OnInit {
   actualizar = false;
 
   opcionesClientes: { label: string; value: number }[] = [];
-  opcionesMercancias: { label: string; value: number }[] = [];
+  opcionesMercancias: String[] = [];
   opcionesContenedores: String[] = [];
   opcionesTipoCarga: { label: string; value: string }[] = [];
-  opcionesDescripcion: String[] = [];
+  opcionesTamano: String[] = [];
   opcionesNaviera: { label: string; value: number }[] = [];
   opcionesOrigen: { label: string; value: number }[] = [];
   opcionesDestino: { label: string; value: number }[] = [];
-  opcionesDespachoPortuario: String[] = [];
-  opcionesDespachoAduanero: String[] = [];
-  opcionesDespachoAduaneroGeneral: String[] = [];
-  opcionesDepositoAduanero: String[] = [];
   opcionesAsignacionCarga: String[] = [];
   opcionesEstado: { label: string; value: string }[] = [];
 
@@ -222,12 +144,11 @@ export class DespachosComponent implements OnInit {
   bloquearContenedor = false;
   bloquearTamano = false;
 
-  constructor(private despachoService: DespachosService) { }
+  constructor(private despachoService: Despachos_ExpService) { }
 
   ngOnInit(): void {
     this.obtenerCiudades();
     this.obtenerNavieras();
-    this.obtenerMercancias();
     this.obtenerClientes();
     this.obtenerVehiculos();
     this.obtenerListado();
@@ -240,54 +161,33 @@ export class DespachosComponent implements OnInit {
   get despachosFiltrados() {
     return this.despachos.filter(d => {
       const clienteStr = this.getClienteNombre(d.id_cliente)?.toLowerCase() || '';
-      const mercanciaStr = this.getMercanciaNombre(d.id_mercancia)?.toLowerCase() || '';
+      const mercanciaStr = d.mercancia?.toLowerCase() || '';
+      const crtStr = d.crt?.toLowerCase() || '';
       const contenedorStr = d.numero_contenedor?.toLowerCase() || '';
-      const tipoCargaStr = d.id_tipo_carga?.toLowerCase() || '';
-      const descripcionStr = d.descripcion_carga?.toLowerCase() || '';
-      const blMadreStr = d.bl_madre?.toLowerCase() || '';
-      const blHijoStr = d.bl_hijo?.toLowerCase() || '';
-      const damStr = d.dam?.toLowerCase() || '';
-      const embalajeStr = d.embalaje?.toLowerCase() || '';
+      const tipoCargaStr = d.tipo_carga?.toLowerCase() || '';
+      const tamanoStr = d.tamano?.toLowerCase() || '';
       const pesoStr = d.peso_kg?.toString() || '';
-      const volumenStr = d.volumen_m3?.toString() || '';
       const navieraStr = this.getNavieraNombre(d.id_naviera)?.toLowerCase() || '';
       const origenStr = this.getCiudadNombre(d.id_ciudad_origen)?.toLowerCase() || '';
       const destinoStr = this.getCiudadNombre(d.id_ciudad_destino)?.toLowerCase() || '';
-      const despachoPortuarioStr = d.id_despacho_portuario?.toLowerCase() || '';
-      const despachoAduaneroStr = d.id_despacho_aduanero?.toLowerCase() || '';
-      const despachoAduaneroGenStr = d.id_despacho_aduanero_general?.toLowerCase() || '';
-      const depositoAduaneroStr = d.id_deposito_aduanero?.toLowerCase() || '';
       const asignacionCargaStr = this.getVehiculoNombre(d.id_asignacion_vehiculo_carga)?.toLowerCase() || '';
       const fechaCargaStr = d.fecha_carga ? new Date(d.fecha_carga).toISOString().split('T')[0] : '';
-      const asignacionDescargaStr = this.getVehiculoNombre(d.id_asignacion_vehiculo_descarga)?.toLowerCase() || '';
       const fechaDescargaStr = d.fecha_descarga ? new Date(d.fecha_descarga).toISOString().split('T')[0] : '';
       const estadoStr = d.estado?.toLowerCase() || '';
 
       return (
         clienteStr.includes(this.filtroCliente.toLowerCase()) &&
         mercanciaStr.includes(this.filtroMercancia.toLowerCase()) &&
+        crtStr.includes(this.filtroCrt.toLowerCase()) &&
         contenedorStr.includes(this.filtroContenedor.toLowerCase()) &&
         tipoCargaStr.includes(this.filtroTipoCarga.toLowerCase()) &&
-        descripcionStr.includes(this.filtroDescripcion.toLowerCase()) &&
-        blMadreStr.includes(this.filtroBlMadre.toLowerCase()) &&
-        (this.filtroFechaBlMadre ? fechaCargaStr === this.filtroFechaBlMadre : true) &&
-        blHijoStr.includes(this.filtroBlHijo.toLowerCase()) &&
-        (this.filtroFechaBlHijo ? fechaDescargaStr === this.filtroFechaBlHijo : true) &&
-        damStr.includes(this.filtroDam.toLowerCase()) &&
-        (this.filtroFechaDam ? fechaDescargaStr === this.filtroFechaDam : true) &&
-        embalajeStr.includes(this.filtroEmbalaje.toLowerCase()) &&
+        tamanoStr.includes(this.filtroTamano.toLowerCase()) &&
         pesoStr.includes(this.filtroPeso.toString()) &&
-        volumenStr.includes(this.filtroVolumen.toString()) &&
         navieraStr.includes(this.filtroNaviera.toLowerCase()) &&
         origenStr.includes(this.filtroOrigen.toLowerCase()) &&
         destinoStr.includes(this.filtroDestino.toLowerCase()) &&
-        despachoPortuarioStr.includes(this.filtroDespachoPortuario.toLowerCase()) &&
-        despachoAduaneroStr.includes(this.filtroDespachoAduanero.toLowerCase()) &&
-        despachoAduaneroGenStr.includes(this.filtroDespachoAduaneroGeneral.toLowerCase()) &&
-        depositoAduaneroStr.includes(this.filtroDepositoAduanero.toLowerCase()) &&
         asignacionCargaStr.includes(this.filtroAsignacionCarga.toLowerCase()) &&
         fechaCargaStr.includes(this.filtroFechaCarga) &&
-        asignacionDescargaStr.includes(this.filtroAsignacionDescarga.toLowerCase()) &&
         fechaDescargaStr.includes(this.filtroFechaDescarga) &&
         estadoStr.includes(this.filtroEstado.toLowerCase())
       );
@@ -304,17 +204,25 @@ export class DespachosComponent implements OnInit {
       c.label.toLowerCase().includes(query)
     );
   }
+
   filtrarMercancias(event: any) {
-    if (this.opcionesMercancias.length === 0) {
-      const idsmercancias = new Set(this.despachos.map(d => d.id_mercancia));
-      this.opcionesMercancias = this.mercancias.filter(m => idsmercancias.has(m.value));
+    if (this.opcionesMercancias.length === 0 && this.despachos?.length > 0) {
+
+      const lista = this.despachos
+        .map(d => d?.mercancia ? String(d.mercancia).trim() : '')
+        .filter(c => c !== '');
+
+      // Eliminar repetidos
+      this.opcionesMercancias = [...new Set(lista)];
     }
 
-    const query = event.query.toLowerCase();
-    this.mercanciasFiltradas = this.opcionesMercancias.filter(m =>
-      m.label.toLowerCase().includes(query)
+    const query = event.query ? event.query.toLowerCase() : '';
+
+    this.mercanciasFiltradas = this.opcionesMercancias.filter(c =>
+      c.toLowerCase().includes(query)
     );
   }
+
   filtrarContenedores(event: any) {
     // Solo llenar una vez
     if (this.opcionesContenedores.length === 0 && this.despachos?.length > 0) {
@@ -332,7 +240,7 @@ export class DespachosComponent implements OnInit {
   }
   filtrarTiposCarga(event: any) {
     if (this.opcionesTipoCarga.length === 0) {
-      const idsTiposCarga = new Set(this.despachos.map(d => d.id_tipo_carga));
+      const idsTiposCarga = new Set(this.despachos.map(d => d.tipo_carga));
       this.opcionesTipoCarga = this.tipo_carga.filter(m => idsTiposCarga.has(m.value));
     }
     console.log(this.opcionesTipoCarga);
@@ -342,18 +250,18 @@ export class DespachosComponent implements OnInit {
       m.label.toLowerCase().includes(query)
     );
   }
-  filtrarDescripciones(event: any) {
-    if (this.opcionesDescripcion.length === 0 && this.despachos?.length > 0) {
+  filtrarTamanos(event: any) {
+    if (this.opcionesTamano.length === 0 && this.despachos?.length > 0) {
       // Convertimos todo a string, filtramos nulos o vacíos y quitamos duplicados
       const todas = this.despachos
-        .map(d => d?.descripcion_carga ? String(d.descripcion_carga).trim() : '')
+        .map(d => d?.tamano ? String(d.tamano).trim() : '')
         .filter(c => c !== '');
-      this.opcionesDescripcion = [...new Set(todas)]; // distinct
+      this.opcionesTamano = [...new Set(todas)]; // distinct
     }
 
     const query = (event.query || '').toLowerCase();
 
-    this.descripcionesFiltradas = this.opcionesDescripcion.filter(c =>
+    this.tamanosFiltrados = this.opcionesTamano.filter(c =>
       c.toLowerCase().includes(query)
     );
   }
@@ -390,71 +298,6 @@ export class DespachosComponent implements OnInit {
       c.label.toLowerCase().includes(query)
     );
   }
-
-  filtrarDespachosPortuarios(event: any) {
-    if (!this.opcionesDespachoPortuario.length && this.despachos?.length > 0) {
-      const unicos = new Set(
-        this.despachos
-          .map(d => d?.id_despacho_portuario ? String(d.id_despacho_portuario).trim() : '')
-          .filter(c => c !== '')
-      );
-      this.opcionesDespachoPortuario = Array.from(unicos);
-    }
-
-    const query = (event.query || '').toLowerCase();
-    this.despachosPortuariosFiltrados = this.opcionesDespachoPortuario.filter(c =>
-      c.toLowerCase().includes(query)
-    );
-  }
-
-  filtrarDespachosAduaneros(event: any) {
-    if (!this.opcionesDespachoAduanero.length && this.despachos?.length > 0) {
-      const unicos = new Set(
-        this.despachos
-          .map(d => d?.id_despacho_aduanero ? String(d.id_despacho_aduanero).trim() : '')
-          .filter(c => c !== '')
-      );
-      this.opcionesDespachoAduanero = Array.from(unicos);
-    }
-
-    const query = (event.query || '').toLowerCase();
-    this.despachosAduanerosFiltrados = this.opcionesDespachoAduanero.filter(c =>
-      c.toLowerCase().includes(query)
-    );
-  }
-
-  filtrarDespachosAduanerosGenerales(event: any) {
-    if (!this.opcionesDespachoAduaneroGeneral.length && this.despachos?.length > 0) {
-      const unicos = new Set(
-        this.despachos
-          .map(d => d?.id_despacho_aduanero_general ? String(d.id_despacho_aduanero_general).trim() : '')
-          .filter(c => c !== '')
-      );
-      this.opcionesDespachoAduaneroGeneral = Array.from(unicos);
-    }
-
-    const query = (event.query || '').toLowerCase();
-    this.despachosAduanerosGeneralesFiltrados = this.opcionesDespachoAduaneroGeneral.filter(c =>
-      c.toLowerCase().includes(query)
-    );
-  }
-
-  filtrarDepositosAduaneros(event: any) {
-    if (!this.opcionesDepositoAduanero.length && this.despachos?.length > 0) {
-      const unicos = new Set(
-        this.despachos
-          .map(d => d?.id_deposito_aduanero ? String(d.id_deposito_aduanero).trim() : '')
-          .filter(c => c !== '')
-      );
-      this.opcionesDepositoAduanero = Array.from(unicos);
-    }
-
-    const query = (event.query || '').toLowerCase();
-    this.depositosAduanerosFiltrados = this.opcionesDepositoAduanero.filter(c =>
-      c.toLowerCase().includes(query)
-    );
-  }
-
 
   filtrarAsignacionesCarga(event: any) {
     if (this.opcionesAsignacionCarga.length === 0 && this.despachos?.length > 0) {
@@ -504,26 +347,13 @@ export class DespachosComponent implements OnInit {
     this.filtroMercancia = '';
     this.filtroContenedor = '';
     this.filtroTipoCarga = '';
-    this.filtroDescripcion = '';
-    this.filtroBlMadre = '';
-    this.filtroFechaBlMadre = '';
-    this.filtroBlHijo = '';
-    this.filtroFechaBlHijo = '';
-    this.filtroDam = '';
-    this.filtroFechaDam = '';
-    this.filtroEmbalaje = '';
+    this.filtroTamano = '';
     this.filtroPeso = '';
-    this.filtroVolumen = '';
     this.filtroNaviera = '';
     this.filtroOrigen = '';
     this.filtroDestino = '';
-    this.filtroDespachoPortuario = '';
-    this.filtroDespachoAduanero = '';
-    this.filtroDespachoAduaneroGeneral = '';
-    this.filtroDepositoAduanero = '';
     this.filtroAsignacionCarga = '';
     this.filtroFechaCarga = '';
-    this.filtroAsignacionDescarga = '';
     this.filtroFechaDescarga = '';
     this.filtroEstado = '';
   }
@@ -583,7 +413,7 @@ export class DespachosComponent implements OnInit {
   }
 
   verPDF(nombre: any) {
-    const url = `${URL_SERVICIOS}/despachos/verPdf/${nombre}`;
+    const url = `${URL_SERVICIOS}/despachos_exp/verPdf/${nombre}`;
 
     const extension = nombre.split('.').pop()?.toLowerCase();
 
@@ -595,7 +425,7 @@ export class DespachosComponent implements OnInit {
       this.mostrarDialogImagen = true;
     }
 
-    // this.pdfSeleccionadoURL = `${URL_SERVICIOS}/despachos/verPdf/${nombre}`; // ajusta a tu ruta real
+    // this.pdfSeleccionadoURL = `${URL_SERVICIOS}/despachos_exp/verPdf/${nombre}`; // ajusta a tu ruta real
 
     // console.log('PDF URL:', this.pdfSeleccionadoURL);
     // this.mostrarDialogPDF = true;
@@ -609,7 +439,7 @@ export class DespachosComponent implements OnInit {
 
       try {
         const respuesta = await axios.post(
-          `${URL_SERVICIOS}/despachos/subir_pdf`,
+          `${URL_SERVICIOS}/despachos_exp/subir_pdf`,
           formData,
           {
             headers: {
@@ -678,25 +508,6 @@ export class DespachosComponent implements OnInit {
     return naviera ? naviera.dias : 20;
   }
 
-  obtenerMercancias(): void {
-    this.despachoService.getMercancia().subscribe({
-      next: (data) => {
-        this.mercancias = data.map((mercancia) => ({
-          label: mercancia.mercancia,
-          value: mercancia.id_mercancia,
-        }));
-        console.log('Mercancías cargadas:', this.mercancias);
-      },
-      error: (err) => {
-        console.error('Error al cargar mercancías:', err);
-      },
-    });
-  }
-  getMercanciaNombre(id: number): string {
-    const mercancia = this.mercancias.find((m) => m.value === id);
-    return mercancia ? mercancia.label : 'Sin nombre';
-  }
-
   obtenerClientes(): void {
     this.despachoService.getClientes().subscribe({
       next: (data) => {
@@ -741,47 +552,23 @@ export class DespachosComponent implements OnInit {
   abrirNuevoDespacho(): void {
     this.despachoSeleccionado = {
       id_cliente: null,
-      id_mercancia: null,
-      id_contenedor: '',
+      mercancia: null,
+      crt: '',
       numero_contenedor: '',
       tipo_carga: '',
-      descripcion_carga: '',
-      bl_madre: '',
+      tamano: '',
       peso_kg: '',
       id_naviera: null,
-      id_despacho_portuario: '',
-      fecha_llegada: null,
-      fecha_limite: null,
+      fecha_carga: null,
+      fecha_descarga: null,
+      fecha_stack: null,
       id_ciudad_origen: null,
       id_ciudad_destino: null,
-      id_despacho_aduanero: '',
       id_asignacion_vehiculo_carga: null,
-      fecha_carga: null,
-      id_asignacion_vehiculo_descarga: null,
-      fecha_descarga: null,
-      descripcion: '',
       estado: 'EN OFICINA',
       usucre: localStorage.getItem('login'),
       feccre: new Date(),
-      volumen_m3: null,
-      bl_hijo: '',
-      fecha_bl_madre: null,
-      fecha_bl_hijo: null,
-      dam: '',
-      fecha_dam: null,
-      embalaje: '',
-      id_deposito_aduanero: '',
-      id_despacho_aduanero_general: '',
-      permisos: false,
-      precinto: '',
-      precinto_gog: '',
-      precinto_dress: '',
-      bl_nieto: '',
-      fecha_bl_nieto: null,
       id_preasignacion_vehiculo_carga: null,
-      autorizado: false,
-      dim: '',
-      fecha_dim: null,
       despacho_agencia: '',
       despacho_nombre: '',
       despacho_telefono: ''
@@ -795,17 +582,11 @@ export class DespachosComponent implements OnInit {
     this.actualizar = true;
 
     this.despachoSeleccionado = {
-      ...despacho, fecha_llegada: despacho.fecha_llegada ? new Date(despacho.fecha_llegada) : null,
-      fecha_limite: despacho.fecha_limite ? new Date(despacho.fecha_limite) : null,
+      ...despacho,
       fecha_carga: despacho.fecha_carga ? new Date(despacho.fecha_carga) : null,
       fecha_descarga: despacho.fecha_descarga ? new Date(despacho.fecha_descarga) : null,
-      fecha_bl_madre: despacho.fecha_bl_madre ? new Date(despacho.fecha_bl_madre) : null,
-      fecha_bl_hijo: despacho.fecha_bl_hijo ? new Date(despacho.fecha_bl_hijo) : null,
-      fecha_dam: despacho.fecha_dam ? new Date(despacho.fecha_dam) : null,
+      fecha_stack: despacho.fecha_stack ? new Date(despacho.fecha_stack) : null
     };
-    this.actualizarOrigen(despacho.id_ciudad_origen);
-    this.actualizarDespachoPortuario(despacho.id_despacho_portuario);
-    this.actualizarDespacho(despacho.id_despacho_aduanero);
 
     this.popupVisible = true;
     this.modoEdicion = true;
@@ -823,7 +604,7 @@ export class DespachosComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.despachoService.eliminarDespacho(despacho.id_despacho, despacho.id_contenedor).subscribe({
+        this.despachoService.eliminarDespacho(despacho.id_despacho).subscribe({
           next: () => {
             this.obtenerListado();
             Swal.fire(
@@ -883,16 +664,6 @@ export class DespachosComponent implements OnInit {
     }
   }
 
-  calcularFechaLimite(fechaLlegada: Date) {
-    if (!fechaLlegada) return;
-
-    const fechaLimite = new Date(fechaLlegada);
-    console.log('Días para fecha límite:', this.getNavieraDias(this.despachoSeleccionado.id_naviera));
-    fechaLimite.setDate(fechaLimite.getDate() + this.getNavieraDias(this.despachoSeleccionado.id_naviera));
-
-    this.despachoSeleccionado.fecha_limite = fechaLimite;
-  }
-
   estiloFila(despacho: any): string {
     let mensaje = '';
 
@@ -901,37 +672,9 @@ export class DespachosComponent implements OnInit {
       return 'despacho-culminado'; // Culminado
     }
 
-    //VERIFICA FECHA BL MADRE
-    if (!despacho.fecha_bl_madre) {
-      if (!despacho.fecha_bl_hijo) {
-        if (!despacho.fecha_bl_nieto) {
-          mensaje = 'fecha BL no definida';
-        }
-      }
-    }
-
-    if (!despacho.fecha_dam) {
-      mensaje = 'fecha DAM no definida';
-    }
-
-    if ((despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto) && despacho.fecha_dam) {
-      const fechaDam = new Date(despacho.fecha_dam);
-      const fechaBL = new Date(despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto);
-
-      const nuevaFechaBL = new Date(fechaBL);
-      nuevaFechaBL.setDate(nuevaFechaBL.getDate() + 20);
-
-      if ((fechaDam.getTime() > nuevaFechaBL.getTime()) && (!despacho.pago_dam)) {
-        mensaje = 'CONTRAVENCION';
-        return 'despacho-observado';
-      }
-    }
-
     //VERIFICA PDFS
     if (!despacho.archivosSubidos || Object.keys(despacho.archivosSubidos).length === 0) {
       mensaje = 'PDFs no subidos';
-    } else if (!despacho.archivosSubidos.includes('FACTURA_COMERCIAL')) {
-      mensaje = 'FACTURA COMERCIAL no subida';
     }
 
     if (mensaje != '') {
@@ -947,35 +690,10 @@ export class DespachosComponent implements OnInit {
     if (despacho.estado === 'CULMINADO') {
       return '';
     } else {
-      //VERIFICA FECHA BL MADRE
-      if (!despacho.fecha_bl_madre) {
-        if (!despacho.fecha_bl_hijo) {
-          if (!despacho.fecha_bl_nieto) {
-            mensajes.push('fecha BL no definida');
-          }
-        }
-      } else {
-        if (!despacho.fecha_dam) {
-          mensajes.push('fecha DAM no definida');
-        } else {
-          const fechaDam = new Date(despacho.fecha_dam);
-          const fechaBL = new Date(despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto);
-
-          const nuevaFechaBL = new Date(fechaBL);
-          nuevaFechaBL.setDate(nuevaFechaBL.getDate() + 20);
-
-          if ((fechaDam.getTime() > nuevaFechaBL.getTime()) && (!despacho.pago_dam)) {
-            mensajes.push('CONTRAVENCION');
-          }
-        }
-      }
 
       //VERIFICA PDFS
       if (!despacho.archivosSubidos || Object.keys(despacho.archivosSubidos).length === 0) {
         mensajes.push('PDFs no subidos');
-
-      } else if (!despacho.archivosSubidos.includes('FACTURA_COMERCIAL')) {
-        mensajes.push('FACTURA COMERCIAL no subida');
 
       }
       return mensajes.join(', ');
@@ -989,37 +707,9 @@ export class DespachosComponent implements OnInit {
       if (despacho.estado === 'CULMINADO') continue;
 
       const mensajes: string[] = [];
-
-      // Verifica FECHA BL MADRE
-      if (!despacho.fecha_bl_madre) {
-        if (!despacho.fecha_bl_hijo) {
-          if (!despacho.fecha_bl_nieto) {
-            mensajes.push('• Fecha BL no definida');
-          }
-        }
-      } else {
-        if (!despacho.fecha_dam) {
-          mensajes.push('• Fecha DAM no definida');
-        } else {
-          const fechaDam = new Date(despacho.fecha_dam);
-          const fechaBL = new Date(despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto);
-
-          const nuevaFechaBL = new Date(fechaBL);
-          nuevaFechaBL.setDate(nuevaFechaBL.getDate() + 20);
-
-          if ((nuevaFechaBL.getTime() > fechaDam.getTime()) && (!despacho.pago_dam)) {
-            mensajes.push('• CONTRAVENCION');
-          }
-        }
-      }
-
       // Verifica PDFs
       if (!despacho.archivosSubidos || Object.keys(despacho.archivosSubidos).length === 0) {
         mensajes.push('• PDFs no subidos');
-      } else {
-        if (!despacho.archivosSubidos.includes('FACTURA COMERCIAL')) {
-          mensajes.push('• FACTURA COMERCIAL no subida');
-        }
       }
 
       // Si tiene mensajes, lo añadimos a alertas
@@ -1047,50 +737,14 @@ export class DespachosComponent implements OnInit {
 
   armarObservacionesAccordion() {
     const gruposMap: { [key: string]: ObservacionItem[] } = {
-      '⚠️ Fecha BL no definida': [],
-      '⚠️ Fecha DAM no definida': [],
-      '🚨 CONTRAVENCION': [],
-      '📄 FACTURA COMERCIAL no subida': [],
       '📎 PDFs no subidos': []
     };
 
     for (const despacho of this.despachosFiltrados) {
-      
+
       if (despacho.estado === 'CULMINADO') continue;
 
       const cliente = this.getClienteNombre(despacho.id_cliente) || 'Sin nombre';
-      // Verifica BL
-      if (!despacho.fecha_bl_madre && !despacho.fecha_bl_hijo && !despacho.fecha_bl_nieto) {
-        gruposMap['⚠️ Fecha BL no definida'].push({
-          id_despacho: despacho.id_despacho,
-          cliente,
-          detalle: ['Fecha BL no definida']
-        });
-      }
-
-      // Verifica DAM
-      if (despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto) {
-        if (!despacho.fecha_dam) {
-          gruposMap['⚠️ Fecha DAM no definida'].push({
-            id_despacho: despacho.id_despacho,
-            cliente,
-            detalle: ['Fecha DAM no definida']
-          });
-        } else {
-          const fechaDam = new Date(despacho.fecha_dam);
-          const fechaBL = new Date(despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto);
-          const nuevaFechaBL = new Date(fechaBL);
-          nuevaFechaBL.setDate(nuevaFechaBL.getDate() + 20);
-
-          if ((nuevaFechaBL.getTime() > fechaDam.getTime()) && !despacho.pago_dam) {
-            gruposMap['🚨 CONTRAVENCION'].push({
-              id_despacho: despacho.id_despacho,
-              cliente,
-              detalle: ['CONTRAVENCION']
-            });
-          }
-        }
-      }
 
       // Verifica PDFs
       if (!despacho.archivosSubidos || Object.keys(despacho.archivosSubidos).length === 0) {
@@ -1099,14 +753,6 @@ export class DespachosComponent implements OnInit {
           cliente,
           detalle: ['PDFs no subidos']
         });
-      } else {
-        if (!despacho.archivosSubidos.includes('FACTURA COMERCIAL')) {
-          gruposMap['📄 FACTURA COMERCIAL no subida'].push({
-            id_despacho: despacho.id_despacho,
-            cliente,
-            detalle: ['FACTURA COMERCIAL no subida']
-          });
-        }
       }
       this.mostrarDialogObservaciones = true;
     }
@@ -1120,90 +766,12 @@ export class DespachosComponent implements OnInit {
       .filter(grupo => grupo.items.length > 0); // eliminar grupos vacíos
   }
 
-
-
   generarClientesUnicos() {
     const idsEnDespachos = new Set(this.despachos.map(d => d.id_cliente));
 
     this.clientesFiltro = this.clientes
       .filter(c => idsEnDespachos.has(c.value))
       .map(c => ({ label: c.label, value: c.value }));
-  }
-
-  actualizarTipoCarga(tipo_carga: string) {
-    switch (tipo_carga) {
-      case 'CARGA_SUELTA':
-        this.bloquearContenedor = true;
-        this.bloquearTamano = true;
-        setTimeout(() => {
-          this.despachoSeleccionado.numero_contenedor = '';
-          this.despachoSeleccionado.tamano = '';
-        }, 0);
-        break;
-      default:
-        this.bloquearContenedor = false;
-        this.bloquearTamano = false;
-    }
-  }
-
-  actualizarOrigen(despacho: string) {
-    const origen = this.getCiudadNombre(Number(despacho));
-    switch (origen) {
-      case 'IQUIQUE':
-        this.bloquearOrigen = false;
-        break;
-      default:
-        this.bloquearOrigen = true;
-        if (!this.actualizar) {
-          setTimeout(() => {
-            this.despachoSeleccionado.id_despacho_portuario = '';
-          }, 0);
-        }
-
-    }
-    if (origen === 'ARICA') {
-      this.bloquearPrecintoArica = false;
-      this.bloquearPrecintoIquique = true;
-    } else if (origen === 'IQUIQUE') {
-      this.bloquearPrecintoIquique = false;
-      this.bloquearPrecintoArica = true;
-    } else {
-      this.bloquearPrecintoArica = true;
-      this.bloquearPrecintoIquique = true;
-    }
-  }
-
-  actualizarDespachoPortuario(despacho: string) {
-    switch (despacho) {
-      case 'INDIRECTO ANTICIPADO':
-        this.bloquearDespachoPortuario = false;
-        break;
-      default:
-        this.bloquearDespachoPortuario = true;
-        if (!this.actualizar) {
-          setTimeout(() => {
-            this.despachoSeleccionado.id_despacho_aduanero = '';
-            this.despachoSeleccionado.id_despacho_aduanero_general = '';
-          }, 0);
-        }
-
-    }
-  }
-
-  actualizarDespacho(despacho: string) {
-    switch (despacho) {
-      case 'GENERAL':
-        this.bloquearDespachoGeneral = false;
-        break;
-      default:
-        this.bloquearDespachoGeneral = true;
-        if (!this.actualizar) {
-          setTimeout(() => {
-            this.despachoSeleccionado.id_despacho_aduanero_general = '';
-          }, 0);
-        }
-
-    }
   }
 
   onFileSelected(event: Event, despacho: any, documento: any) {
@@ -1264,7 +832,7 @@ export class DespachosComponent implements OnInit {
             formData.append('id_despacho', despacho.id_despacho.toString());
             formData.append('documento', documento.id.toString());
 
-            axios.post(`${URL_SERVICIOS}/despachos/subir_pdf`, formData, {
+            axios.post(`${URL_SERVICIOS}/despachos_exp/subir_pdf`, formData, {
               headers: { 'Content-Type': 'multipart/form-data' }
             })
               .then(response => {
@@ -1316,17 +884,6 @@ export class DespachosComponent implements OnInit {
     });
   }
 
-  generarPDF() {
-    const docDefinition: TDocumentDefinitions = {
-      content: [
-        { text: 'Hola, este es un PDF generado con pdfmake', fontSize: 16 },
-        { text: 'Puedes agregar párrafos, tablas, imágenes y más.', margin: [0, 10, 0, 0] }
-      ]
-    };
-
-    pdfMake.createPdf(docDefinition).download('archivo.pdf');
-  }
-
   exportarDespachosPDF() {
     const content: any[] = [];
 
@@ -1345,59 +902,23 @@ export class DespachosComponent implements OnInit {
       col1.push({ text: `Cliente: ${this.getClienteNombre(d.id_cliente)}`, style: 'cardTitle' });
       col2.push({ text: `Estado: ${d.estado || '-'}`, style: 'cardText' });
 
-      if (d.id_tipo_carga) col1.push({ text: `Tipo Carga: ${d.id_tipo_carga}`, style: 'cardText' });
+      if (d.tipo_carga) col1.push({ text: `Tipo Carga: ${d.tipo_carga}`, style: 'cardText' });
       if (d.numero_contenedor) col2.push({ text: `Contenedor: ${d.numero_contenedor}`, style: 'cardText' });
 
-      if (d.descripcion_carga) col1.push({ text: `Tamaño: ${d.descripcion_carga}`, style: 'cardText' });
+      if (d.tamano) col1.push({ text: `Tamaño: ${d.tamano}`, style: 'cardText' });
       if (d.id_naviera) col2.push({ text: `Naviera: ${this.getNavieraNombre(d.id_naviera)}`, style: 'cardText' });
 
-      if (this.getNavieraNombre(d.id_naviera) === 'MSC') {
-        col1.push({ text: `Autorizado MSC: ${d.autorizado ? 'Sí' : 'No'}`, style: 'cardText' });
-      }
-
       if (d.peso_kg) col1.push({ text: `Peso (kg): ${d.peso_kg}`, style: 'cardText' });
-      if (d.volumen_m3) col2.push({ text: `Volumen (m³): ${d.volumen_m3}`, style: 'cardText' });
 
-      if (d.id_mercancia) col1.push({ text: `Mercancía: ${this.getMercanciaNombre(d.id_mercancia)}`, style: 'cardText' });
-      if (d.embalaje) col2.push({ text: `Embalaje: ${d.embalaje}`, style: 'cardText' });
+      if (d.mercancia) col1.push({ text: `Mercancía: ${d.mercancia}`, style: 'cardText' });
+      if (d.crt) col2.push({ text: `CRT: ${d.crt}`, style: 'cardText' });
 
       if (d.id_ciudad_origen) col1.push({ text: `Origen: ${this.getCiudadNombre(d.id_ciudad_origen)}`, style: 'cardText' });
       if (d.id_ciudad_destino) col2.push({ text: `Destino: ${this.getCiudadNombre(d.id_ciudad_destino)}`, style: 'cardText' });
 
-      if (d.fecha_llegada) col1.push({ text: `Fecha Llegada: ${this.formatFecha(d.fecha_llegada)}`, style: 'cardText' });
-      if (d.fecha_limite) col2.push({ text: `Fecha Límite: ${this.formatFecha(d.fecha_limite)}`, style: 'cardText' });
-
-      if (this.getCiudadNombre(d.id_ciudad_origen) === 'ARICA' && d.id_despacho_portuario) {
-        col1.push({ text: `Despacho Portuario: ${d.id_despacho_portuario}`, style: 'cardText' });
-      }
-
-      if (d.id_despacho_aduanero) col2.push({ text: `Despacho Aduanero: ${d.id_despacho_aduanero}`, style: 'cardText' });
-      if (d.id_despacho_aduanero === 'GENERAL' && d.id_despacho_aduanero_general) {
-        col1.push({ text: `Despacho Aduanero General: ${d.id_despacho_aduanero_general}`, style: 'cardText' });
-      }
-
-      if (d.id_deposito_aduanero) col2.push({ text: `Depósito Aduanero: ${d.id_deposito_aduanero}`, style: 'cardText' });
-
-      // BL Madre
-      if (d.bl_madre && !d.bl_hijo && !d.bl_nieto) {
-        col1.push({ text: `BL Madre: ${d.bl_madre}`, style: 'cardText' });
-        if (d.fecha_bl_madre) col2.push({ text: `Fecha BL Madre: ${this.formatFecha(d.fecha_bl_madre)}`, style: 'cardText' });
-      }
-
-      // BL Hijo
-      if (d.bl_hijo && !d.bl_nieto) {
-        col1.push({ text: `BL Hijo: ${d.bl_hijo}`, style: 'cardText' });
-        if (d.fecha_bl_hijo) col2.push({ text: `Fecha BL Hijo: ${this.formatFecha(d.fecha_bl_hijo)}`, style: 'cardText' });
-      }
-
-      // BL Nieto
-      if (d.bl_nieto) {
-        col1.push({ text: `BL Nieto: ${d.bl_nieto}`, style: 'cardText' });
-        if (d.fecha_bl_nieto) col2.push({ text: `Fecha BL Nieto: ${this.formatFecha(d.fecha_bl_nieto)}`, style: 'cardText' });
-      }
-
-      if (d.dam) col1.push({ text: `DAM: ${d.dam}`, style: 'cardText' });
-      if (d.fecha_dam) col2.push({ text: `Fecha DAM: ${this.formatFecha(d.fecha_dam)}`, style: 'cardText' });
+      if (d.fecha_carga) col1.push({ text: `Fecha Carga: ${this.formatFecha(d.fecha_carga)}`, style: 'cardText' });
+      if (d.fecha_descarga) col2.push({ text: `Fecha Descarga: ${this.formatFecha(d.fecha_descarga)}`, style: 'cardText' });
+      if (d.fecha_stack) col2.push({ text: `Fecha Stack: ${this.formatFecha(d.fecha_stack)}`, style: 'cardText' });
 
       if (d.id_preasignacion_vehiculo_carga) {
         col1.push({ text: `Preasignación Carga: ${this.getVehiculoNombre(d.id_preasignacion_vehiculo_carga)}`, style: 'cardText' });
@@ -1405,18 +926,6 @@ export class DespachosComponent implements OnInit {
       if (d.id_asignacion_vehiculo_carga) {
         col2.push({ text: `Asignación Carga: ${this.getVehiculoNombre(d.id_asignacion_vehiculo_carga)}`, style: 'cardText' });
       }
-
-      if (d.fecha_carga) col1.push({ text: `Fecha Carga: ${this.formatFecha(d.fecha_carga)}`, style: 'cardText' });
-
-      // Descripción y precintos ocupan fila completa
-      if (d.descripcion) {
-        col1.push({ text: `Descripción: ${d.descripcion}`, style: 'cardText', colSpan: 2 });
-      }
-      if (d.precinto) col2.push({ text: `Precinto: ${d.precinto}`, style: 'cardText' });
-      if (d.precinto_dress) col1.push({ text: `Precinto DRES: ${d.precinto_dress}`, style: 'cardText' });
-      if (d.precinto_gog) col2.push({ text: `Precinto GOG: ${d.precinto_gog}`, style: 'cardText' });
-      if (d.dim) col1.push({ text: `DIM: ${d.dim}`, style: 'cardText' });
-      if (d.fecha_dim) col2.push({ text: `Fecha DIM: ${this.formatFecha(d.fecha_dim)}`, style: 'cardText' });
 
       if (d.despacho_agencia) col1.push({ text: `Despacho Agencia: ${d.despacho_agencia}`, style: 'cardText' });
       if (d.despacho_nombre) col2.push({ text: `Contacto: ${d.despacho_nombre}`, style: 'cardText' });
@@ -1472,54 +981,26 @@ export class DespachosComponent implements OnInit {
     // Transformar datos a un array plano para Excel
     const datosParaExcel = this.despachosFiltrados.map(d => ({
       Cliente: this.getClienteNombre(d.id_cliente),
-      Mercancía: this.getMercanciaNombre(d.id_mercancia),
+      Mercancía: d.mercancia,
+      Crt: d.crt,
       Contenedor: d.numero_contenedor,
-      'Tipo Carga': d.id_tipo_carga,
-      'Tamaño': d.descripcion_carga,
+      'Tipo Carga': d.tipo_carga,
+      'Tamaño': d.tamano,
       'Naviera': this.getNavieraNombre(d.id_naviera),
-      Autorizado: this.getNavieraNombre(d.id_naviera) === 'MSC' ? (d.autorizado ? 'Sí' : 'No') : '',
       'Peso (kg)': d.peso_kg,
-      'Volumen (m³)': d.volumen_m3,
-      Embalaje: d.embalaje,
       Origen: this.getCiudadNombre(d.id_ciudad_origen),
       Destino: this.getCiudadNombre(d.id_ciudad_destino),
 
-      'Fecha Llegada': this.formatFecha(d.fecha_llegada),
-      'Fecha Límite': this.formatFecha(d.fecha_limite),
-
-      'BL Madre': d.bl_madre,
-      'Fecha BL Madre': this.formatFecha(d.fecha_bl_madre),
-      'BL Hijo': d.bl_hijo,
-      'Fecha BL Hijo': this.formatFecha(d.fecha_bl_hijo),
-      'BL Nieto': d.bl_nieto,
-      'Fecha BL Nieto': this.formatFecha(d.fecha_bl_nieto),
-
-      DAM: d.dam,
-      'Fecha DAM': this.formatFecha(d.fecha_dam),
-
-      'Despacho Portuario': this.getCiudadNombre(d.id_ciudad_origen) === 'ARICA' ? d.id_despacho_portuario : '',
-      'Despacho Aduanero': d.id_despacho_aduanero,
-      'Despacho Aduanero General': d.id_despacho_aduanero === 'GENERAL' ? d.id_despacho_aduanero_general : '',
-      'Depósito Aduanero': d.id_deposito_aduanero,
+      'Fecha Carga': this.formatFecha(d.fecha_carga),
+      'Fecha Descarga': this.formatFecha(d.fecha_descarga),
+      'Fecha Stack': this.formatFecha(d.fecha_stack),
 
       'Preasignación Carga': !d.id_asignacion_vehiculo_carga ? this.getVehiculoNombre(d.id_preasignacion_vehiculo_carga) : '',
       'Asignación Carga': this.getVehiculoNombre(d.id_asignacion_vehiculo_carga),
-      'Fecha Carga': this.formatFecha(d.fecha_carga),
-
-      // Solo si despacho es anticipado
-      DIM: d.id_despacho_aduanero === 'ANTICIPADO' ? d.dim : '',
-      'Fecha DIM': d.id_despacho_aduanero === 'ANTICIPADO' ? this.formatFecha(d.fecha_dim) : '',
 
       'Agencia': d.despacho_agencia,
       'Agencia Nombre': d.despacho_nombre,
       'Agencia Teléfono': d.despacho_telefono,
-
-      'Precinto': d.precinto,
-      'Precinto DRES': d.precinto_dress,
-      'Precinto GOG': d.precinto_gog,
-
-      'Autorizado MSC': this.getNavieraNombre(d.id_naviera) === 'MSC' ? (d.autorizado ? 'Sí' : 'No') : '',
-      'Descripción Adicional': d.descripcion,
       Estado: d.estado
     }));
 
@@ -1560,38 +1041,11 @@ export class DespachosComponent implements OnInit {
   }
 
   getDocumentosFiltrados(despacho: any) {
-    let docs = this.getCiudadNombre(despacho.id_ciudad_origen) === 'ARICA'
+    let docs = this.getCiudadNombre(despacho.id_ciudad_destino) === 'ARICA'
       ? this.documentosRequeridosArica
       : this.documentosRequeridosIquique;
 
-    // Filtra lo que no quieres mostrar
-    if (despacho.id_despacho_aduanero_general === 'CON_DESCARGA') {
-      docs = docs.filter(doc => doc.nombre !== 'DIM');
-    }
-    if (!despacho.permisos && despacho.permisos !== true) {
-      docs = docs.filter(doc => doc.nombre !== 'PERMISOS');
-    }
-    if (despacho.estado === 'EN OFICINA') {
-      docs = docs.filter(doc => !['MIC-CRT'].includes(doc.nombre));
-    }
-
     return docs;
-
-  }
-
-  esContravencion(despacho: any): boolean {
-    if ((despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto) && despacho.fecha_dam) {
-      const fechaDam = new Date(despacho.fecha_dam);
-      const fechaBL = new Date(despacho.fecha_bl_madre || despacho.fecha_bl_hijo || despacho.fecha_bl_nieto);
-
-      const nuevaFechaBL = new Date(fechaBL);
-      nuevaFechaBL.setDate(nuevaFechaBL.getDate() + 20);
-
-      if (fechaDam.getTime() > nuevaFechaBL.getTime()) {
-        return true; // hay contravención
-      }
-    }
-    return false; // no hay
   }
 
   guardarEstadoDespacho(despacho: any, nuevoEstado: boolean): void {
@@ -1638,6 +1092,22 @@ export class DespachosComponent implements OnInit {
     } finally {
       element.classList.remove('modo-captura');
       this.generando = false;
+    }
+  }
+
+  actualizarTipoCarga(tipo_carga: string) {
+    switch (tipo_carga) {
+      case 'CARGA_SUELTA':
+        this.bloquearContenedor = true;
+        this.bloquearTamano = true;
+        setTimeout(() => {
+          this.despachoSeleccionado.numero_contenedor = '';
+          this.despachoSeleccionado.tamano = '';
+        }, 0);
+        break;
+      default:
+        this.bloquearContenedor = false;
+        this.bloquearTamano = false;
     }
   }
 

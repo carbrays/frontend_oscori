@@ -19,14 +19,14 @@
       <tr>
         <th>Nombre Consignatario</th>
         <th>N° Contenedor</th>
+        <th>Naviera</th>
         <th>Tamaño Contenedor</th>
         <th>Peso KG</th>
-        <th>Naviera</th>
-        <th>Tipo Documento</th>
+        <th>CRT</th>
         <th>Tipo Carga</th>
         <th>Origen</th>
         <th>Destino</th>
-        <th>Fecha Llegada</th>
+        <th>Fecha Carga</th>
         <th>Flete</th>
         <th>N° Cotización</th>
         <th>Acciones</th>
@@ -36,56 +36,25 @@
     <ng-template pTemplate="body" let-cotizacion>
       <tr (click)="onRowClick(cotizacion)" [ngClass]="estiloFila(cotizacion)">
         <td>{{ getClienteNombre(cotizacion.nombre_comercial) }}</td>
-        <td *ngIf="cotizacion.contenedores.length>1">
-          {{cotizacion.contenedores.length}}
-          <button type="button"
-            class="btn-outline-info rounded-pill btn btn-icon btn-sm" (click)="cotizacion.expanded = !cotizacion.expanded; $event.stopPropagation()"><i
-              [class]="cotizacion.expanded ? 'ri-arrow-drop-up-line fs-22' : 'ri-arrow-drop-down-line fs-22'" aria-hidden="true"></i></button>
-            </td>
-        <td *ngIf="cotizacion.contenedores.length==0 || cotizacion.contenedores.length==1">{{ cotizacion.contenedores?.[0]?.numero_contenedor }}</td>
-        <td *ngIf="cotizacion.contenedores.length>1"></td>
-        <td *ngIf="cotizacion.contenedores.length==0 || cotizacion.contenedores.length==1">{{ cotizacion.contenedores?.[0]?.tamano }}</td>
-        <td *ngIf="cotizacion.contenedores.length>1"></td>
-        <td *ngIf="cotizacion.contenedores.length==0 || cotizacion.contenedores.length==1">{{ cotizacion.contenedores?.[0]?.peso_kg }}</td>
+        <td>{{ cotizacion.numero_contenedor }}</td>
         <td>{{ getNavieraNombre(cotizacion.id_naviera) }}</td>
-        <td>{{ cotizacion.tipo_documento }}</td>
+        <td>{{ cotizacion.tamano }}</td>
+        <td>{{ cotizacion.peso_kg }}</td>
+        <td>{{ cotizacion.crt }}</td>
         <td>{{ cotizacion.id_tipo_carga }}</td>
         <td>{{ getCiudadNombre(cotizacion.id_ciudad_origen) }}</td>
         <td>{{ getCiudadNombre(cotizacion.id_ciudad_destino) }}</td>
-        <td>{{ cotizacion.fecha_llegada | date:'dd/MM/yyyy' }}</td>
+        <td>{{ cotizacion.fecha_carga | date:'dd/MM/yyyy' }}</td>
         <td>{{ cotizacion.flete }}</td>
         <td>{{ cotizacion.correlativo }}</td>
         <td>
-          <button *ngIf="cotizacion.estado !== 'ACEPTADO'" type="button"
-            class="btn-outline-danger rounded-pill btn btn-icon btn-sm" (click)="eliminarCotizacion(cotizacion); $event.stopPropagation()"><i
-              class="ri-delete-bin-6-line fs-22" aria-hidden="true"></i></button>
+          <button *ngIf="cotizacion.estado !== 'ACEPTADO'" type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm"
+            (click)="eliminarCotizacion(cotizacion)"><i class="ri-delete-bin-6-line fs-22"
+              aria-hidden="true"></i></button>
           <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm"
-            (click)="editarCotizacion(cotizacion); $event.stopPropagation()"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
+            (click)="editarCotizacion(cotizacion)"><i class="ri-ball-pen-line fs-22" aria-hidden="true"></i></button>
         </td>
       </tr>
-      <tr *ngIf="cotizacion.expanded">
-      <td colspan="4" style="padding: 0;">
-        <p-table [value]="cotizacion.contenedores" [style]="{'margin': '0'}">
-          <ng-template pTemplate="header">
-      <tr>
-        <th style="opacity: 0;">Nombre Consignatario</th>
-        <th>N° Contenedor</th>
-        <th>Tamaño Contenedor</th>
-        <th>Peso KG</th>
-      </tr>
-    </ng-template>
-          <ng-template pTemplate="body" let-cont>
-            <tr>
-              <td style="opacity: 0;">{{ getClienteNombre(cotizacion.nombre_comercial) }}</td>
-              <td>{{ cont.numero_contenedor }}</td>
-              <td>{{ cont.tamano }}</td>
-              <td>{{ cont.peso_kg }}</td>
-              
-            </tr>
-          </ng-template>
-        </p-table>
-      </td>
-    </tr>
     </ng-template>
   </p-table>
 </div>
@@ -138,16 +107,14 @@
                     <ng-select class="input-full" [items]="clientes" bindLabel="nombre_comercial" bindValue="value"
                       [(ngModel)]="cotizacionSeleccionada.nombre_comercial" [ngModelOptions]="{ standalone: true }"
                       placeholder="Seleccione un cliente" (ngModelChange)="clienteSeleccionado($event)"
-                      (clear)="clienteLimpio()"
                       [disabled]="!cotizacionSeleccionada.categoria_cliente">
                     </ng-select>
 
                     <button pButton type="button" icon="ri-adds-line" class="p-button-success p-button-sm"
-                      style="height: 40px; padding: 0 8px;" (click)="crearCliente()"
-                      [disabled]="!cotizacionSeleccionada.categoria_cliente">
+                      style="height: 40px; padding: 0 8px;" (click)="crearCliente()" [disabled]="!cotizacionSeleccionada.categoria_cliente">
                       <i class="ri-add-line" style="font-size: 1.2rem;"></i>
                     </button>
-
+                    
                   </div>
 
                 </div>
@@ -195,11 +162,10 @@
                       [disabled]="!cotizacionSeleccionada.categoria_cliente">
                     </ng-select>
                     <button pButton type="button" icon="ri-adds-line" class="p-button-success p-button-sm"
-                      style="height: 40px; padding: 0 8px;" (click)="crearForwader()"
-                      [disabled]="!cotizacionSeleccionada.categoria_cliente">
+                      style="height: 40px; padding: 0 8px;" (click)="crearForwader()" [disabled]="!cotizacionSeleccionada.categoria_cliente">
                       <i class="ri-add-line" style="font-size: 1.2rem;"></i>
                     </button>
-
+                    
                   </div>
 
                 </div>
@@ -239,8 +205,7 @@
 
           <div class="d-flex justify-content-end mt-3">
             <button pButton label="Siguiente" (click)="nextStep()" style="width: auto;"
-              [disabled]="!cotizacionSeleccionada.nombre_comercial && !cotizacionSeleccionada.c_nombre_comercial"
-              class="p-button-primary w-full md:w-auto"></button>
+              [disabled]="!cotizacionSeleccionada.nombre_comercial && !cotizacionSeleccionada.c_nombre_comercial" class="p-button-primary w-full md:w-auto"></button>
           </div>
         </div>
       </div>
@@ -252,24 +217,6 @@
 
           <form #form="ngForm">
             <div class="d-flex flex-wrap mb-4 p-fluid">
-              <div class="p-1 w-100">
-                <label for="tipo_documento">Tipo Documento</label>
-                <p-selectButton [options]="tipo_documento" [(ngModel)]="cotizacionSeleccionada.tipo_documento"
-                  optionLabel="label" optionValue="value" [style]="{ width: '100%', height: '35px' }"
-                  [ngModelOptions]="{ standalone: true }" name="tipo_documento" />
-              </div>
-
-              <div class="p-1 w-100">
-                <label for="tipo_bl">Tipo BL</label>
-                <p-selectButton [options]="tipo_bl" [(ngModel)]="cotizacionSeleccionada.tipo_bl" optionLabel="label"
-                  optionValue="value" [style]="{ width: '100%', height: '35px' }"
-                  [ngModelOptions]="{ standalone: true }" name="tipo_bl" />
-              </div>
-
-              <div class="p-1 flex-fill">
-                <label for="numero_bl">Número BL</label>
-                <input pInputText id="numero_bl" [(ngModel)]="cotizacionSeleccionada.numero_bl" name="numero_bl" />
-              </div>
 
               <div class="p-1 flex-fill">
                 <label for="id_tipo_carga">Tipo Carga</label>
@@ -279,28 +226,7 @@
                   name="tipo_carga" />
               </div>
 
-              <div *ngIf="!bloquearContenedor" class="col-12 md:col-6">
-                <button pButton label="Añadir Contenedor" icon="pi pi-plus" class="p-button-success"
-                  (click)="nuevoContenedor()">
-                </button>
-                <div class="chips-container">
-                  <div class="chip" *ngFor="let d of contenedores; let i = index" (click)="editarContenedor(i)">
-                    Contenedor: {{ d.numero_contenedor }} <br>
-                    Tamaño:{{ d.tamano }} <br>
-                    Peso Kg:{{ d.peso_kg }} kg <br>
-                    Mercancia: {{ getMercanciaNombre(d.id_mercancia) }} <br>
-                    Embalaje: {{ d.embalaje }} <br>
-                    Volumen: {{ d.volumen_m3 }} m³
-                    
-                    <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm"
-                      (click)="eliminarContenedor(i); $event.stopPropagation();"><i class="ri-delete-bin-6-line fs-22"
-                        aria-hidden="true"></i></button>
-                    <!-- <span class="remove" (click)="eliminarContenedor(i); $event.stopPropagation();">×</span> -->
-                  </div>
-                </div>
-              </div>
-
-              <!-- <div *ngIf="!bloquearContenedor" class="p-1 flex-fill">
+              <div *ngIf="!bloquearContenedor" class="p-1 flex-fill">
                 <label for="numero_contenedor">Contenedor</label>
                 <input pInputText id="numero_contenedor" [(ngModel)]="cotizacionSeleccionada.numero_contenedor"
                   name="numero_contenedor" [disabled]="bloquearContenedor" />
@@ -318,31 +244,16 @@
               </div>
 
               <div class="p-1 flex-fill">
-                <label for="id_mercancia">Mercancía</label>
-                <div class="divadd">
-                  <ng-select [items]="mercancias" bindLabel="label" bindValue="value"
-                    [(ngModel)]="cotizacionSeleccionada.id_mercancia" [ngModelOptions]="{ standalone: true }"
-                    placeholder="Seleccione una mercancía" [style.width.%]="100" [style.minWidth.px]="250">
-                  </ng-select>
-
-                  <button pButton type="button" icon="ri-adds-line" class="p-button-success p-button-sm"
-                    style="height: 40px; padding: 0 8px;" (click)="crearMercancia()">
-                    <i class="ri-add-line" style="font-size: 1.2rem;"></i>
-                  </button>
-
-                </div>
+                <label for="mercancia">Mercancía</label>
+                <input pInputText type="text" id="mercancia" [(ngModel)]="cotizacionSeleccionada.mercancia"
+                  name="mercancia" />
               </div>
 
               <div class="p-1 flex-fill">
-                <label for="embalaje">Embalaje</label>
-                <input pInputText id="embalaje" [(ngModel)]="cotizacionSeleccionada.embalaje" name="embalaje" />
+                <label for="crt">CRT</label>
+                <input pInputText type="text" id="crt" [(ngModel)]="cotizacionSeleccionada.crt"
+                  name="crt" />
               </div>
-
-              <div class="p-1 flex-fill">
-                <label for="volumen_m3">Volumen m3</label>
-                <input pInputText type="number" id="volumen_m3" [(ngModel)]="cotizacionSeleccionada.volumen_m3"
-                  name="volumen_m3" />
-              </div> -->
 
               <div class="p-1 w-100">
                 <label for="id_naviera">Naviera</label>
@@ -352,25 +263,31 @@
               </div>
 
               <div class="p-1 flex-fill" style="min-width: 250px;">
-                <label for="fecha_llegada">Fecha Llegada</label>
-                <p-calendar inputId="fecha_llegada" [(ngModel)]="cotizacionSeleccionada.fecha_llegada"
-                  name="fecha_llegada" dateFormat="yy-mm-dd" [showIcon]="true"
-                  [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"
-                  (ngModelChange)="calcularFechaLimite($event)"></p-calendar>
+                <label for="fecha_carga">Fecha Carga</label>
+                <p-calendar inputId="fecha_carga" [(ngModel)]="cotizacionSeleccionada.fecha_carga"
+                  name="fecha_carga" dateFormat="yy-mm-dd" [showIcon]="true"
+                  [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
               </div>
 
               <div class="p-1 flex-fill" style="min-width: 250px;">
-                <label for="fecha_limite">Fecha Límite</label>
-                <p-calendar inputId="fecha_limite" [(ngModel)]="cotizacionSeleccionada.fecha_limite" name="fecha_limite"
+                <label for="fecha_descarga">Fecha Descarga</label>
+                <p-calendar inputId="fecha_descarga" [(ngModel)]="cotizacionSeleccionada.fecha_descarga" name="fecha_descarga"
                   dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }"
-                  [appendTo]="'body'" [disabled]="true"></p-calendar>
+                  [appendTo]="'body'" ></p-calendar>
+              </div>
+
+              <div class="p-1 flex-fill" style="min-width: 250px;">
+                <label for="fecha_stack">Fecha Stack</label>
+                <p-calendar inputId="fecha_stack" [(ngModel)]="cotizacionSeleccionada.fecha_stack" name="fecha_stack"
+                  dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }"
+                  [appendTo]="'body'" ></p-calendar>
               </div>
 
               <div class="p-1 flex-fill">
                 <label for="id_ciudad_origen">Ciudad Origen</label>
                 <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
                   [(ngModel)]="cotizacionSeleccionada.id_ciudad_origen" [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="actualizarOrigen($event)" placeholder="Seleccione una ciudad">
+                  placeholder="Seleccione una ciudad">
                 </ng-select>
               </div>
 
@@ -381,36 +298,7 @@
                   placeholder="Seleccione una ciudad">
                 </ng-select>
               </div>
-
-              <div class="p-1 w-100">
-                <label for="id_despacho_aduanero">Despacho Aduanero</label>
-                <p-selectButton [options]="tipo_despacho_aduanero"
-                  [(ngModel)]="cotizacionSeleccionada.id_despacho_aduanero" optionLabel="label" optionValue="value"
-                  [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
-                  name="despacho_aduanero" />
-              </div>
-
-              <div class="p-1 flex-fill">
-                <label for="lugar_descarga">Lugar Descarga</label>
-                <input pInputText id="lugar_descarga" [(ngModel)]="cotizacionSeleccionada.lugar_descarga"
-                  name="lugar_descarga" />
-              </div>
-
-              <div *ngIf="bloquearOrigen" class="p-1 w-100">
-                <label for="id_despacho_portuario">Despacho Portuario</label>
-                <p-selectButton [options]="tipo_despacho_portuario"
-                  [(ngModel)]="cotizacionSeleccionada.id_despacho_portuario" optionLabel="label" optionValue="value"
-                  [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
-                  name="id_despacho_portuario" />
-              </div>
-
-              <div class="p-1 flex-fill">
-                <label for="camion">Camion</label>
-                <p-selectButton [options]="camion" [(ngModel)]="cotizacionSeleccionada.camion" optionLabel="label"
-                  optionValue="value" [style]="{ width: '100%', height: '35px' }"
-                  [ngModelOptions]="{ standalone: true }" name="camion" />
-              </div>
-
+              
               <div class="p-1 w-100">
                 <label for="observacion">Observación</label>
                 <textarea pInputTextarea id="observacion" [(ngModel)]="cotizacionSeleccionada.observacion"
@@ -437,12 +325,6 @@
 
         <!-- Checkboxes centrados -->
         <div class="d-flex flex-column gap-2 mb-3 align-items-center">
-          <div class="d-flex flex-column align-items-center">
-            <label for="devolucion" class="mb-1">Devolución</label>
-            <p-checkbox [(ngModel)]="cotizacionSeleccionada.devolucion" [binary]="true" inputId="devolucion"
-              name="devolucion">
-            </p-checkbox>
-          </div>
 
           <div class="d-flex flex-column align-items-center mb-2">
             <label for="gate_in" class="mb-1">Gate In</label>
@@ -516,7 +398,6 @@
 
   <iframe [src]="pdfSrc" width="100%" height="100%" style="border:none;"></iframe>
 </p-dialog>
-
 
 <!-- CREAR CLIENTE -->
 <p-dialog [(visible)]="dialogCliente" [modal]="true" [style]="{ width: '60%' }" header="Crear Nuevo Cliente">
@@ -607,77 +488,4 @@
         (click)="dialogForwader = false"></button>
     </div>
   </form>
-</p-dialog>
-
-<!-- CREAR MERCANCIA -->
-<p-dialog [(visible)]="dialogMercancia" [modal]="true" [style]="{ width: '800px' }" header="Crear Nueva Mercancia">
-  <form (ngSubmit)="guardarMercancia()" #form="ngForm">
-    <div class="p-fluid p-grid p-formgrid">
-
-      <div class="p-field p-col-4">
-        <label for="placa">Mercancía</label>
-        <input pInputText id="placa" [(ngModel)]="nuevaMercancia.mercancia" name="placa" />
-      </div>
-
-      <div class="p-field p-col-4">
-        <label for="marca">Descripción</label>
-        <input pInputText id="marca" [(ngModel)]="nuevaMercancia.descripcion" name="marca" />
-      </div>
-
-    </div>
-    <div class="p-dialog-footer">
-      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
-      <button pButton type="button" label="Cancelar" class="p-button-secondary"
-        (click)="dialogMercancia = false"></button>
-    </div>
-  </form>
-</p-dialog>
-
-<!-- EDITAR DETALLE CONTENEDOR -->
-<p-dialog header="Contenedor" [(visible)]="contenedorVisible" [modal]="true" [style]="{width: '650px'}">
-
-  <fieldset class="d-flex flex-wrap mb-4 p-fluid" style="border-radius: 10px; border: 1px solid #ccc;">
-    <legend>Datos del Contenedor</legend>
-
-    <div class="p-1 flex-fill">
-      <label>N° Contenedor</label>
-      <input pInputText [(ngModel)]="contenedorActual.numero_contenedor">
-    </div>
-
-    <div class="p-1 flex-fill">
-      <label>Tamaño</label>
-      <input pInputText [(ngModel)]="contenedorActual.tamano">
-    </div>
-
-    <div class="p-1 flex-fill">
-      <label>Peso KG</label>
-      <input pInputText type="number" [(ngModel)]="contenedorActual.peso_kg">
-    </div>
-
-    <div class="p-1 flex-fill">
-      <label>Mercancía</label>
-      <ng-select [items]="mercancias" bindLabel="label" bindValue="value" [(ngModel)]="contenedorActual.id_mercancia"
-        placeholder="Seleccione">
-      </ng-select>
-      <button pButton type="button" icon="ri-adds-line" class="p-button-success p-button-sm"
-                    style="height: 40px; padding: 0 8px;" (click)="crearMercancia()">
-                    <i class="ri-add-line" style="font-size: 1.2rem;"></i>
-                  </button>
-    </div>
-
-    <div class="p-1 flex-fill">
-      <label>Embalaje</label>
-      <input pInputText [(ngModel)]="contenedorActual.embalaje">
-    </div>
-
-    <div class="p-1 flex-fill">
-      <label>Volumen m³</label>
-      <input pInputText type="number" [(ngModel)]="contenedorActual.volumen_m3">
-    </div>
-  </fieldset>
-
-  <p-footer>
-    <button pButton label="Guardar" icon="pi pi-check" (click)="guardarContenedor()"></button>
-  </p-footer>
-
 </p-dialog>

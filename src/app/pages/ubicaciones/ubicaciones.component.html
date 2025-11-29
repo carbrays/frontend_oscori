@@ -1,0 +1,47 @@
+<div class="map-container">
+  <h3>Mapa de Ubicaciones</h3>
+  <!-- <button pButton type="button" label="Agregar Punto" icon="pi pi-plus" (click)="activarAgregarPunto()"></button> -->
+
+  <div class="row g-3">
+  <div class="col-12">
+    <!-- <h5>VEHICULOS</h5> -->
+    <div class="d-flex flex-wrap justify-content-between gap-3">
+      <div class="card p-3 text-white shadow-sm border-0 flex-grow-1" *ngFor="let vehiculo of vehiculos"
+        [ngStyle]="{'background-color': '#28a745', 'min-width':'200px', 'max-width':'250px'}"
+        (click)="seleccionarVehiculo(vehiculo)">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fs-4">{{ vehiculo.nombre }}</div>
+          <i [class]="vehiculo.icono" style="font-size: 1.5rem;"></i>
+        </div>
+        <div class="display-6 fw-bold">{{ vehiculo.placa }}</div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+  <h3>{{ vehiculoSeleccionado.placa }}</h3>
+</div>
+
+  </div>
+</div>
+
+  <div id="map" style="height: 500px; width: 100%; margin-top: 10px;"></div>
+
+  <!-- Formulario emergente -->
+  <p-dialog header="Nuevo Punto" [(visible)]="mostrarFormulario" [modal]="true" [closable]="false">
+    <form (ngSubmit)="guardarPunto()" #form="ngForm">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="titulo">Título</label>
+          <input id="titulo" type="text" pInputText [(ngModel)]="puntoTemp.titulo" name="titulo" required />
+        </div>
+        <div class="p-field">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" pInputTextarea [(ngModel)]="puntoTemp.descripcion" name="descripcion"></textarea>
+        </div>
+      </div>
+      <p-footer>
+        <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+        <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="cancelarPunto()"></button>
+      </p-footer>
+    </form>
+  </p-dialog>
+</div>

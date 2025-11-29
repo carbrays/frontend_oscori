@@ -8,7 +8,7 @@ import { URL_SERVICIOS } from 'src/app/config/config';
 })
 export class ContenedorService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getContenedores(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/contenedores`);
@@ -43,11 +43,11 @@ export class ContenedorService {
     return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/mercancias`);
   }
 
-   getCiudad(): Observable<any[]> {
+  getCiudad(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/ciudades`);
   }
 
-   getNaviera(): Observable<any[]> {
+  getNaviera(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/navieras`);
   }
 
@@ -106,12 +106,16 @@ export class ContenedorService {
   getPdfs(id_contenedor: number, pdf: string): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/pdfs/${id_contenedor}/${pdf}`);
   }
-  
-  subirPdf(formData: FormData): Observable<any> {
-  return this.http.post(`${URL_SERVICIOS}/contenedor/subir_pdf`, formData);
-}
 
-deleteFile(pdf: string): Observable<any> {
+  subirPdf(formData: FormData): Observable<any> {
+    return this.http.post(`${URL_SERVICIOS}/contenedor/subir_pdf`, formData);
+  }
+
+  deleteFile(pdf: string): Observable<any> {
     return this.http.delete(`${URL_SERVICIOS}/contenedor/eliminar_pdf/${pdf}`);
+  }
+
+  subirComprobante(formData: FormData): Observable<any> {
+    return this.http.post(`${URL_SERVICIOS}/contenedor/subir_comprobante`, formData);
   }
 }

@@ -42,4 +42,8 @@ export class ClientesService {
     };
     return this.http.put(`${URL_SERVICIOS}/cliente/eliminar_cliente/${id_cliente}`, body);
   }
+
+   getCiudad(): Observable<any[]> {
+      return this.http.get<any[]>(`${URL_SERVICIOS}/cliente/ciudades`);
+    }
 }

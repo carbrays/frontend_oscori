@@ -6,13 +6,9 @@ import { URL_SERVICIOS } from 'src/app/config/config';
 @Injectable({
   providedIn: 'root',
 })
-export class VehiculosService {
+export class UbicacionesService {
 
   constructor(private http: HttpClient) {}
-
-  getConductores(): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/conductores`);
-  }
 
   getVehiculos(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/vehiculos`);
@@ -37,6 +33,10 @@ export class VehiculosService {
 
   getVehiculosPropios(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/vehiculos_propios`);
+  }
+
+  getUbicacionesVehiculo(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/ubicaciones/${id}`);
   }
 
   getMantenimientos(id: number): Observable<any[]> {
@@ -121,26 +121,6 @@ export class VehiculosService {
       fecmod: new Date()
     };
     return this.http.put(`${URL_SERVICIOS}/vehiculo/eliminar_revision/${id}`, body);
-  }
-
-  getPdfs(carpeta: string, id: number, pdf: string): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/pdfs/${carpeta}/${id}/${pdf}`);
-  }
-
-  subirPdf(carpeta: string, formData: FormData): Observable<any> {
-    const body = {
-      archivo: formData,
-      carpeta: carpeta
-    };
-    return this.http.post(`${URL_SERVICIOS}/vehiculo/subir_pdf`, body);
-  }
-
-  deleteFile(carpeta: string, pdf: string): Observable<any> {
-    return this.http.delete(`${URL_SERVICIOS}/vehiculo/eliminar_pdf/${carpeta}/${pdf}`);
-  }
-
-  getViajes(id: number, fecha: string): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/viajes/${id}/${fecha}`);
   }
   
 }

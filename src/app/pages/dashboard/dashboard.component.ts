@@ -45,6 +45,16 @@ export class DashboardComponent implements OnInit {
 
   contenedores: any[] = [];
 
+  vistaClientes = true;
+  clienteSeleccionado: any = null;
+  clientesAgrupados: any[] = [];
+  despachosFiltradosCliente: any[] = [];
+
+  vistaContenedores = true;
+  contenedorSeleccionado: any = null;
+  contenedoresAgrupados: any[] = [];
+  contenedoresFiltradosCliente: any[] = [];
+
   constructor(private dashboardService: DashboardService, private zone: NgZone) { }
 
   ngOnInit() {
@@ -264,11 +274,41 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getDespachos(grupo, estado).subscribe({
       next: (data) => {
         this.despachos = data;
+        this.agruparClientes();
         console.log('Despachos cargados:', this.despachos);
       },
       error: (err) =>
         Swal.fire('Error', 'No se pudo cargar la lista de despachos.', 'error'),
     });
+  }
+
+  agruparClientes() {
+    // Agrupa por cliente
+    const mapa = new Map<number, { id_cliente: number; nombre: string; cantidad: number }>();
+
+    for (const d of this.despachos) {
+      const id = d.id_cliente;
+      if (!mapa.has(id)) {
+        mapa.set(id, { id_cliente: id, nombre: this.getClienteNombre(id), cantidad: 0 });
+      }
+      mapa.get(id)!.cantidad++;
+    }
+
+    this.clientesAgrupados = Array.from(mapa.values());
+  }
+
+  verDespachosDeCliente(cliente: any) {
+    this.vistaClientes = false;
+    this.clienteSeleccionado = cliente;
+    this.despachosFiltradosCliente = this.despachos.filter(
+      (d) => d.id_cliente === cliente.id_cliente
+    );
+  }
+
+  volverAClientes() {
+    this.vistaClientes = true;
+    this.clienteSeleccionado = null;
+    this.despachosFiltradosCliente = [];
   }
 
   abrirDialogContenedor(card: any) {
@@ -281,6 +321,7 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getContenedores(estado).subscribe({
       next: (data) => {
         this.contenedores = data;
+        this.agruparContenedores();
         console.log('Contenedores cargados:', this.contenedores);
       },
       error: (err) =>
@@ -288,10 +329,39 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  agruparContenedores() {
+    // Agrupa por cliente
+    const mapa = new Map<number, { id_cliente: number; nombre: string; cantidad: number }>();
+
+    for (const d of this.contenedores) {
+      const id = d.id_cliente;
+      if (!mapa.has(id)) {
+        mapa.set(id, { id_cliente: id, nombre: this.getClienteNombre(id), cantidad: 0 });
+      }
+      mapa.get(id)!.cantidad++;
+    }
+
+    this.contenedoresAgrupados = Array.from(mapa.values());
+  }
+
+  verContenedoresDeCliente(cliente: any) {
+    this.vistaContenedores = false;
+    this.contenedorSeleccionado = cliente;
+    this.contenedoresFiltradosCliente = this.contenedores.filter(
+      (d) => d.id_cliente === cliente.id_cliente
+    );
+  }
+
+  volverAContenedores() {
+    this.vistaContenedores = true;
+    this.contenedorSeleccionado = null;
+    this.contenedoresFiltradosCliente = [];
+  }
+
   exportarDespachosPDF() {
     const content: any[] = [];
 
-    this.despachos.forEach((d, i) => {
+    this.despachosFiltradosCliente.forEach((d, i) => {
       // Determinar color de fondo por estado
       let bgColor = '#ffffff'; // despacho normal
       const estilo = this.estiloFila(d);
@@ -469,7 +539,7 @@ export class DashboardComponent implements OnInit {
   exportarContenedoresPDF() {
     const content: any[] = [];
 
-    this.contenedores.forEach((c, i) => {
+    this.contenedoresFiltradosCliente.forEach((c, i) => {
       // Determinar color de fondo por estado (igual que CSS)
       let bgColor = '#ffffff';
       const estilo = this.estiloFilaContenedor(c.fecha_limite, c.estado);

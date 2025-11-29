@@ -19,7 +19,7 @@
       <th>Volumen (m³)</th>
       <th>Combustible</th>
       <th>Kilometraje</th>
-      <th>Estado</th>
+      <th>Conductor</th>
       <th>Acciones</th>
     </tr>
     <!-- Fila de filtros -->
@@ -47,7 +47,7 @@
           placeholder="Buscar Combustible" /></th>
       <th><input type="text" pInputText [(ngModel)]="filtroKilometraje" style="width: 100%;" placeholder="Buscar Km" />
       </th>
-      <th><input type="text" pInputText [(ngModel)]="filtroEstado" style="width: 100%;" placeholder="Buscar Estado" />
+      <th><input type="text" pInputText [(ngModel)]="filtroConductor" style="width: 100%;" placeholder="Buscar Conductor" />
       </th>
       <th></th>
     </tr>
@@ -68,7 +68,7 @@
       <td>{{ vehiculo.volumen_carga_m3 }}</td>
       <td>{{ vehiculo.tipo_combustible }}</td>
       <td>{{ vehiculo.kilometraje }}</td>
-      <td>{{ vehiculo.despachos_en_proceso }}</td>
+      <td>{{ vehiculo.conductor ? getConductor(vehiculo.conductor) : vehiculo.nombre ? vehiculo.nombre + ' ' + vehiculo.paterno + ' ' + vehiculo.materno : 'Sin nombre' }}</td>
       <td>
         <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm"
           (click)="eliminarVehiculo(vehiculo)">
@@ -110,7 +110,9 @@
 
       <div class="p-field p-col-4">
         <label for="tipo_vehiculo">Tipo de Vehículo</label>
-        <input pInputText id="tipo_vehiculo" [(ngModel)]="vehiculoSeleccionado.tipo_vehiculo" name="tipo_vehiculo" />
+        <p-selectButton [options]="tipo" [(ngModel)]="vehiculoSeleccionado.tipo_vehiculo" optionLabel="label"
+          optionValue="value" [style]="{ width: '100%', height: '35px' }" [ngModelOptions]="{ standalone: true }"
+          name="tipo_vehiculo" />
       </div>
 
       <div class="p-field p-col-4">
@@ -151,13 +153,52 @@
         <input pInputText id="kilometraje" [(ngModel)]="vehiculoSeleccionado.kilometraje" name="kilometraje" />
       </div>
 
-      <div class="p-field p-col-4">
-        <label for="estado">Estado</label>
-        <ng-select [items]="estados" placeholder="Selecciona un estado" bindLabel="label" bindValue="value"
-          [(ngModel)]="vehiculoSeleccionado.estado" name="cargo">
-        </ng-select>
+      <fieldset *ngIf="vehiculoSeleccionado.tipo_vehiculo !== 'PROPIO'" class="d-flex flex-wrap mb-4 p-fluid" style="border-radius: 10px; border: 1px solid #ccc;">
+        <legend>CONDUCTOR</legend>
 
-      </div>
+        <div class="p-2 flex-fill">
+          <label for="nombre">Nombre</label>
+          <input pInputText id="nombre" [(ngModel)]="vehiculoSeleccionado.nombre" name="nombre" />
+        </div>
+
+        <div class="p-2 flex-fill">
+          <label for="paterno">Paterno</label>
+          <input pInputText id="paterno" [(ngModel)]="vehiculoSeleccionado.paterno" name="paterno" />
+        </div>
+
+        <div class="p-2 flex-fill">
+          <label for="materno">Materno</label>
+          <input pInputText id="materno" [(ngModel)]="vehiculoSeleccionado.materno" name="materno" />
+        </div>
+
+        <div class="p-2 flex-fill">
+          <label for="ci">CI</label>
+          <input pInputText id="ci" [(ngModel)]="vehiculoSeleccionado.ci" name="ci" />
+        </div>
+
+        <div class="p-2 flex-fill">
+          <label for="telefono">Telefono</label>
+          <input pInputText id="telefono" [(ngModel)]="vehiculoSeleccionado.telefono" name="telefono" />
+        </div>
+
+        <div class="p-2 flex-fill">
+          <label for="direccion">Direccion</label>
+          <input pInputText id="direccion" [(ngModel)]="vehiculoSeleccionado.direccion" name="direccion" />
+        </div>
+      </fieldset>
+
+      <fieldset *ngIf="vehiculoSeleccionado.tipo_vehiculo === 'PROPIO'" class="d-flex flex-wrap mb-4 p-fluid" style="border-radius: 10px; border: 1px solid #ccc;">
+        <legend>CONDUCTOR</legend>
+
+        <div class="p-2 flex-fill">
+          <label for="conductor">Conductor</label>
+          <ng-select [items]="conductores" bindLabel="label" bindValue="value"
+            [(ngModel)]="vehiculoSeleccionado.conductor" [ngModelOptions]="{ standalone: true }"
+            placeholder="Seleccione un conductor">
+          </ng-select>
+        </div>
+
+      </fieldset>
 
     </div>
     <div class="p-dialog-footer">

@@ -2,12 +2,9 @@
   <div class="col-12">
     <h5>VEHICULOS</h5>
     <div class="d-flex flex-wrap justify-content-between gap-3">
-      <div 
-        class="card p-3 text-white shadow-sm border-0 flex-grow-1"
-        *ngFor="let vehiculo of vehiculos"
+      <div class="card p-3 text-white shadow-sm border-0 flex-grow-1" *ngFor="let vehiculo of vehiculos"
         [ngStyle]="{'background-color': '#28a745', 'min-width':'200px', 'max-width':'250px'}"
-        (click)="seleccionarVehiculo(vehiculo)"
-      >
+        (click)="seleccionarVehiculo(vehiculo)">
         <div class="d-flex align-items-center justify-content-between mb-2">
           <div class="fs-4">{{ vehiculo.nombre }}</div>
           <i [class]="vehiculo.icono" style="font-size: 1.5rem;"></i>
@@ -18,18 +15,615 @@
   </div>
 </div>
 
-<div *ngIf="verOpciones" class="container my-4">
-  <div class="row text-center">
-    <div class="col-md-4" *ngFor="let opcion of opciones">
-      <div
-        class="card shadow-sm border-0 p-4 h-100 d-flex flex-column align-items-center justify-content-center"
-        [style.background-color]="opcion.color"
-        style="border-radius: 15px; cursor: pointer;"
-        (click)="onCardClick(opcion)"
-      >
-        <i [class]="opcion.icono" style="font-size: 4rem; color: white;"></i>
-        <h5 class="mt-3 text-white">{{ opcion.titulo }}</h5>
+<div *ngIf="verOpciones">
+  <button pButton type="button" icon="pi pi-plus" label="← Atrás" class="p-button-success"
+      (click)="verOpciones = false; verVehiculos = true;"></button>
+      <h5>{{ this.vehiculoSeleccionado?.placa }}</h5>
+  <div class="container my-4">
+    <div class="row text-center">
+      <div class="col-md-4" *ngFor="let opcion of opciones">
+        <div class="card shadow-sm border-0 p-4 h-100 d-flex flex-column align-items-center justify-content-center"
+          [style.background-color]="opcion.color" style="border-radius: 15px; cursor: pointer;"
+          (click)="onCardClick(opcion)">
+          <i [class]="opcion.icono" style="font-size: 4rem; color: white;"></i>
+          <h5 class="mt-3 text-white">{{ opcion.titulo }}</h5>
+        </div>
       </div>
     </div>
   </div>
+  <div class="container my-4">
+
+  <h5 class="mb-3">VIAJES</h5>
+
+  <!-- Fila de fecha + botón -->
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <p-calendar 
+      inputId="fecha" 
+      [(ngModel)]="fechaSeleccionada" 
+      name="fecha"
+      dateFormat="yy-mm-dd" 
+      [showIcon]="true"
+      [style]="{ width: '200px' }"
+      [appendTo]="'body'">
+    </p-calendar>
+
+    <button 
+      pButton 
+      type="button" 
+      icon="pi pi-search" 
+      label="Buscar"
+      (click)="buscar()"
+      class="p-button-success">
+    </button>
+  </div>
+
+  <!-- CARD CENTRADO (TOTAL) -->
+  <div class="d-flex justify-content-center mb-4">
+    <div class="card text-center shadow-sm border-0 p-4"
+         style="border-radius: 15px; width: 300px; height: 300px; background: #ffffff; color: black;"
+         (click)="abrirViajes('')">
+
+      <h5 class="mt-3">Cantidad de Viajes</h5>
+      <div class="display-5 fw-bold">
+        {{ totalViajes }}
+      </div>
+
+      <h5 class="mt-4">Cantidad de kilómetros</h5>
+      <div class="display-6 fw-bold">
+        {{ kmTotal }}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CARDS ARICA / IQUIQUE LADO A LADO -->
+  <div class="row g-4">
+
+    <!-- ARICA -->
+    <div class="col-md-6">
+      <div class="card text-center shadow-sm border-0 p-4 h-100"
+           style="border-radius: 15px; background: #ffffff; color: black;"
+           (click)="abrirViajes('ARICA')">
+
+        <h5 class="mt-3">ARICA</h5>
+        <div class="display-5 fw-bold">
+          {{ viajesArica }}
+        </div>
+
+        <br>
+
+        <h6 class="mt-3">Cantidad de kilómetros</h6>
+        <div class="display-6 fw-bold">
+          {{ kmArica }}
+        </div>
+      </div>
+    </div>
+
+    <!-- IQUIQUE -->
+    <div class="col-md-6">
+      <div class="card text-center shadow-sm border-0 p-4 h-100"
+           style="border-radius: 15px; background: #ffffff; color: black;"
+           (click)="abrirViajes('IQUIQUE')">
+
+        <h5 class="mt-3">IQUIQUE</h5>
+        <div class="display-5 fw-bold">
+          {{ viajesIquique }}
+        </div>
+
+        <br>
+
+        <h6 class="mt-3">Cantidad de kilómetros</h6>
+        <div class="display-6 fw-bold">
+          {{ kmIquique }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
+
+</div>
+
+<div *ngIf="verMantenimientos">
+  <button pButton type="button" icon="pi pi-plus" label="← Atrás" class="p-button-success"
+    (click)="verMantenimientos = false; verOpciones = true;"></button>
+  <div class="container my-4">
+    <h5>Mantenimientos</h5>
+    <button pButton type="button" icon="pi pi-plus" label="Nuevo Mantenimiento" class="p-button-success"
+      (click)="abrirNuevoMantenimiento()"></button>
+    <p-dataView [value]="mantenimientos" layout="list" [rows]="5">
+      <ng-template let-mant let-index="rowIndex" pTemplate="listItem">
+        <div class="p-3 border rounded mb-3 shadow-sm">
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <div class="text-primary fs-5"><b>ID:</b> {{ mant.id_mantenimiento }}</div>
+              <div class="fs-5"><b>Tipo:</b> {{ mant.tipo }}</div>
+              <div><b>Fecha:</b> {{ mant.fecha | date:'yyyy-MM-dd' }}</div>
+              <div><b>Lugar:</b> {{ mant.lugar }}</div>
+              <div><b>Costo:</b> {{ mant.costo }} Bs.</div>
+              <div><b>Kilometraje:</b> {{ mant.km }} km</div>
+              <div><b>Próximo:</b> {{ mant.fecha_siguiente | date:'yyyy-MM-dd' }}</div>
+              <div><b>Estado:</b> {{ mant.estado }}</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-info" (click)="editarMantenimiento(mant)">
+                <i class="pi pi-pencil"></i> Editar
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="eliminarMantenimiento(mant)">
+                <i class="pi pi-trash"></i> Eliminar
+              </button>
+            </div>
+
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-success" (click)="obtenerDetallesMantenimientos(mant)">
+              <i class="pi pi-pencil"></i> DETALLES DEL MANTENIMIENTO
+            </button>
+            <label class="btn btn-sm" [ngClass]="{
+        'btn-success': mant.archivosSubidos?.includes('comprobante'),
+        'btn-outline-danger': !mant.archivosSubidos?.includes('comprobante')
+      }" style="cursor: pointer;" for="comprobante" title="comprobante"
+              (click)="verPdfs('mantenimiento', mant.id_mantenimiento, 'comprobante')">
+              Comprobante
+            </label>
+          </div>
+        </div>
+      </ng-template>
+    </p-dataView>
+  </div>
+</div>
+
+<p-dialog [(visible)]="popupMantenimiento" [modal]="true" [style]="{ width: '70%' }" header="Mantenimiento">
+  <form (ngSubmit)="guardarMantenimiento()" #form="ngForm" class="p-fluid">
+
+    <div class="d-flex flex-wrap gap-3">
+
+      <div class="flex-fill">
+        <label for="tipo">Tipo de Mantenimiento</label>
+        <input pInputText id="tipo" [(ngModel)]="mantenimientoSeleccionado.tipo" name="tipo" required />
+      </div>
+
+      <div class="flex-fill">
+        <label for="fecha">Fecha</label>
+        <p-calendar inputId="fecha" [(ngModel)]="mantenimientoSeleccionado.fecha" name="fecha" dateFormat="yy-mm-dd"
+          [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+      </div>
+
+      <div class="flex-fill">
+        <label for="lugar">Lugar</label>
+        <input pInputText id="lugar" [(ngModel)]="mantenimientoSeleccionado.lugar" name="lugar" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="costo">Costo (Bs.)</label>
+        <input pInputText id="costo" type="number" [(ngModel)]="mantenimientoSeleccionado.costo" name="costo" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="km">Kilometraje</label>
+        <input pInputText id="km" type="number" [(ngModel)]="mantenimientoSeleccionado.km" name="km" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="fecha_siguiente">Próximo Mantenimiento</label>
+        <p-calendar inputId="fecha_siguiente" [(ngModel)]="mantenimientoSeleccionado.fecha_siguiente"
+          name="fecha_siguiente" dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }"
+          [appendTo]="'body'"></p-calendar>
+      </div>
+
+    </div>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary"
+        (click)="popupMantenimiento = false"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog [(visible)]="popupDetalles" [modal]="true" [style]="{ width: '70%' }" header="Mantenimiento">
+  <div class="container my-4">
+    <h5>Detalles Mantenimiento</h5>
+    <p-table [value]="detallesMantenimiento" responsiveLayout="scroll" class="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Pieza</th>
+          <th>Descripción</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Unidad</th>
+          <th>Costo</th>
+          <th>Próxima Fecha</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-det>
+        <tr>
+          <td>{{ det.pieza }}</td>
+          <td>{{ det.descripcion }}</td>
+          <td>{{ det.tipo }}</td>
+          <td>{{ det.cantidad }}</td>
+          <td>{{ det.unidad }}</td>
+          <td>{{ det.costo }} Bs.</td>
+          <td>{{ det.fecha_siguiente | date:'yyyy-MM-dd' }}</td>
+          <td>{{ det.estado }}</td>
+          <td>
+
+            <button class="btn btn-sm btn-outline-info me-1" (click)="editarDetalleMantenimiento(det)">
+              <i class="pi pi-pencil"></i> Editar
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminarDetalleMantenimiento(det)">
+              <i class="pi pi-trash"></i> Eliminar
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="p-dialog-footer mt-3">
+    <button pButton type="submit" label="+ Detalle" class="p-button-success me-2"
+      (click)="abrirNuevoDetalleMantenimiento()"></button>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="popupDetalle" [modal]="true" [style]="{ width: '60%' }" header="Detalle de Mantenimiento">
+  <form (ngSubmit)="guardarDetalleMantenimiento()" #formDet="ngForm" class="p-fluid">
+
+    <div class="d-flex flex-wrap gap-3">
+      <div class="flex-fill">
+        <label for="pieza">Pieza</label>
+        <input pInputText id="pieza" [(ngModel)]="detalleSeleccionado.pieza" name="pieza" required />
+      </div>
+
+      <div class="flex-fill">
+        <label for="descripcion">Descripción</label>
+        <input pInputText id="descripcion" [(ngModel)]="detalleSeleccionado.descripcion" name="descripcion" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="tipo">Tipo</label>
+        <input pInputText id="tipo" [(ngModel)]="detalleSeleccionado.tipo" name="tipo" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="cantidad">Cantidad</label>
+        <input pInputText id="cantidad" type="number" [(ngModel)]="detalleSeleccionado.cantidad" name="cantidad" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="unidad">Unidad</label>
+        <input pInputText id="unidad" [(ngModel)]="detalleSeleccionado.unidad" name="unidad" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="costoDet">Costo (Bs.)</label>
+        <input pInputText id="costoDet" type="number" [(ngModel)]="detalleSeleccionado.costo" name="costo" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="fecha_siguiente_det">Próxima Fecha</label>
+        <p-calendar inputId="fecha_siguiente_det" [(ngModel)]="detalleSeleccionado.fecha_siguiente"
+          name="fecha_siguiente" dateFormat="yy-mm-dd" [showIcon]="true" [style]="{ width: '100%', height: '35px' }"
+          [appendTo]="'body'"></p-calendar>
+      </div>
+    </div>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupDetalle = false"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<div *ngIf="verReparaciones">
+  <button pButton type="button" icon="pi pi-plus" label="← Atrás" class="p-button-success"
+    (click)="verReparaciones = false; verOpciones = true;"></button>
+  <div class="container my-4">
+    <h5>Reparaciones</h5>
+    <button pButton type="button" icon="pi pi-plus" label="Nueva Reparación" class="p-button-success"
+      (click)="abrirNuevaReparacion()"></button>
+    <p-dataView [value]="reparaciones" layout="list" [rows]="5">
+      <ng-template let-rep let-index="rowIndex" pTemplate="listItem">
+        <div class="p-3 border rounded mb-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <div class="text-primary fs-5"><b>ID:</b> {{ rep.id_reparacion }}</div>
+              <div class="fs-5"><b>Pieza:</b> {{ rep.pieza }}</div>
+              <div><b>Descripción:</b> {{ rep.descripcion }}</div>
+              <div><b>Tipo:</b> {{ rep.tipo }}</div>
+              <div><b>Fecha:</b> {{ rep.fecha | date:'yyyy-MM-dd' }}</div>
+              <div><b>Lugar:</b> {{ rep.lugar }}</div>
+              <div><b>Costo:</b> {{ rep.costo }} Bs.</div>
+              <div><b>Kilometraje:</b> {{ rep.km }} km</div>
+              <div><b>Próximo:</b> {{ rep.fec_siguiente | date:'yyyy-MM-dd' }}</div>
+              <div><b>Estado:</b> {{ rep.estado }}</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-info" (click)="editarReparacion(rep)">
+                <i class="pi pi-pencil"></i> Editar
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="eliminarReparacion(rep)">
+                <i class="pi pi-trash"></i> Eliminar
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="btn btn-sm" [ngClass]="{
+        'btn-success': rep.archivosSubidos?.includes('fotos'),
+        'btn-outline-danger': !rep.archivosSubidos?.includes('fotos')
+      }" style="cursor: pointer;" for="fotos" title="fotos"
+              (click)="verPdfs('reparacion', rep.id_reparacion, 'fotos')">
+              Fotos
+            </label>
+            <label class="btn btn-sm" [ngClass]="{
+        'btn-success': rep.archivosSubidos?.includes('comprobante'),
+        'btn-outline-danger': !rep.archivosSubidos?.includes('comprobante')
+      }" style="cursor: pointer;" for="comprobante" title="comprobante"
+              (click)="verPdfs('reparacion', rep.id_reparacion, 'comprobante')">
+              Comprobante
+            </label>
+          </div>
+        </div>
+      </ng-template>
+    </p-dataView>
+  </div>
+</div>
+
+<!-- Dialogo Reparación -->
+<p-dialog [(visible)]="popupReparacion" [modal]="true" [style]="{ width: '70%' }" header="Reparación">
+  <form (ngSubmit)="guardarReparacion()" #form="ngForm" class="p-fluid">
+
+    <div class="d-flex flex-wrap gap-3">
+
+      <div class="flex-fill">
+        <label for="pieza">Pieza</label>
+        <input pInputText id="pieza" [(ngModel)]="reparacionSeleccionada.pieza" name="pieza" required />
+      </div>
+
+      <div class="flex-fill">
+        <label for="descripcion">Descripción</label>
+        <textarea pInputTextarea id="descripcion" [(ngModel)]="reparacionSeleccionada.descripcion" name="descripcion"
+          rows="2"></textarea>
+      </div>
+
+      <div class="flex-fill">
+        <label for="tipo">Tipo</label>
+        <input pInputText id="tipo" [(ngModel)]="reparacionSeleccionada.tipo" name="tipo" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="fecha">Fecha</label>
+        <p-calendar inputId="fecha" [(ngModel)]="reparacionSeleccionada.fecha" name="fecha" dateFormat="yy-mm-dd"
+          [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+      </div>
+
+      <div class="flex-fill">
+        <label for="lugar">Lugar</label>
+        <input pInputText id="lugar" [(ngModel)]="reparacionSeleccionada.lugar" name="lugar" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="costo">Costo (Bs.)</label>
+        <input pInputText id="costo" type="number" [(ngModel)]="reparacionSeleccionada.costo" name="costo" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="km">Kilometraje</label>
+        <input pInputText id="km" type="number" [(ngModel)]="reparacionSeleccionada.km" name="km" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="fec_siguiente">Próxima Revisión</label>
+        <p-calendar inputId="fec_siguiente" [(ngModel)]="reparacionSeleccionada.fec_siguiente" name="fec_siguiente"
+          dateFormat="yy-mm-dd" [showIcon]="true"></p-calendar>
+      </div>
+
+    </div>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary"
+        (click)="popupReparacion = false"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<div *ngIf="verRevisiones">
+  <button pButton type="button" icon="pi pi-plus" label="← Atrás" class="p-button-success"
+    (click)="verRevisiones = false; verOpciones = true;"></button>
+  <div class="container my-4">
+    <h5>Revisiones</h5>
+    <button pButton type="button" icon="pi pi-plus" label="Nueva Revisión" class="p-button-success"
+      (click)="abrirNuevaRevision()"></button>
+    <p-dataView [value]="revisiones" layout="list" [rows]="5">
+      <ng-template let-rev let-index="rowIndex" pTemplate="listItem">
+        <div class="p-3 border rounded mb-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <div class="text-primary fs-5"><b>ID:</b> {{ rev.id_revision }}</div>
+              <div class="fs-5"><b>Tipo:</b> {{ rev.tipo }}</div>
+              <div><b>Pieza:</b> {{ rev.pieza }}</div>
+              <div><b>Fecha:</b> {{ rev.fecha | date:'yyyy-MM-dd' }}</div>
+              <div><b>Acción:</b> {{ rev.accion }}</div>
+              <div><b>Estado:</b> {{ rev.estado }}</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-info" (click)="editarRevision(rev)">
+                <i class="pi pi-pencil"></i> Editar
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="eliminarRevision(rev)">
+                <i class="pi pi-trash"></i> Eliminar
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="btn btn-sm" [ngClass]="{
+        'btn-success': rev.archivosSubidos?.includes('comprobante'),
+        'btn-outline-danger': !rev.archivosSubidos?.includes('comprobante')
+      }" style="cursor: pointer;" for="comprobante" title="comprobante"
+              (click)="verPdfs('revision', rev.id_revision, 'comprobante')">
+              Comprobante
+            </label>
+          </div>
+        </div>
+      </ng-template>
+    </p-dataView>
+  </div>
+</div>
+
+<!-- Diálogo para crear/editar revisión -->
+<p-dialog [(visible)]="popupRevision" [modal]="true" [style]="{ width: '60%' }" header="Revisión">
+  <form (ngSubmit)="guardarRevision()" #form="ngForm" class="p-fluid">
+
+    <div class="d-flex flex-wrap gap-3">
+
+      <div class="flex-fill">
+        <label for="tipo">Tipo</label>
+        <input pInputText id="tipo" [(ngModel)]="revisionSeleccionada.tipo" name="tipo" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="pieza">Pieza</label>
+        <input pInputText id="pieza" [(ngModel)]="revisionSeleccionada.pieza" name="pieza" />
+      </div>
+
+      <div class="flex-fill">
+        <label for="fecha">Fecha</label>
+        <p-calendar inputId="fecha" [(ngModel)]="revisionSeleccionada.fecha" name="fecha" dateFormat="yy-mm-dd"
+          [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+      </div>
+
+      <div class="flex-fill w-100">
+        <label for="accion">Acción Realizada</label>
+        <textarea pInputTextarea id="accion" [(ngModel)]="revisionSeleccionada.accion" name="accion"
+          rows="3"></textarea>
+      </div>
+
+    </div>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2"></button>
+      <button pButton type="button" label="Cancelar" class="p-button-secondary"
+        (click)="popupRevision = false"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog [header]="tituloDialogPDF" [(visible)]="mostrarDialogPDF" [modal]="true" [style]="{ width: 'auto' }">
+  <div class="d-flex" style="gap: 1rem;">
+
+    <p-table [value]="pdfs" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre del archivo</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-pdf let-rowIndex="rowIndex">
+        <tr>
+          <td>
+            <label for="nombre"> {{ pdf.nombre }}</label>
+          </td>
+
+          <td>
+
+            <button class="btn btn-sm btn-outline-info me-2" (click)="verPDF(carpetaSeleccionada, pdf.nombre)">
+              <i class="pi pi-pencil"></i>Ver
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminarPDF(carpetaSeleccionada, pdf.nombre)">
+              <i class="pi pi-trash"></i>Eliminar
+            </button>
+
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="p-dialog-footer mt-3">
+    <button pButton type="button" label="+ Agregar" class="p-button-secondary"
+      (click)=" abrirSelectorArchivo(carpetaSeleccionada, idSeleccionado, tipoSeleccionado)"></button>
+
+  </div>
+
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarPDF" [modal]="true" [style]="{ width: '80%' }">
+  <div class="d-flex" style="gap: 1rem;">
+
+    <div style="flex: 1; height: 600px; border: 1px solid #ccc;">
+      <ngx-doc-viewer [url]="pdfSeleccionadoURL" viewer="url" style="width:100%;height:100%;" disabledDownload="false">
+      </ngx-doc-viewer>
+    </div>
+  </div>
+
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarImagen" [modal]="true" [closable]="true"
+  [style]="{ width: '90vw', maxWidth: '1200px', padding: '0' }" [contentStyle]="{ padding: '0' }"
+  styleClass="dialog-fullscreen">
+
+  <div class="dialog-img-container">
+    <img [src]="imagenSeleccionadaURL" alt="Imagen" class="dialog-img" />
+  </div>
+</p-dialog>
+
+<p-dialog
+  [header]="tituloViajesDialog"
+  [(visible)]="viajesDialog"
+  [modal]="true"
+  [style]="{ width: '80%' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+<button 
+        pButton 
+        label="Exportar Excel"
+        icon="pi pi-file-excel"
+        class="p-button-success p-button-sm"
+        (click)="exportarExcel()"
+      ></button>
+  <p-table
+    [value]="viajesSeleccionados"
+    [paginator]="true"
+    [rows]="10"
+    responsiveLayout="scroll"
+    styleClass="p-datatable-gridlines p-datatable-striped"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>#</th>
+        <th>Consignatario</th>
+        <th>Ciudad Origen</th>
+        <th>Ciudad Destino</th>
+        <th>Fecha Carga</th>
+        <th>Fecha Llegada</th>
+        <th>KM Central - Origen</th>
+        <th>KM Origen - Destino</th>
+        <th>KM Destino - Central</th>
+        <th>KM Total</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row let-i="rowIndex">
+      <tr>
+        <td>{{ i + 1 }}</td>
+        <td>{{ row.consignatario }}</td>
+        <td>{{ row.ciudad_origen }}</td>
+        <td>{{ row.ciudad_destino }}</td>
+        <td>{{ formatFecha2(row.fecha_carga) }}</td>
+        <td>{{ formatFecha2(row.fecha_llegada) }}</td>
+        <td>{{ row.km_central_origen | number:'1.2-2' }}</td>
+        <td>{{ row.km_origen_destino | number:'1.2-2' }}</td>
+        <td>{{ row.km_destino_central | number:'1.2-2' }}</td>
+        <td><strong>{{ row.km_total | number:'1.2-2' }}</strong></td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>

@@ -1,116 +1,177 @@
 <!-- ========== App Menu ========== -->
 <div class="app-menu navbar-menu">
-    <!-- LOGO -->
-    <div class="navbar-brand-box">
-        <!-- Dark Logo-->
-        <a href="index.html" class="logo logo-dark">
-            <span class="logo-sm">
-                <img src="assets/images/logo-sm.png" alt="" height="32">
-            </span>
-            <span class="logo-lg">
-                <img src="assets/images/logo-dark.png" alt="" height="17">
-            </span>
-        </a>
-        <!-- Light Logo-->
-        <a href="index.html" class="logo logo-light">
-            <span class="logo-sm">
-                <img src="assets/images/logo-sm.png" alt="" height="32">
-            </span>
-            <span class="logo-lg">
-                <img src="assets/images/logo.png" alt="" height="117">
-            </span>
-        </a>
-        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover" title="Vertical Hover">
-            <i class="ri-record-circle-line"></i>
-        </button>
-    </div>
+  <!-- LOGO -->
+  <div class="navbar-brand-box">
+    <!-- Dark Logo-->
+    <a href="index.html" class="logo logo-dark">
+      <span class="logo-sm">
+        <img src="assets/images/logo-sm.png" alt="" height="32">
+      </span>
+      <span class="logo-lg">
+        <img src="assets/images/logo-dark.png" alt="" height="17">
+      </span>
+    </a>
+    <!-- Light Logo-->
+    <a href="index.html" class="logo logo-light">
+      <span class="logo-sm">
+        <img src="assets/images/logo-sm.png" alt="" height="32">
+      </span>
+      <span class="logo-lg">
+        <img src="assets/images/logo.png" alt="" height="117">
+      </span>
+    </a>
+    <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover"
+      title="Vertical Hover">
+      <i class="ri-record-circle-line"></i>
+    </button>
+  </div>
 
-    <div id="scrollbar">
-        <div class="container-fluid">
+  <div id="scrollbar">
+    <div class="container-fluid">
 
-            <div id="two-column-menu">
+      <div id="two-column-menu">
+      </div>
+      <ul class="navbar-nav" id="navbar-nav">
+        <!-- <li class="menu-title"><span data-key="t-menu"><b style="color: rgb(248, 235, 178);">Menu principal</b></span></li> -->
+        <ul class="navbar-nav" id="navbar-nav">
+          <li class="menu-title">
+            <span><b style="color: rgb(248, 235, 178);">Menú principal</b></span>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="'/dashboard'" routerLinkActive="active">
+              <i class="ri-dashboard-line"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuAdministracion">
+              <i class="ri-user-3-line"></i> <span>Administración</span>
+            </a>
+
+            <div id="menuAdministracion" class="collapse">
+              <ul class="nav flex-column ms-3">
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/usuarios'" routerLinkActive="active">
+                    <i class="ri-user-line"></i>
+                    <span>Usuarios</span>
+                  </a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/navieras'" routerLinkActive="active">
+                    <i class="ri-ship-line"></i>
+                    <span>Navieras</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/clientes'" routerLinkActive="active">
+                    <i class="ri-map-pin-line"></i>
+                    <span>Clientes</span>
+                  </a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/mercancias'" routerLinkActive="active">
+                    <i class="ri-stack-line"></i>
+                    <span>Mercancías</span>
+                  </a>
+                </li>
+              </ul>
             </div>
-            <ul class="navbar-nav" id="navbar-nav">
-                <!-- <li class="menu-title"><span data-key="t-menu"><b style="color: rgb(248, 235, 178);">Menu principal</b></span></li> -->
-                <ul class="navbar-nav" id="navbar-nav">
-  <li class="menu-title">
-    <span><b style="color: rgb(248, 235, 178);">Menú principal</b></span>
-  </li>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/dashboard'" routerLinkActive="active">
-      <i class="ri-dashboard-line"></i>
-      <span>Dashboard</span>
-    </a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuVehiculos">
+              <i class="ri-truck-line"></i> <span>Vehículos</span>
+            </a>
 
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/usuarios'" routerLinkActive="active">
-      <i class="ri-user-line"></i>
-      <span>Usuarios</span>
-    </a>
-  </li>
+            <div id="menuVehiculos" class="collapse">
+              <ul class="nav flex-column ms-3">
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/vehiculos'" routerLinkActive="active">
+                    <i class="ri-truck-line"></i>
+                    <span>Vehículos</span>
+                  </a>
+                </li>
 
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/navieras'" routerLinkActive="active">
-      <i class="ri-ship-line"></i>
-      <span>Navieras</span>
-    </a>
-  </li>
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/vehiculos_seguimiento'" routerLinkActive="active">
+                    <i class="ri-truck-line"></i>
+                    <span>Vehículos Seguimiento</span>
+                  </a>
+                </li>
 
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/vehiculos'" routerLinkActive="active">
-      <i class="ri-truck-line"></i>
-      <span>Vehículos</span>
-    </a>
-  </li>
-  
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/vehiculos_seguimiento'" routerLinkActive="active">
-      <i class="ri-truck-line"></i>
-      <span>Vehículos Seguimiento</span>
-    </a>
-  </li>
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/ubicaciones'" routerLinkActive="active">
+                    <i class="ri-truck-line"></i>
+                    <span>Vehiculos Localizacion</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/clientes'" routerLinkActive="active">
-      <i class="ri-map-pin-line"></i>
-      <span>Clientes</span>
-    </a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuImportacion">
+              <i class="ri-download-2-fill"></i> <span>Importación</span>
+            </a>
 
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/mercancias'" routerLinkActive="active">
-      <i class="ri-stack-line"></i>
-      <span>Mercancías</span>
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/cotizacion'" routerLinkActive="active">
-      <i class="ri-inbox-unarchive-line"></i>
-      <span>Cotizacion</span>
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/despachos'" routerLinkActive="active">
-      <i class="ri-inbox-unarchive-line"></i>
-      <span>Despachos</span>
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="'/contenedor'" routerLinkActive="active">
-      <i class="ri-archive-line"></i>
-      <span>Contenedor</span>
-    </a>
-  </li>
+            <div id="menuImportacion" class="collapse">
+              <ul class="nav flex-column ms-3">
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/cotizacion'" routerLinkActive="active">
+                    <i class="ri-inbox-unarchive-line"></i>
+                    <span>Cotizacion</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/despachos'" routerLinkActive="active">
+                    <i class="ri-inbox-unarchive-line"></i>
+                    <span>Despachos</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/contenedor'" routerLinkActive="active">
+                    <i class="ri-barcode-box-line"></i>
+                    <span>Contenedor</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
 
-  </ul>
-            </ul>
-        </div>
-        <!-- Sidebar -->
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuExportacion">
+              <i class="ri-upload-2-fill"></i> <span>Exportación</span>
+            </a>
+
+            <div id="menuExportacion" class="collapse">
+              <ul class="nav flex-column ms-3">
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/cotizacion_exp'" routerLinkActive="active">
+                    <i class="ri-inbox-unarchive-line"></i>
+                    <span>Expor Cotizacion</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" [routerLink]="'/despachos_exp'" routerLinkActive="active">
+                    <i class="ri-archive-line"></i>
+                    <span>Expor Despachos</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+        </ul>
+      </ul>
     </div>
+    <!-- Sidebar -->
+  </div>
 
-    <div class="sidebar-background"></div>
+  <div class="sidebar-background"></div>
 </div>
 
 <!-- Left Sidebar End -->

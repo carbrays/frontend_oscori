@@ -14,6 +14,7 @@ export class ClientesComponent implements OnInit {
   modoEdicion = false;
   clienteSeleccionado: any = {};
   tituloPopup = 'Cliente';
+  ciudades: { label: string; value: number }[] = [];
 
   estados = [
     { label: 'Activo', value: 'ACTIVO' },
@@ -26,6 +27,7 @@ export class ClientesComponent implements OnInit {
   constructor(private clienteService: ClientesService, private zone: NgZone) { }
 
   ngOnInit(): void {
+    this.obtenerCiudades();
     this.obtenerListado();
   }
 
@@ -54,6 +56,24 @@ getClienteNombre(id: number): string {
         Swal.fire('Error', 'No se pudieron cargar los clientes', 'error');
       }
     });
+  }
+
+  obtenerCiudades(): void {
+    this.clienteService.getCiudad().subscribe({
+      next: (data) => {
+        this.ciudades = data.map((ciudad) => ({
+          label: ciudad.ciudad,
+          value: ciudad.id_ciudad,
+        }));
+      },
+      error: (err) => {
+        console.error('Error al cargar ciudades:', err);
+      },
+    });
+  }
+  getCiudadNombre(id: number): string {
+    const ciudad = this.ciudades.find((c) => c.value === id);
+    return ciudad ? ciudad.label : 'Sin nombre';
   }
 
   abrirNuevoCliente(): void {

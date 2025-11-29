@@ -40,6 +40,7 @@ import { DashboardComponent } from "./dashboard/dashboard.component";
 import { PostulanteComponent } from "./postulante/postulante.component";
 import { ReporteComponent } from "./reporte/reporte.component";
 import { PagesComponent } from "./pages.component";
+import { ImageCropperComponent } from 'ngx-image-cropper';
 
 import { UsuarioComponent } from "./usuario/usuario.component";
 import { ClientesComponent } from "./clientes/clientes.component";
@@ -50,6 +51,9 @@ import { NavierasComponent } from "./navieras/navieras.component";
 import { MercanciaComponent } from "./mercancia/mercancia.component";
 import { CotizacionComponent } from "./cotizacion/cotizacion.component";
 import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos_seguimiento.component";
+import { UbicacionesComponent } from './ubicaciones/ubicaciones.component';
+import { Cotizacion_ExpComponent } from './cotizacion_exp/cotizacion_exp.component';
+import { Despachos_ExpComponent } from './despachos_exp/despachos_exp.component';
 
 @NgModule({
     declarations: [
@@ -69,7 +73,10 @@ import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos
     CodVerificacionComponent,
     AdmUsuariosComponent,
     CotizacionComponent,
-    VehiculosSeguimientoComponent
+    VehiculosSeguimientoComponent,
+    UbicacionesComponent,
+    Cotizacion_ExpComponent,
+    Despachos_ExpComponent
     ],
     exports: [
         DashboardComponent,
@@ -114,7 +121,8 @@ import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos
         StepsModule,
         AutoCompleteModule,
         ImageModule,
-        ProgressSpinnerModule
+        ProgressSpinnerModule,
+        ImageCropperComponent
     ]
 })
 

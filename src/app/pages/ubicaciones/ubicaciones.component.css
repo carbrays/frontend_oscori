@@ -1,3 +1,7 @@
+::ng-deep .fila-libre {
+  background-color: #e0ffe0 !important;
+}
+
 label,
 input {
   display: inline-block;
@@ -84,28 +88,6 @@ label {
   text-transform: uppercase;
 }
 
-.contenedor {
-  background-color: #ffffff !important;
-}
-
-.fecha-vencida {
-  background-color: #f8d7da !important;
-  color: #721c24 !important;
-  font-weight: bold;
-}
-
-.fecha-pre-vencida {
-  background-color: #f8f5d7 !important;
-  color: #71721c !important;
-  font-weight: bold;
-}
-
-.fecha-devuelto {
-  background-color: #d7f8e5 !important;
-  color: #1c7236 !important;
-  font-weight: bold;
-}
-
 .input-error {
   border: 1px solid red !important;
   box-shadow: 0 0 0 0.1rem rgba(255, 0, 0, 0.25);
@@ -142,16 +124,6 @@ label {
   /* más alto que el p-dialog */
 }
 
-.faltante {
-  color: rgb(255, 0, 0);
-  font-weight: bold;
-}
-
-.nofaltante {
-  color: rgb(1, 110, 65);
-  font-weight: bold;
-}
-
 img {
   max-width: 80%;
   max-height: 150px;
@@ -181,59 +153,23 @@ img {
   /* mantiene proporción sin recortar */
 }
 
-/*PARA GENERAR IMAGEN PNG*/
-.overlay-carga {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.8); /* semi-transparente */
-  z-index: 9999; /* encima de todo */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.card {
+  cursor: pointer;
+  border-radius: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
-.caja-carga {
-  text-align: center;
-  color: #333;
-  font-size: 1.2rem;
+/* Hover: al pasar el mouse */
+.card:hover {
+  transform: translateY(-5px) scale(1.05);  /* levanta un poco la card */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  filter: brightness(1.1); /* aclara el color */
 }
 
-.modo-captura {
-  font-size: 1.2rem !important;
-  line-height: 1.4 !important;
+/* Active: cuando se hace click */
+.card:active {
+  transform: translateY(2px) scale(0.98); /* efecto de “presionar” */
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  filter: brightness(0.9); /* oscurece el color */
 }
 
-.modo-captura .d-grid {
-  grid-template-columns: repeat(2, 1fr) !important; /* solo 2 columnas */
-  gap: 6px !important; /* compacta los espacios si quieres */
-}
-
-.modo-captura .d-flex {
-  flex-wrap: wrap !important; /* fuerza a que los flex hagan wrap y bajen */
-}
-
-.modo-captura div {
-  padding: 2px !important; /* reduce padding general si quieres */
-}
-
-.modo-captura .fs-5 {
-  font-size: 1.4rem !important; /* fuerza a que se aplique */
-  line-height: 1.4 !important;
-}
-
-.modo-captura .fs-4 {
-  font-size: 1.4rem !important; /* fuerza a que se aplique */
-  line-height: 1.4 !important;
-}
-
-.recibo-container {
-  background: white;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  text-align: center;
-  font-family: Arial, sans-serif;
-}

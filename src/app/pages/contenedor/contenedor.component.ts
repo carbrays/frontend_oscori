@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { ContenedorService } from 'src/app/services/contenedor/contenedor.service';
 import Swal from 'sweetalert2';
 import { forkJoin } from 'rxjs';
@@ -13,12 +13,21 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 import * as htmlToImage from 'html-to-image';
 
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 @Component({
   selector: 'app-contenedor',
   templateUrl: './contenedor.component.html',
   styleUrls: ['./contenedor.component.css']
 })
+
 export class ContenedoresComponent implements OnInit {
+
+  @ViewChild('reciboPreview', { static: false }) reciboPreview!: ElementRef;
+
   URL = URL_SERVICIOS;
   contenedores: any[] = [];
   contenedorSeleccionado: any = {};
@@ -155,9 +164,29 @@ export class ContenedoresComponent implements OnInit {
 
   loading = false;
 
-   generando: boolean = false;
+  generando: boolean = false;
 
-  constructor(private contenedorService: ContenedorService) { }
+  imagenOriginal: any = '';
+  imagenRecortada: any = '';
+  cropperVisible: boolean = false;
+  archivoOriginal: File | null = null;
+  contenedorActual: any = null;
+  nombreActual: string = '';
+
+  mostrarVistaPreviaRecibo = false;
+  gastoSeleccionado: any = {};
+  pdfSrc: SafeResourceUrl | null = null;
+  pdfBlob: Blob | null = null;
+
+  clienteSeleccionado: any = null;
+  clientesFiltrados: any[] = [];
+  opcionesClientes: { label: string; value: number }[] = [];
+
+  contenedor: any = null;
+  contenedorFiltrados: any[] = [];
+  opcionesContenedores: String[] = [];
+
+  constructor(private contenedorService: ContenedorService, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
     this.obtenerListado();
@@ -178,7 +207,7 @@ export class ContenedoresComponent implements OnInit {
     this.contenedorService.getContenedores().subscribe({
       next: data => {
         this.contenedores = data;
-
+        this.verificarFechas();
       },
       error: err => Swal.fire('Error', 'No se pudo cargar la lista de contenedores.', 'error')
     });
@@ -208,9 +237,9 @@ export class ContenedoresComponent implements OnInit {
       const diasStr = contenedor.dias?.toString() || '';
       const observacionesStr = contenedor.observaciones?.toLowerCase() || '';
       let deudaStr = true;
-    if (this.filtroDeuda) {
-      deudaStr = contenedor[this.filtroDeuda] && contenedor[this.filtroDeuda] > 0;
-    }
+      if (this.filtroDeuda) {
+        deudaStr = contenedor[this.filtroDeuda] && contenedor[this.filtroDeuda] > 0;
+      }
 
       return (
         contenedorStr.includes(this.filtroContenedor.toLowerCase()) &&
@@ -302,9 +331,7 @@ export class ContenedoresComponent implements OnInit {
           label: cliente.nombre_comercial,
           value: cliente.id_cliente,
         }));
-
-        this.verificarFechas();
-        // this.generarClientesUnicos(); 
+        console.log('Clientes cargados:', '************');
       },
       error: (err) => {
         console.error('Error al cargar clientes:', err);
@@ -379,6 +406,7 @@ export class ContenedoresComponent implements OnInit {
     this.filtroUbicacionDevolucion = '';
     this.filtroDias = '';
     this.filtroObservaciones = '';
+    this.filtroDeuda = '';
   }
 
   abrirNuevoContenedor(): void {
@@ -405,6 +433,7 @@ export class ContenedoresComponent implements OnInit {
       tiene_trasbordo: false,
       tiene_lavado: false,
       tiene_reparacion_contenedor: false,
+      fecha_devolucion_naviera: null
     };
     this.popupVisible = true;
     this.modoEdicion = false;
@@ -412,7 +441,10 @@ export class ContenedoresComponent implements OnInit {
   }
 
   editarContenedor(contenedor: any): void {
-    this.contenedorSeleccionado = { ...contenedor, fecha_devolucion: contenedor.fecha_devolucion ? new Date(contenedor.fecha_devolucion) : null, };
+    this.contenedorSeleccionado = {
+      ...contenedor, fecha_devolucion: contenedor.fecha_devolucion ? new Date(contenedor.fecha_devolucion) : null,
+      fecha_devolucion_naviera: contenedor.fecha_devolucion_naviera ? new Date(contenedor.fecha_devolucion_naviera) : null
+    };
     this.popupVisible = true;
     this.modoEdicion = true;
     this.tituloPopup = 'Editar Contenedor';
@@ -443,6 +475,7 @@ export class ContenedoresComponent implements OnInit {
     if (this.modoEdicion) {
       this.contenedorSeleccionado.usumod = localStorage.getItem('login');
       this.contenedorSeleccionado.fecmod = new Date();
+      console.log('Contenedor a actualizar:', this.contenedorSeleccionado);
       this.contenedorService.editarContenedor(this.contenedorSeleccionado.id_contenedor, this.contenedorSeleccionado).subscribe({
         next: () => {
           this.popupVisible = false;
@@ -461,10 +494,6 @@ export class ContenedoresComponent implements OnInit {
         error: err => Swal.fire('Error', 'No se pudo crear el contenedor.', 'error')
       });
     }
-  }
-
-  urlPdf(id: string) {
-    return `http://localhost:3000/despachos/verPdf/${id}`;
   }
 
   esFechaVencida(fechaStr: string | Date): boolean {
@@ -496,7 +525,7 @@ export class ContenedoresComponent implements OnInit {
       return 'fecha-pre-vencida'; // Está por vencer
     } else if (estado === 'DEVUELTO') {
       return 'fecha-devuelto'; // No aplica estilo
-    } 
+    }
     return 'contenedor';
   }
 
@@ -625,6 +654,10 @@ export class ContenedoresComponent implements OnInit {
     this.contenedorService.getGastosContenedor(this.contenedorSeleccionado.id_contenedor, nombreGasto).subscribe({
       next: data => {
         this.gastos = data;
+        this.gastos.forEach(gasto => {
+          gasto.fecha_pago = new Date(gasto.fecha_pago);
+        });
+        console.log('Gastos cargados:', this.gastos);
       },
       error: err => Swal.fire('Error', 'No se pudo cargar la lista de gastos.', 'error')
     });
@@ -666,7 +699,13 @@ export class ContenedoresComponent implements OnInit {
     });
 
     forkJoin(requests).subscribe({
-      next: () => {
+      next: (resultados: any) => {
+        this.gastos = this.gastos.map((g, i) => ({
+          ...g,
+          id_contenedor_gasto: resultados[i].gasto.id_contenedor_gasto
+        }));
+        this.subirComprobantes();
+
         this.mostrarGastos = false;
         this.obtenerListado();
         Swal.fire('Éxito', 'Todos los gastos fueron guardados correctamente.', 'success');
@@ -741,44 +780,88 @@ export class ContenedoresComponent implements OnInit {
       return;
     }
 
-    // ✅ Generar el nuevo nombre automáticamente
-    const extension = file.type === 'image/png' ? 'png' : 'jpg';
-    const nuevoNombre = `${contenedor.id_contenedor}-${nombre}.${extension}`;
+    this.archivoOriginal = file;
+    this.contenedorActual = contenedor;
+    this.nombreActual = nombre;
+
+    this.imagenOriginal = null;
+    this.imagenOriginal = event;
+    this.cropperVisible = true;
+  }
+
+  imageCropped(event: any) {
+    this.imagenRecortada = event.objectUrl || null;
+    console.log('Imagen recortada:', this.imagenRecortada);
+  }
+
+  cerrarCropper() {
+    this.cropperVisible = false;
+    this.imagenRecortada = '';
+    this.imagenOriginal = '';
+  }
+
+  guardarImagenRecortada() {
+    console.log('Guardando imagen recortada...' + this.imagenRecortada + ' archivo: ' + this.archivoOriginal);
+    if (!this.archivoOriginal || !this.imagenRecortada) return;
+
+    const c = this.contenedorActual;
+    const nombre = this.nombreActual;
+
+    const extension = this.archivoOriginal.type === 'image/png' ? 'png' : 'jpg';
+    const nuevoNombre = `${c.id_contenedor}-${nombre}.${extension}`;
 
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: `¿Deseas subir la imagen con el nombre: "${nuevoNombre}"?`,
+      title: '¿Confirmar recorte?',
+      text: `¿Deseas subir la imagen recortada como "${nuevoNombre}"?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Sí, subir',
-      cancelButtonText: 'No, cancelar'
-    }).then((confirmResult) => {
+      cancelButtonText: 'Cancelar'
+    }).then(async confirmResult => {
       if (confirmResult.isConfirmed) {
+        let blob: Blob;
+
+        if (this.imagenRecortada.startsWith('data:image')) {
+          // ✅ Es Base64
+          blob = this.base64ToBlob(this.imagenRecortada);
+        } else {
+          // ✅ Es ObjectURL
+          const response = await fetch(this.imagenRecortada);
+          blob = await response.blob();
+        }
+        const nuevoArchivo = new File([blob], nuevoNombre, { type: this.archivoOriginal!.type });
+
         const formData = new FormData();
-
-        // ✅ Crear nuevo File con nombre automático
-        const nuevoArchivo = new File([file], nuevoNombre, { type: file.type });
-
         formData.append('archivo', nuevoArchivo);
-        formData.append('id_contenedor', contenedor.id_contenedor.toString());
+        formData.append('id_contenedor', c.id_contenedor.toString());
         formData.append('nombre', nombre);
 
         axios.post(`${URL_SERVICIOS}/contenedor/subir_imagen`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
-          .then(response => {
+          .then(() => {
             Swal.fire('¡Subido!', 'La imagen se subió correctamente.', 'success');
+            this.cerrarCropper();
             this.obtenerImagenes();
             this.obtenerListado();
           })
-          .catch(error => {
-            console.error('Error al subir la imagen', error);
-            Swal.fire('Error', 'Error al subir la imagen. Intenta nuevamente.', 'error');
+          .catch(err => {
+            console.error('Error al subir imagen', err);
+            Swal.fire('Error', 'No se pudo subir la imagen.', 'error');
           });
-      } else {
-        input.value = '';
       }
     });
+  }
+
+  private base64ToBlob(base64: string): Blob {
+    const byteString = atob(base64.split(',')[1]);
+    const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
   }
 
   verDevoluciones(contenedor: any): void {
@@ -1071,7 +1154,6 @@ export class ContenedoresComponent implements OnInit {
     });
   }
 
-
   generarPDF(contenedor: any, tipo: 'CARGUIO' | 'DESCARGUIO' | 'DEVOLUCION') {
     this.loading = true;
 
@@ -1082,10 +1164,15 @@ export class ContenedoresComponent implements OnInit {
     };
 
     const logo = 'assets/images/logo.png';
+    const hojaMembrete = 'assets/images/membretado.jpg';
     const empresa = 'TRANSPORTES OSCORI';
     const cliente = {
       contenedor: contenedor.numero_contenedor,
-      fecha: new Date().toLocaleDateString()
+      fecha: new Date().toLocaleDateString(),
+      cliente: this.getClienteNombre(contenedor.id_cliente),
+      asignacionCarga: this.getVehiculoNombre(contenedor.id_asignacion_vehiculo_carga),
+      ano: contenedor.ano,
+      tamano: contenedor.tamano
     };
 
     // Filtrar imágenes válidas según tipo
@@ -1117,30 +1204,86 @@ export class ContenedoresComponent implements OnInit {
         .map(r => (r as PromiseFulfilledResult<{ label: string; dataUrl: string }>).value);
 
       // Convertir logo a base64
-      this.getBase64ImageFromURL(logo).then(logoBase64 => {
+      this.getBase64ImageFromURL(hojaMembrete).then(logoBase64 => {
         const docDefinition: any = {
-          pageMargins: [40, 0, 40, 40],
+          pageMargins: [40, 100, 40, 50],
+          background: function (currentPage: number) {
+            return {
+              image: logoBase64,
+              width: 595,
+              height: 842
+            };
+          },
           content: [
-            { image: logoBase64, width: 100, alignment: 'center', margin: [0, 0, 0, 10] },
+            // { image: logoBase64, width: 100, alignment: 'center', margin: [0, 0, 0, 10] },
             // { text: empresa, style: 'header', alignment: 'center', margin: [0, 0, 0, 20] },
+
             {
-              columns: [
-                [
-                  { text: `Contenedor: ${cliente.contenedor}`, style: 'subheader' },
-                  { text: `Fecha: ${cliente.fecha}`, style: 'subheader' }
+              table: {
+                widths: ['40%', '60%'],
+                body: [
+                  [
+                    {
+                      text: [
+                        { text: 'Contenedor: ', bold: true },
+                        { text: cliente.contenedor }
+                      ]
+                    },
+                    {
+                      text: [
+                        { text: tipo === 'DEVOLUCION' ? '' : 'Cliente: ', bold: true },
+                        { text: tipo === 'DEVOLUCION' ? '' : cliente.cliente }
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      text: [
+                        { text: 'Fecha: ', bold: true },
+                        { text: cliente.fecha }
+                      ]
+                    },
+                    {
+                      text: [
+                        { text: tipo === 'DEVOLUCION' ? 'Año Contenedor: ' : 'Placa: ', bold: true },
+                        { text: tipo === 'DEVOLUCION' ? cliente.ano : cliente.asignacionCarga.split('-')[0] || 'SP' }
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      text: [
+                        { text: '' }
+                      ]
+                    },
+                    {
+                      text: [
+                        { text: tipo === 'DEVOLUCION' ? '' : 'Conductor: ', bold: true },
+                        { text: tipo === 'DEVOLUCION' ? '' : cliente.asignacionCarga.split('-')[1] || '' }
+                      ]
+                    }
+                  ],
                 ]
-              ],
-              margin: [0, 0, 0, 20]
+              },
+              layout: 'noBorders',
+              margin: [0, 0, 0, 0]
             },
             imagenesOk.length
               ? this.chunkImages(imagenesOk, 2).map(row => {
                 return {
-                  columns: row.map(cell =>
+                  stack: row.map(cell =>
                     cell.dataUrl
                       ? {
                         stack: [
-                          { text: cell.label, alignment: 'center', margin: [0, 0, 0, 5] },
-                          { image: cell.dataUrl, fit: [240, 180], alignment: 'center', margin: [0, 4, 0, 0] }
+                          // { image: cell.dataUrl, width: 240, height: 190, alignment: 'center', margin: [0, 4, 0, 0] },
+                          { image: cell.dataUrl, fit: [520, 300], alignment: 'center', margin: [0, 0, 0, 0] },
+                          //                           { 
+                          //   image: cell.dataUrl,          
+                          //   alignment: 'center', 
+                          //   margin: [0, 4, 0, 0] 
+                          // },
+                          { text: cell.label, bold: true, alignment: 'center', margin: [0, 0, 0, 5] }
+
                         ],
                         margin: [0, 0, 0, 0]
                       }
@@ -1157,14 +1300,17 @@ export class ContenedoresComponent implements OnInit {
           }
         };
         const placa = this.getVehiculoNombre(contenedor.id_asignacion_vehiculo_carga).split(' - ')[0] || 'SP';
-        pdfMake.createPdf(docDefinition).download(`${contenedor.numero_contenedor}_${this.getClienteNombre(contenedor.id_cliente)}_${placa}_${tipo}.pdf`);
+        if (tipo === 'DEVOLUCION') {
+          pdfMake.createPdf(docDefinition).download(`${contenedor.numero_contenedor}_${contenedor.ano}_${contenedor.tamano}_${tipo}.pdf`);
+        } else {
+          pdfMake.createPdf(docDefinition).download(`${contenedor.numero_contenedor}_${this.getClienteNombre(contenedor.id_cliente)}_${placa}_${tipo}.pdf`);
+        }
       });
     }).finally(() => (this.loading = false));
   }
 
-
   /** Carga una imagen (misma-origin o CORS habilitado) y devuelve dataURL base64 */
-  getBase64ImageFromURL(url: string): Promise<string> {
+  getBase64ImageFromURL_logo(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.setAttribute('crossOrigin', 'anonymous');
@@ -1180,6 +1326,102 @@ export class ContenedoresComponent implements OnInit {
       img.src = url;
     });
   }
+
+  /** Carga una imagen (misma-origin o CORS habilitado), la comprime y devuelve dataURL base64 */
+  /** Optimiza imagen: redimensiona y comprime sin perder mucha calidad */
+  getBase64ImageFromURL(
+    url: string,
+    maxWidth = 1200,   // más ancho = mejor calidad
+    maxHeight = 900,   // proporción adecuada para horizontal
+    quality = 0.85     // 0.85 mantiene buena nitidez sin pesar demasiado
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.onload = () => {
+        let { width, height } = img;
+
+        // Redimensionar proporcionalmente si es muy grande
+        if (width > maxWidth || height > maxHeight) {
+          const scale = Math.min(maxWidth / width, maxHeight / height);
+          width *= scale;
+          height *= scale;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // Mejora la nitidez del escalado (suavizado)
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+
+        // Convertir a JPEG con buena calidad
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = err => reject(err);
+      img.src = url;
+    });
+  }
+
+  getBase64ImageFromURL2(
+    url: string,
+    maxWidth = 800,  // ancho máximo permitido
+    maxHeight = 800, // alto máximo permitido
+    quality = 0.75   // calidad JPEG (0–1)
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        let { width, height } = img;
+
+        // 🔸 Mantener proporciones según orientación
+        const aspectRatio = width / height;
+
+        if (width > height) {
+          // Imagen horizontal
+          if (width > maxWidth) {
+            height = Math.round(maxWidth / aspectRatio);
+            width = maxWidth;
+          }
+        } else {
+          // Imagen vertical o cuadrada
+          if (height > maxHeight) {
+            width = Math.round(maxHeight * aspectRatio);
+            height = maxHeight;
+          }
+        }
+
+        // 🔹 Crear canvas con nuevo tamaño
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+
+        // 🔸 Convertir a JPEG comprimido
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+
+      img.onerror = err => reject(err);
+      img.src = url;
+    });
+  }
+
+
+
 
   /** Divide un array en filas de `size` elementos (para la tabla) */
   chunkImages<T>(arr: T[], size: number): T[][] {
@@ -1198,11 +1440,11 @@ export class ContenedoresComponent implements OnInit {
   async generarImagenContenedor(contenedor: any, index: number) {
     const element = document.getElementById(`contenedor-${index}`);
     if (!element) return;
-  
+
     this.generando = true;
-  
+
     element.classList.add('modo-captura');
-  
+
     try {
       const dataUrl = await htmlToImage.toPng(element, { quality: 0.95 });
       const link = document.createElement('a');
@@ -1215,6 +1457,180 @@ export class ContenedoresComponent implements OnInit {
       element.classList.remove('modo-captura');
       this.generando = false;
     }
+  }
+
+  subirComprobante(gasto: any) {
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/*';
+
+    input.onchange = (event: any) => {
+      this.onFileSubirComprobante(event, gasto);
+    };
+
+    input.click();
+  }
+
+  async generarComprobante(gasto: any) {
+    this.gastoSeleccionado = gasto;
+    const docDefinition: any = {
+      content: [
+        { text: 'RECIBO DE PAGO', style: 'titulo', alignment: 'center', margin: [0, 0, 0, 20] },
+        { text: this.tituloMostrarGastos, alignment: 'center', margin: [0, 0, 0, 20] },
+        {
+          table: {
+            widths: ['40%', '60%'],
+            body: [
+              ['Cliente:', gasto.persona_pago || ''],
+              ['Monto:', gasto.monto ? `${gasto.monto} BOB` : ''],
+              ['Fecha:', gasto.fecha_pago ? new Date(gasto.fecha_pago).toLocaleDateString() : new Date().toLocaleDateString()],
+              ['Lugar:', gasto.lugar ? this.getCiudadNombre(gasto.lugar) : '']
+            ]
+          },
+          layout: 'noBorders'
+        }
+      ],
+      styles: {
+        titulo: { fontSize: 16, bold: true }
+      }
+    };
+
+    // 🔹 Generar el PDF y mostrarlo en un iframe seguro
+    const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+    pdfDocGenerator.getBlob((blob) => {
+      this.pdfBlob = blob; // ✅ Guardamos el blob original
+      const blobUrl = URL.createObjectURL(blob);
+      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
+      this.mostrarVistaPreviaRecibo = true;
+    });
+  }
+
+  subirReciboPDF() {
+    if (!this.pdfBlob) {
+      Swal.fire('Error', 'No hay archivo PDF generado.', 'error');
+      return;
+    }
+
+    const file = new File([this.pdfBlob], 'recibo_pago.pdf', { type: 'application/pdf' });
+
+    // 🔹 Simula la selección del archivo
+    this.gastoSeleccionado.archivo = file;
+
+    Swal.fire('Éxito', 'Archivo seleccionado', 'success');
+    this.mostrarVistaPreviaRecibo = false;
+
+    console.log('Archivo listo:', this.gastoSeleccionado.archivo);
+
+    // Si quieres subirlo automáticamente:
+    // this.subirArchivoGasto(this.gastoSeleccionado);
+  }
+
+
+
+
+
+  onFileSubirComprobante(event: any, gasto: any): void {
+    console.log('Evento de archivo:', event);
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    // ✅ Validación: solo PDFs o imágenes
+    if (!(file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+      Swal.fire('Error', 'Tipo de archivo no permitido. Solo se permiten PDFs e imágenes.', 'error');
+      input.value = '';
+      return;
+    }
+
+    if (event.target.files.length > 0) {
+      gasto.archivo = file;
+      Swal.fire('Éxito', 'Archivo seleccionado.', 'success');
+    }
+  }
+
+  subirComprobantes(): void {
+    const uploads = this.gastos
+      .filter(g => g.archivo)
+      .map((gasto, index) => {
+        const extension = gasto.archivo.name.split('.').pop()?.toLowerCase() || '';
+        console.log(`Subiendo archivo para gasto index ${gasto.id_contenedor_gasto}:`, extension);
+        const nuevoArchivo = new File(
+          [gasto.archivo],
+          `${gasto.id_contenedor_gasto}.${extension}`,
+          { type: gasto.archivo.type }
+        );
+        const formData = new FormData();
+        formData.append('archivo', nuevoArchivo);
+        formData.append('id_despacho', gasto.id_contenedor.toString());
+        formData.append('documento', gasto.id_contenedor_gasto.toString());
+
+        axios.post(`${URL_SERVICIOS}/contenedor/subir_pdf`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+          .then(response => {
+            Swal.fire('¡Subido!', 'El archivo se subió correctamente.', 'success');
+            // this.obtenerPdfs(documento);
+            this.obtenerListado();
+          })
+          .catch(error => {
+            console.error('Error al subir el PDF', error);
+            Swal.fire('Error', 'Error al subir el archivo PDF. Intenta nuevamente.', 'error');
+          });
+      });
+
+    if (uploads.length > 0) {
+      forkJoin(uploads).subscribe({
+        next: () => console.log('Archivos subidos correctamente'),
+        error: () => console.log('Error al subir archivos')
+      });
+    }
+  }
+
+  verComprobante(nombre: any) {
+    const url = `${URL_SERVICIOS}/contenedor/verPdf/${nombre}`;
+
+    const extension = nombre.split('.').pop()?.toLowerCase();
+
+    if (extension === 'pdf') {
+      this.pdfSeleccionadoURL = url;
+      this.mostrarDialogPDF = true;
+    } else {
+      this.imagenSeleccionadaURL = url;
+      this.mostrarDialogImagen = true;
+    }
+  }
+
+  getDeuda(label: any): void {
+    this.filtroDeuda = this.opcionesDeudas.find(op => op.label === label)?.value ?? '';
+  }
+
+  filtrarClientes(event: any) {
+    if (this.opcionesClientes.length === 0) {
+      const idsclientes = new Set(this.contenedores.map(d => d.id_cliente));
+      this.opcionesClientes = this.clientes.filter(c => idsclientes.has(c.value));
+    }
+
+    const query = event.query.toLowerCase();
+    this.clientesFiltrados = this.opcionesClientes.filter(c =>
+      c.label.toLowerCase().includes(query)
+    );
+  }
+  filtrarContenedores(event: any) {
+    // Solo llenar una vez
+    if (this.opcionesContenedores.length === 0 && this.contenedores?.length > 0) {
+      // Convertimos todo a string y filtramos los nulos o vacíos
+      this.opcionesContenedores = this.contenedores
+        .map(d => d?.numero_contenedor ? String(d.numero_contenedor) : '')
+        .filter(c => c.trim() !== '');
+    }
+
+    const query = event.query ? event.query.toLowerCase() : '';
+
+    this.contenedorFiltrados = this.opcionesContenedores.filter(c =>
+      c?.toLowerCase().includes(query)
+    );
   }
 
 }

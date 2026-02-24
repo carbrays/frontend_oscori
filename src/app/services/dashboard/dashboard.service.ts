@@ -14,6 +14,9 @@ export class DashboardService {
   getTotal(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/cliente/totales`);
   }
+  getTotalCotizacion(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/totales`);
+  }
 
   getClientes(): Observable<any[]> {
     return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/clientes`);
@@ -24,7 +27,7 @@ export class DashboardService {
   }
 
   getNaviera(): Observable<any[]> {
-    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/navieras`);
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/navieras`);
   }
 
   getCiudad(): Observable<any[]> {
@@ -43,5 +46,24 @@ export class DashboardService {
     return this.http.get<any[]>(`${URL_SERVICIOS}/contenedor/contenedores_estado/${estado}`);
   }
 
+   getCotizacionesEstado(estado: string): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/cotizaciones_estado/${estado}`);
+  }
+
+   getCotizaciones(tipo: number, id_cliente: number, estado: string): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/cotizaciones/${tipo}/${id_cliente}/${estado}`);
+  }
+
+  getForwaders(): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/cotizacion/forwaders`);
+  }
+
+  deleteFile(pdf: string): Observable<any> {
+    return this.http.delete(`${URL_SERVICIOS}/vehiculo/eliminar_pdf/${pdf}`);
+  }
+
+  getPdfs(placa: string): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/vehiculo/pdfs/${placa}`);
+  }
   
 }

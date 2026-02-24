@@ -24,7 +24,7 @@
   <div class="col-12">
     <h5>VEHICULOS</h5>
     <div class="row g-3">
-      <div class="col-md-2" *ngFor="let card of agrupados['VEHICULOS']">
+      <div class="col-md-2" *ngFor="let card of agrupados['VEHICULOS']" (click)="abrirDialogVehiculos(card)">
         <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': card.color}">
           <div class="d-flex align-items-center justify-content-between mb-2">
             <div class="fs-4">{{ card.titulo }}</div>
@@ -38,10 +38,44 @@
   </div>
 </div>
 
-<p-dialog [(visible)]="dialogDespachos" [modal]="true" [style]="{ width: '90%' }"
-  [header]="vistaClientes ? 'CLIENTES' : 'DESPACHOS DE ' + clienteSeleccionado?.nombre">
+<div class="row g-3">
+  <div class="col-12">
+    <h5>COTIZACION</h5>
+    <div class="row g-3">
+      <div class="col-md-2" *ngFor="let cotizacion of cotizaciones" (click)="abrirDialogCotizacion(cotizacion)">
+        <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': '#6f42c1'}">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="fs-4">{{ cotizacion.label }}</div>
+            <i class="pi pi-file-pdf" style="font-size: 1.5rem;"></i>
+          </div>
+          <div class="display-6 fw-bold">{{ cotizacion.value }}</div>
+          <!-- <div class="small">{{ card.descripcion }}</div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <div *ngIf="vistaClientes" class="p-4">
+<p-dialog [(visible)]="dialogDespachos" [modal]="true" [style]="{ width: '90%' }"
+  [header]="vistaCiudad ? 'CIUDADES - ' + cardActual?.titulo : vistaClientes ? 'CLIENTES' : 'DESPACHOS DE ' + clienteSeleccionado?.nombre" (onHide)="cerrarDespachos()">
+<!-- <p-dialog [(visible)]="dialogDespachos" [modal]="true" [style]="{ width: '90%' }"
+  [header]="vistaClientes ? 'CLIENTES' : 'DESPACHOS DE ' + getCiudadNombre(cardActual?.titulo)" (onHide)="cerrarDespachos()"> -->
+
+  <div *ngIf="vistaCiudad" class="p-4">
+    <div class="row g-3">
+      <div class="col-md-2" *ngFor="let ciudad of ciudadesAgrupadas" (click)="verDespachosDeCiudad(ciudad)">
+        <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': '#28a745'}">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="fs-4">{{ ciudad.nombre }}</div>
+          </div>
+          <div class="display-6 fw-bold">{{ ciudad.cantidad }}</div>
+          <!-- <div class="small">{{ card.descripcion }}</div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="vistaClientes && vistaCiudad == false" class="p-4">
+    <button pButton icon="pi pi-arrow-left" label="Volver" class="p-button-text" (click)="volverACiudades()"></button>
     <div class="row g-3">
       <div class="col-md-2" *ngFor="let cliente of clientesAgrupados" (click)="verDespachosDeCliente(cliente)">
         <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': '#28a745'}">
@@ -55,19 +89,29 @@
 
     </div>
   </div>
-  <div *ngIf="!vistaClientes" id="contenedor-despachos">
+  <div *ngIf="!vistaClientes  && vistaCiudad == false" id="contenedor-despachos">
     <div class="div">
       <button pButton icon="pi pi-arrow-left" label="Volver" class="p-button-text" (click)="volverAClientes()"></button>
       <button pButton type="button" icon="pi pi-file-pdf" label="Generar PDF" class="p-button-secondary"
         (click)="exportarDespachosPDF()"></button>
     </div>
+
+    <p-tabView [(activeIndex)]="activeIndex" (onChange)="onTabAnioChange($event)">
+      <p-tabPanel *ngFor="let anio of aniosDisponibles" [header]="formatearPeriodo(anio)">
+      </p-tabPanel>
+    </p-tabView>
+
     <p-dataView [value]="despachosFiltradosCliente" layout="list" [rows]="5">
       <ng-template #cardDespacho let-despacho let-index="rowIndex" pTemplate="listItem">
         <div id="despacho-{{index}}" class="p-3 border rounded mb-3 shadow-sm" [ngClass]="estiloFila(despacho)">
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div>
-              <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(despacho.id_cliente) }}</div>
+              <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(despacho.id_cliente) + (despacho.forwader ? ' (' +
+                despacho.forwader + ')': '') }}</div>
             </div>
+            <div class="fs-3">
+            <b>{{ getVehiculoPlaca(despacho.id_asignacion_vehiculo_carga) }}</b>
+          </div>
             <div class="d-flex align-items-center gap-2">
 
               <div class="fs-5">
@@ -202,7 +246,8 @@
 </p-dialog>
 
 <p-dialog [(visible)]="dialogContenedores" [modal]="true" [style]="{ width: '90%' }"
-  [header]="vistaContenedores ? 'CONTENEDORES' : 'CONTENEDORES DE ' + contenedorSeleccionado?.nombre">
+  [header]="vistaContenedores ? 'CONTENEDORES' : 'CONTENEDORES DE ' + contenedorSeleccionado?.nombre"
+  (onHide)="cerrarContenedores()">
   <div *ngIf="vistaContenedores" class="p-4">
     <div class="row g-3">
       <div class="col-md-2" *ngFor="let contenedor of contenedoresAgrupados"
@@ -236,7 +281,8 @@
             <div>
               <div class="text-primary fs-5"><b>#:</b> {{ contenedor.id_contenedor }}</div>
               <div class="text-primary fs-4"><b>N° Contenedor:</b> {{ contenedor.numero_contenedor }}</div>
-              <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(contenedor.id_cliente) }}</div>
+              <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(contenedor.id_cliente) + (contenedor.forwader ? ' ('
+                + contenedor.forwader + ')': '') }}</div>
             </div>
 
             <!-- Columna Derecha: Botones lado a lado -->
@@ -346,5 +392,201 @@
         </div>
       </ng-template>
     </p-dataView>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="dialogCotizacion" [modal]="true" [style]="{ width: '90%' }"
+  [header]="'COTIZACIONES ' + cotizacionSeleccionada?.label" (onHide)="cerrarCotizacion()">
+  <div *ngIf="vistaCotizaciones" class="p-4">
+    <div class="row g-3">
+      <div class="col-md-2" *ngFor="let cotizacion of cotizacionesEstado" (click)="verCotizacionEstado(cotizacion)">
+        <div class="card p-3 text-white shadow-sm border-0" [ngStyle]="{'background-color': '#28a745'}">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="fs-4">{{ cotizacion.label }}</div>
+          </div>
+          <div class="display-6 fw-bold">{{ cotizacion.value }}</div>
+          <!-- <div class="small">{{ card.descripcion }}</div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!vistaCotizaciones" id="contenedor-contenedores">
+    <div class="div">
+      <button pButton icon="pi pi-arrow-left" label="Volver" class="p-button-text"
+        (click)="volverACotizacion()"></button>
+
+    </div>
+
+    <p-table class="resaltatabla" [value]="cotizacionesClientes" [tableStyle]="{ 'min-width': '80rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre Consignatario</th>
+          <th>N° Contenedor</th>
+          <th>Tamaño Contenedor</th>
+          <th>Peso KG</th>
+          <th>Naviera</th>
+          <th>Tipo Documento</th>
+          <th>Tipo Carga</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Fecha Llegada</th>
+          <th>Flete</th>
+          <th>N° Cotización</th>
+          <!-- <th>Acciones</th> -->
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-cotizacion>
+        <tr (click)="onRowClick(cotizacion)" [ngClass]="estiloFila2(cotizacion)">
+          <td>{{ cotizacion.c_nombre_comercial ? getForwaderNombre(cotizacion.c_nombre_comercial) + " ("
+            +cotizacion.tipo_cliente + ")" :
+            cotizacion.nombre_comercial ? getClienteNombre(cotizacion.nombre_comercial) : '' }}</td>
+          <td *ngIf="cotizacion.contenedores.length>1">
+            {{cotizacion.contenedores.length}}
+            <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm"
+              (click)="op.toggle($event); $event.stopPropagation()"><i
+                [class]="cotizacion.expanded ? 'ri-arrow-drop-up-line fs-22' : 'ri-arrow-drop-down-line fs-22'"
+                aria-hidden="true"></i></button>
+            <p-overlayPanel #op>
+              <div class="flex flex-column gap-3 w-25rem">
+
+                <div>
+                  <p-table [value]="cotizacion.contenedores" [style]="{'margin': '0'}" class="tabla-popup">
+                    <ng-template pTemplate="header">
+        <tr>
+
+          <th>N° Contenedor</th>
+          <th>Tamaño Contenedor</th>
+          <th>Peso KG</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-cont>
+        <!-- <tr (click)="onSubRowClick(cotizacion, cont)"> -->
+        <tr>
+
+          <td>{{ cont.numero_contenedor }}</td>
+          <td>{{ cont.tamano }}</td>
+          <td>{{ cont.peso_kg }}</td>
+
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  </div>
+  </p-overlayPanel>
+  </td>
+  <td *ngIf="cotizacion.contenedores.length==0 || cotizacion.contenedores.length==1">{{
+    cotizacion.contenedores?.[0]?.numero_contenedor }}</td>
+  <td *ngIf="cotizacion.contenedores.length>1"></td>
+  <td *ngIf="cotizacion.contenedores.length==0 || cotizacion.contenedores.length==1">{{
+    cotizacion.contenedores?.[0]?.tamano }}</td>
+  <td *ngIf="cotizacion.contenedores.length>1"></td>
+  <td *ngIf="cotizacion.contenedores.length==0 || cotizacion.contenedores.length==1">{{
+    cotizacion.contenedores?.[0]?.peso_kg }}</td>
+  <td>{{ getNavieraNombre(cotizacion.id_naviera) }}</td>
+  <td>{{ cotizacion.tipo_documento }}</td>
+  <td>{{ cotizacion.id_tipo_carga }}</td>
+  <td>{{ getCiudadNombre(cotizacion.id_ciudad_origen) }}</td>
+  <td>{{ getCiudadNombre(cotizacion.id_ciudad_destino) }}</td>
+  <td>{{ cotizacion.fecha_llegada | date:'dd/MM/yyyy' }}</td>
+  <td>{{ cotizacion.flete }}</td>
+  <td>{{ cotizacion.correlativo }}</td>
+  <!-- <td>
+  <button *ngIf="cotizacion.estado !== 'ACEPTADO'" type="button"
+    class="btn-outline-danger rounded-pill btn btn-icon btn-sm"
+    (click)="eliminarCotizacion(cotizacion); $event.stopPropagation()"><i class="ri-delete-bin-6-line fs-22"
+      aria-hidden="true"></i></button>
+  <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm"
+    (click)="editarCotizacion(cotizacion); $event.stopPropagation()"><i class="ri-ball-pen-line fs-22"
+      aria-hidden="true"></i></button>
+</td> -->
+  </tr>
+  <tr *ngIf="cotizacion.expanded">
+    <td colspan="4" style="padding: 0;">
+      <p-table [value]="cotizacion.contenedores" [style]="{'margin': '0'}">
+        <ng-template pTemplate="header">
+  <tr>
+    <th style="opacity: 0;">Nombre Consignatario</th>
+    <th>N° Contenedor</th>
+    <th>Tamaño Contenedor</th>
+    <th>Peso KG</th>
+  </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-cont>
+    <tr>
+      <td style="opacity: 0;">{{ getClienteNombre(cotizacion.nombre_comercial) }}</td>
+      <td>{{ cont.numero_contenedor }}</td>
+      <td>{{ cont.tamano }}</td>
+      <td>{{ cont.peso_kg }}</td>
+
+    </tr>
+  </ng-template>
+  </p-table>
+  </td>
+  </tr>
+  </ng-template>
+  </p-table>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="dialogVehiculos" [modal]="true" [style]="{ width: 'auto' }">
+  <h5>{{ vehiculoSeleccionado ? getPlaca(vehiculoSeleccionado) : 'Vehículo no seleccionado' }}</h5>
+  <div class="d-flex" style="gap: 1rem;">
+
+    <p-table [value]="documentosMergeados" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre del archivo</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-pdf let-rowIndex="rowIndex">
+        <tr>
+          <td>
+            <label for="nombre"> {{ pdf.label }}</label>
+          </td>
+
+          <td>
+
+            <button *ngIf="!pdf.existe" class="btn btn-sm btn-outline-info me-2"
+              (click)="abrirSelectorArchivo(pdf.value)">
+              <i class="pi pi-pencil"></i>Subir
+            </button>
+            <button *ngIf="pdf.existe" class="btn btn-sm btn-outline-info me-2" (click)="verPDF(pdf.nombre)">
+              <i class="pi pi-pencil"></i>Ver
+            </button>
+            <button *ngIf="pdf.existe" class="btn btn-sm btn-outline-danger" (click)="eliminarPDF(pdf.nombre)">
+              <i class="pi pi-trash"></i>Eliminar
+            </button>
+
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarDialogPDF" [modal]="true" [style]="{ width: '80%' }">
+  <div class="d-flex" style="gap: 1rem;">
+
+    <div style="flex: 1; height: 600px; border: 1px solid #ccc;">
+      <ngx-doc-viewer [url]="pdfSeleccionadoURL" viewer="url" style="width:100%;height:100%;"
+        filename="despachoSeleccionado.id_despacho + '.pdf'" disabledDownload="false">
+      </ngx-doc-viewer>
+    </div>
+  </div>
+
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarDialogImagen" [modal]="true" [closable]="true"
+  [style]="{ width: '90vw', maxWidth: '1200px', padding: '0' }" [contentStyle]="{ padding: '0' }"
+  styleClass="dialog-fullscreen">
+
+  <div class="dialog-img-container">
+    <img [src]="imagenSeleccionadaURL" alt="Imagen" class="dialog-img" />
   </div>
 </p-dialog>

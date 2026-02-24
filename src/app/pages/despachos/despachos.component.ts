@@ -18,6 +18,7 @@ import { identifierName } from '@angular/compiler';
 import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { forkJoin } from 'rxjs';
 
 interface ObservacionItem {
   id_despacho: number;
@@ -117,6 +118,84 @@ export class DespachosComponent implements OnInit {
     { label: 'DEVUELTO', value: 'DEVUELTO' }
   ];
 
+  aduanas = [
+  { label: '071 - AGENCIA EXTERIOR MATARANI', value: '071' },
+  { label: '072 - AGENCIA EXTERIOR ARICA', value: '072' },
+  { label: '073 - AGENCIA EXTERIOR MATARANI-ILO', value: '073' },
+
+  { label: '101 - INTERIOR SUCRE', value: '101' },
+  { label: '102 - ADUANA ESPECIALIZADA INTERIOR SUCRE', value: '102' },
+  { label: '111 - AEROPUERTO SUCRE', value: '111' },
+
+  { label: '201 - INTERIOR LA PAZ', value: '201' },
+  { label: '202 - ADUANA ESPECIALIZADA INTERIOR LA PAZ', value: '202' },
+  { label: '211 - AEROPUERTO EL ALTO', value: '211' },
+  { label: '221 - FRONTERA CHARAÑA', value: '221' },
+  { label: '231 - ZONA FRANCA COMERCIAL EL ALTO', value: '231' },
+  { label: '232 - ZONA FRANCA INDUSTRIAL EL ALTO', value: '232' },
+  { label: '234 - ZONA FRANCA INDUSTRIAL PATACAMAYA', value: '234' },
+  { label: '235 - ZONA FRANCA COMERCIAL PATACAMAYA', value: '235' },
+  { label: '241 - FRONTERA DESAGUADERO', value: '241' },
+  { label: '242 - FRONTERA KASANI', value: '242' },
+  { label: '243 - CENTRO DE ATENCIÓN BINACIONAL EN FRONTERA (CEBAF)', value: '243' },
+  { label: '244 - FRONTERA PUERTO ACOSTA', value: '244' },
+  { label: '261 - POSTAL LA PAZ', value: '261' },
+
+  { label: '301 - INTERIOR COCHABAMBA', value: '301' },
+  { label: '302 - ADUANA ESPECIALIZADA INTERIOR COCHABAMBA', value: '302' },
+  { label: '311 - AEROPUERTO COCHABAMBA', value: '311' },
+  { label: '361 - POSTAL COCHABAMBA', value: '361' },
+
+  { label: '401 - INTERIOR ORURO', value: '401' },
+  { label: '402 - ADUANA ESPECIALIZADA INTERIOR ORURO', value: '402' },
+  { label: '421 - FRONTERA PISIGA', value: '421' },
+  { label: '422 - FRONTERA TAMBO QUEMADO', value: '422' },
+  { label: '431 - ZONA FRANCA COMERCIAL ORURO', value: '431' },
+  { label: '432 - ZONA FRANCA INDUSTRIAL ORURO', value: '432' },
+
+  { label: '501 - INTERIOR POTOSÍ', value: '501' },
+  { label: '502 - ADUANA ESPECIALIZADA INTERIOR POTOSÍ', value: '502' },
+  { label: '521 - FRONTERA VILLAZON', value: '521' },
+  { label: '542 - FRONTERA APACHETA - HITO CAJONES', value: '542' },
+  { label: '543 - FRONTERA AVAROA', value: '543' },
+
+  { label: '601 - INTERIOR TARIJA', value: '601' },
+  { label: '602 - ADUANA ESPECIALIZADA INTERIOR TARIJA', value: '602' },
+  { label: '611 - AEROPUERTO TARIJA', value: '611' },
+  { label: '621 - FRONTERA YACUIBA', value: '621' },
+  { label: '622 - FRONTERA PICADA SUCRE', value: '622' },
+  { label: '631 - ZONA FRANCA COMERCIAL YACUIBA', value: '631' },
+  { label: '641 - FRONTERA BERMEJO', value: '641' },
+  { label: '643 - FRONTERA CAÑADA ORURO', value: '643' },
+
+  { label: '701 - INTERIOR SANTA CRUZ', value: '701' },
+  { label: '702 - ADUANA ESPECIALIZADA INTERIOR SANTA CRUZ', value: '702' },
+  { label: '711 - AEROPUERTO VIRU VIRU', value: '711' },
+  { label: '712 - AEROPUERTO PUERTO SUAREZ', value: '712' },
+  { label: '721 - FRONTERA PUERTO SUAREZ', value: '721' },
+  { label: '722 - FRONTERA ARROYO CONCEPCIÓN', value: '722' },
+  { label: '732 - ZONA FRANCA COMERCIAL SANTA CRUZ', value: '732' },
+  { label: '734 - ZONA FRANCA COMERCIAL PUERTO SUAREZ', value: '734' },
+  { label: '735 - ZONA FRANCA COMERCIAL WINNER', value: '735' },
+  { label: '736 - ZONA FRANCA INDUSTRIAL PUERTO SUAREZ', value: '736' },
+  { label: '737 - ZONA FRANCA INDUSTRIAL WINNER', value: '737' },
+  { label: '738 - ZONA FRANCA INDUSTRIAL SANTA CRUZ', value: '738' },
+  { label: '741 - FRONTERA SAN MATÍAS', value: '741' },
+  { label: '743 - FRONTERA SAN VICENTE', value: '743' },
+  { label: '751 - ADMINISTRACION DE ADUANA FLUVIAL PUERTO JENNEFER', value: '751' },
+  { label: '752 - PUNTO DE CONTROL EL FARO', value: '752' },
+  { label: '761 - POSTAL SANTA CRUZ', value: '761' },
+
+  { label: '801 - INTERIOR TRINIDAD', value: '801' },
+  { label: '841 - FRONTERA GUAYARAMERIN', value: '841' },
+  { label: '862 - POSTAL TRINIDAD', value: '862' },
+
+  { label: '911 - AEROPUERTO COBIJA', value: '911' },
+  { label: '921 - FRONTERA COBIJA', value: '921' },
+  { label: '931 - ZONA FRANCA COMERCIAL E IND. COBIJA', value: '931' }
+];
+
+
   pdfSeleccionado: File | null = null;
 
   archivosPDF: File[] = [];
@@ -162,6 +241,7 @@ export class DespachosComponent implements OnInit {
   filtroAsignacionDescarga: string = '';
   filtroFechaDescarga: string = '';
   filtroEstado: string = '';
+  filtroAnioCarga: number | null = null;
 
   clientesFiltrados: any[] = [];
   mercanciasFiltradas: any[] = [];
@@ -222,9 +302,30 @@ export class DespachosComponent implements OnInit {
   bloquearContenedor = false;
   bloquearTamano = false;
 
+  aniosDisponibles: number[] = [];
+
+  activeIndex = 0;
+
+  tiposGasto = [
+    { id: 'DIESEL', nombre: 'DIESEL' },
+    { id: 'PEAJE', nombre: 'PEAJE' },
+    { id: 'VIATICOS', nombre: 'VIATICOS' }
+  ];
+
+  mostrarGastos = false;
+  tituloMostrarGastos = '';
+  gastos: any[] = [];
+
+ modalidad_pago = [
+    { label: 'AL CONTADO', value: 'AL CONTADO' },
+    { label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' },
+    { label: 'QR', value: 'QR' }
+  ];
+
   constructor(private despachoService: DespachosService) { }
 
   ngOnInit(): void {
+    
     this.obtenerCiudades();
     this.obtenerNavieras();
     this.obtenerMercancias();
@@ -258,7 +359,10 @@ export class DespachosComponent implements OnInit {
       const despachoAduaneroGenStr = d.id_despacho_aduanero_general?.toLowerCase() || '';
       const depositoAduaneroStr = d.id_deposito_aduanero?.toLowerCase() || '';
       const asignacionCargaStr = this.getVehiculoNombre(d.id_asignacion_vehiculo_carga)?.toLowerCase() || '';
-      const fechaCargaStr = d.fecha_carga ? new Date(d.fecha_carga).toISOString().split('T')[0] : '';
+      // const fechaCargaStr = d.fecha_carga ? new Date(d.fecha_carga).toISOString().split('T')[0] : '';
+      const anioCarga = d.fecha_llegada
+        ? new Date(d.fecha_llegada).getFullYear()
+        : null;
       const asignacionDescargaStr = this.getVehiculoNombre(d.id_asignacion_vehiculo_descarga)?.toLowerCase() || '';
       const fechaDescargaStr = d.fecha_descarga ? new Date(d.fecha_descarga).toISOString().split('T')[0] : '';
       const estadoStr = d.estado?.toLowerCase() || '';
@@ -270,7 +374,7 @@ export class DespachosComponent implements OnInit {
         tipoCargaStr.includes(this.filtroTipoCarga.toLowerCase()) &&
         descripcionStr.includes(this.filtroDescripcion.toLowerCase()) &&
         blMadreStr.includes(this.filtroBlMadre.toLowerCase()) &&
-        (this.filtroFechaBlMadre ? fechaCargaStr === this.filtroFechaBlMadre : true) &&
+        // (this.filtroFechaBlMadre ? fechaCargaStr === this.filtroFechaBlMadre : true) &&
         blHijoStr.includes(this.filtroBlHijo.toLowerCase()) &&
         (this.filtroFechaBlHijo ? fechaDescargaStr === this.filtroFechaBlHijo : true) &&
         damStr.includes(this.filtroDam.toLowerCase()) &&
@@ -286,12 +390,16 @@ export class DespachosComponent implements OnInit {
         despachoAduaneroGenStr.includes(this.filtroDespachoAduaneroGeneral.toLowerCase()) &&
         depositoAduaneroStr.includes(this.filtroDepositoAduanero.toLowerCase()) &&
         asignacionCargaStr.includes(this.filtroAsignacionCarga.toLowerCase()) &&
-        fechaCargaStr.includes(this.filtroFechaCarga) &&
+        // fechaCargaStr.includes(this.filtroFechaCarga) &&
+        (this.filtroAnioCarga ? anioCarga === this.filtroAnioCarga : true) &&
         asignacionDescargaStr.includes(this.filtroAsignacionDescarga.toLowerCase()) &&
         fechaDescargaStr.includes(this.filtroFechaDescarga) &&
         estadoStr.includes(this.filtroEstado.toLowerCase())
       );
-    });
+    }).sort((a, b) =>
+      new Date(b.fecha_llegada).getTime() -
+      new Date(a.fecha_llegada).getTime()
+    );
   }
   filtrarClientes(event: any) {
     if (this.opcionesClientes.length === 0) {
@@ -628,12 +736,24 @@ export class DespachosComponent implements OnInit {
     this.despachoService.getDespachos().subscribe({
       next: (data) => {
         this.despachos = data;
+        this.cargarAniosDespacho()
         // this.mostrarObservacionesDespachos();
         // this.armarObservacionesAccordion();
       },
       error: (err) =>
         Swal.fire('Error', 'No se pudo cargar la lista de despachos.', 'error'),
     });
+  }
+  cargarAniosDespacho() {
+    const anios = this.despachos
+      .filter(d => d.fecha_llegada)
+      .map(d => new Date(d.fecha_llegada).getFullYear());
+
+    this.aniosDisponibles = [...new Set(anios)].sort((a, b) => b - a);
+    this.filtroAnioCarga = this.aniosDisponibles[0];
+    this.activeIndex = 0;
+
+
   }
 
   obtenerCiudades(): void {
@@ -784,7 +904,14 @@ export class DespachosComponent implements OnInit {
       fecha_dim: null,
       despacho_agencia: '',
       despacho_nombre: '',
-      despacho_telefono: ''
+      despacho_telefono: '',
+      nombre_barco: '',
+      dp: '',
+      tiene_diesel: false,
+      tiene_peaje: false,
+      tiene_viaticos: false,
+      lugar_entrega: '',
+      aduana_destino: ''
     };
     this.popupVisible = true;
     this.modoEdicion = false;
@@ -1055,7 +1182,7 @@ export class DespachosComponent implements OnInit {
     };
 
     for (const despacho of this.despachosFiltrados) {
-      
+
       if (despacho.estado === 'CULMINADO') continue;
 
       const cliente = this.getClienteNombre(despacho.id_cliente) || 'Sin nombre';
@@ -1350,6 +1477,7 @@ export class DespachosComponent implements OnInit {
 
       if (d.descripcion_carga) col1.push({ text: `Tamaño: ${d.descripcion_carga}`, style: 'cardText' });
       if (d.id_naviera) col2.push({ text: `Naviera: ${this.getNavieraNombre(d.id_naviera)}`, style: 'cardText' });
+      if (d.nombre_barco) col1.push({ text: `Nombre del Barco: ${d.nombre_barco}`, style: 'cardText' });
 
       if (this.getNavieraNombre(d.id_naviera) === 'MSC') {
         col1.push({ text: `Autorizado MSC: ${d.autorizado ? 'Sí' : 'No'}`, style: 'cardText' });
@@ -1477,6 +1605,7 @@ export class DespachosComponent implements OnInit {
       'Tipo Carga': d.id_tipo_carga,
       'Tamaño': d.descripcion_carga,
       'Naviera': this.getNavieraNombre(d.id_naviera),
+      'Nombre del Barco': d.nombre_barco,
       Autorizado: this.getNavieraNombre(d.id_naviera) === 'MSC' ? (d.autorizado ? 'Sí' : 'No') : '',
       'Peso (kg)': d.peso_kg,
       'Volumen (m³)': d.volumen_m3,
@@ -1640,5 +1769,235 @@ export class DespachosComponent implements OnInit {
       this.generando = false;
     }
   }
+
+  onTabAnioChange(event: any) {
+    this.filtroAnioCarga = this.aniosDisponibles[event.index];
+  }
+
+  verGasto(despacho: any, gasto: any): void {
+    this.despachoSeleccionado = despacho;
+    this.obtenerGastos(gasto.nombre);
+    this.mostrarGastos = true;
+    this.tituloMostrarGastos = `${gasto.nombre}`;
+  }
+
+  obtenerGastos(nombreGasto: string): void {
+    this.despachoService.getGastosDespacho(this.despachoSeleccionado.id_despacho, nombreGasto).subscribe({
+      next: data => {
+        this.gastos = data;
+        this.gastos.forEach(gasto => {
+          gasto.fecha_pago = gasto.fecha_pago ? new Date(gasto.fecha_pago) : null;
+
+        });
+        console.log('Gastos cargados:', this.gastos);
+      },
+      error: err => Swal.fire('Error', 'No se pudo cargar la lista de gastos.', 'error')
+    });
+  }
+
+  agregarGasto(): void {
+    this.gastos.push({
+      id_despachos_gasto: null,
+      id_despacho: this.despachoSeleccionado.id_despacho,
+      tipo: this.tituloMostrarGastos,
+      descripcion: '',
+      monto: '',
+      cancelado: false,
+      estado: 'ACTIVO',
+      fecha_pago: null,
+      modalidad_pago: '',
+      persona_pago: ''
+    });
+  }
+
+  guardarGasto(): void {
+    const incompletos = this.gastos.filter(g => !g.descripcion || !g.monto);
+
+    if (incompletos.length > 0) {
+      Swal.fire(
+        'Advertencia',
+        'Debes llenar al menos Descripcion y Monto en todos los gastos antes de guardar, caso contrario borre los vacíos',
+        'warning'
+      );
+      return;
+    }
+
+    const requests = this.gastos.map(gasto => {
+      if (gasto.id_despachos_gasto) {
+        return this.despachoService.editarGasto(gasto.id_despachos_gasto, gasto);
+      } else {
+        return this.despachoService.insertarGasto(gasto);
+      }
+    });
+
+    forkJoin(requests).subscribe({
+      next: (resultados: any) => {
+        this.gastos = this.gastos.map((g, i) => ({
+          ...g,
+          id_despachos_gasto: resultados[i].gasto.id_despachos_gasto
+        }));
+        this.subirComprobantes();
+
+        this.mostrarGastos = false;
+        this.obtenerListado();
+        Swal.fire('Éxito', 'Todos los gastos fueron guardados correctamente.', 'success');
+      },
+      error: () => {
+        Swal.fire('Error', 'Ocurrió un problema al guardar los gastos.', 'error');
+      }
+    });
+  }
+
+  eliminarGasto(index: number) {
+    const gasto = this.gastos[index];
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Deseas eliminar el gasto?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        if (gasto.id_despachos_gasto) {
+          this.despachoService.eliminarGasto(gasto.id_despachos_gasto, this.despachoSeleccionado.id_despacho, gasto.tipo).subscribe({
+            next: () => {
+              this.gastos.splice(index, 1);
+              this.obtenerListado();
+              Swal.fire('Eliminado', 'Gasto eliminado correctamente.', 'success');
+            },
+            error: err => Swal.fire('Error', 'No se pudo eliminar el gasto.', 'error')
+          });
+        } else {
+          this.gastos.splice(index, 1);
+        }
+      }
+    });
+  }
+
+  subirComprobante(gasto: any) {
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/*';
+
+    input.onchange = (event: any) => {
+      this.onFileSubirComprobante(event, gasto);
+    };
+
+    input.click();
+  }
+
+  onFileSubirComprobante(event: any, gasto: any): void {
+    console.log('Evento de archivo:', event);
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    // ✅ Validación: solo PDFs o imágenes
+    if (!(file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+      Swal.fire('Error', 'Tipo de archivo no permitido. Solo se permiten PDFs e imágenes.', 'error');
+      input.value = '';
+      return;
+    }
+
+    if (event.target.files.length > 0) {
+      gasto.archivo = file;
+      Swal.fire('Éxito', 'Archivo seleccionado.', 'success');
+    }
+  }
+
+  async generarComprobante(gasto: any) {
+    this.despachoSeleccionado = gasto;
+    const docDefinition: any = {
+      content: [
+        { text: 'RECIBO DE PAGO', style: 'titulo', alignment: 'center', margin: [0, 0, 0, 20] },
+        { text: this.tituloMostrarGastos, alignment: 'center', margin: [0, 0, 0, 20] },
+        {
+          table: {
+            widths: ['40%', '60%'],
+            body: [
+              ['Cliente:', gasto.persona_pago || ''],
+              ['Monto:', gasto.monto ? `${gasto.monto} BOB` : ''],
+              ['Fecha:', gasto.fecha_pago ? new Date(gasto.fecha_pago).toLocaleDateString() : new Date().toLocaleDateString()],
+              ['Lugar:', gasto.lugar ? this.getCiudadNombre(gasto.lugar) : '']
+            ]
+          },
+          layout: 'noBorders'
+        }
+      ],
+      styles: {
+        titulo: { fontSize: 16, bold: true }
+      }
+    };
+
+    // 🔹 Generar el PDF y mostrarlo en un iframe seguro
+    // const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+    // pdfDocGenerator.getBlob((blob) => {
+    //   this.pdfBlob = blob; // ✅ Guardamos el blob original
+    //   const blobUrl = URL.createObjectURL(blob);
+    //   this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
+    //   this.mostrarVistaPreviaRecibo = true;
+    // });
+  }
+
+  subirComprobantes(): void {
+    const uploads = this.gastos
+      .filter(g => g.archivo)
+      .map((gasto, index) => {
+        console.log(`Preparando subida de archivo para gasto index ${index}:`, gasto.id_despachos_gasto);
+        const extension = gasto.archivo.name.split('.').pop()?.toLowerCase() || '';
+        console.log(`Subiendo archivo para gasto index ${gasto.id_despachos_gasto}:`, extension);
+        const nuevoArchivo = new File(
+          [gasto.archivo],
+          `${gasto.id_despachos_gasto}.${extension}`,
+          { type: gasto.archivo.type }
+        );
+        const formData = new FormData();
+        formData.append('archivo', nuevoArchivo);
+        formData.append('id_despacho', gasto.id_despacho.toString());
+        formData.append('documento', gasto.id_despachos_gasto.toString());
+
+        axios.post(`${URL_SERVICIOS}/despachos/subir_pdf`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+          .then(response => {
+            Swal.fire('¡Subido!', 'El archivo se subió correctamente.', 'success');
+            // this.obtenerPdfs(documento);
+            this.obtenerListado();
+          })
+          .catch(error => {
+            console.error('Error al subir el PDF', error);
+            Swal.fire('Error', 'Error al subir el archivo PDF. Intenta nuevamente.', 'error');
+          });
+      });
+
+    if (uploads.length > 0) {
+      forkJoin(uploads).subscribe({
+        next: () => console.log('Archivos subidos correctamente'),
+        error: () => console.log('Error al subir archivos')
+      });
+    }
+  }
+
+  verComprobante(nombre: any) {
+    const url = `${URL_SERVICIOS}/despachos/verPdf/${nombre}`;
+
+    const extension = nombre.split('.').pop()?.toLowerCase();
+
+    if (extension === 'pdf') {
+      this.pdfSeleccionadoURL = url;
+      this.mostrarDialogPDF = true;
+    } else {
+      this.imagenSeleccionadaURL = url;
+      this.mostrarDialogImagen = true;
+    }
+  }
+
+  getAduana(value: string): string {
+  const item = this.aduanas.find(a => a.value === value);
+  return item ? item.label : value;
+}
 
 }

@@ -1,0 +1,62 @@
+<div id="contenedor-despachos">
+  <p-dataView [value]="operaciones" layout="list" class="tracking-dataview">
+
+    <ng-template let-op pTemplate="listItem">
+
+      <div class="tracking-card">
+
+        <!-- LADO IZQUIERDO INFO -->
+        <div class="tracking-info">
+
+          <div class="camion">
+            <i class="pi pi-truck"></i>
+            {{ op.camion }}
+          </div>
+
+          <div class="location">
+            <strong>Origen:</strong> {{ op.origen }}
+            <small>{{ op.fechaOrigen }}</small>
+          </div>
+
+          <div class="location">
+            <strong>Destino:</strong> {{ op.destino }}
+            <small>{{ op.fechaDestino }}</small>
+          </div>
+
+          <div class="location" *ngIf="op.nuevoDestino">
+            <strong>Nuevo destino:</strong> {{ op.nuevoDestino }}
+            <small>{{ op.fechaNuevoDestino }}</small>
+          </div>
+
+          <div class="estados">
+            <span *ngFor="let estado of op.estados" class="estado">
+              {{ estado }}
+            </span>
+          </div>
+
+        </div>
+
+        <!-- LADO DERECHO TRACKING -->
+        <div class="tracking-visual">
+
+          <div class="linea">
+            <div class="progreso" [style.width.%]="op.progreso">
+            </div>
+
+            <div class="camion-icon" [style.left.%]="op.progreso">
+              🚛
+            </div>
+          </div>
+
+          <div class="porcentaje">
+            {{ op.progreso }}%
+          </div>
+
+        </div>
+
+      </div>
+
+    </ng-template>
+
+  </p-dataView>
+</div>

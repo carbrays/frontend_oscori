@@ -35,11 +35,11 @@ ingresar(forma: NgForm){
           this.router.navigate(['/cod-asignar'])
         } else {
           Notiflix.Loading.remove();
-          Swal.fire({
-              title: '¡Bienvenid@!',
-              text: 'Has iniciado sesión correctamente.',
-              icon: 'success'
-            })
+          // Swal.fire({
+          //     title: '¡Bienvenid@!',
+          //     text: 'Has iniciado sesión correctamente.',
+          //     icon: 'success'
+          //   })
           this.router.navigate(['/dashboard'])
         }
       }, (err) => {

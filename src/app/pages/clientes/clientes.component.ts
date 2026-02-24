@@ -24,6 +24,11 @@ export class ClientesComponent implements OnInit {
 
   filtroCliente: string = '';
 
+  contactoVisible = false;
+  contactos: any[] = [];
+  contactoActual: any = {};
+  editIndex: any = null;
+
   constructor(private clienteService: ClientesService, private zone: NgZone) { }
 
   ngOnInit(): void {
@@ -50,7 +55,13 @@ getClienteNombre(id: number): string {
 
   obtenerListado(): void {
     this.clienteService.getClientes().subscribe({
-      next: (data) => this.clientes = data,
+      next: (data) => {
+        this.clientes = data; 
+        this.clientes.forEach(cliente => {
+          cliente.contactos = JSON.parse(cliente.contactos || '[]');
+        });
+        console.log(this.clientes);
+      },
       error: (err) => {
         console.error('Error al obtener clientes', err);
         Swal.fire('Error', 'No se pudieron cargar los clientes', 'error');
@@ -86,14 +97,16 @@ getClienteNombre(id: number): string {
       whatsapp: '',
       direccion: '',
       pais: '',
-      ciudad: '',
+      ciudad: null,
       id_forwarder: null,
       persona_contacto: '',
       telefono_contacto: '',
       correo_contacto: '',
       estado: 'ACTIVO',
       usucre: localStorage.getItem('login'),
-      feccre: new Date()
+      feccre: new Date(),
+      contactos: '[]'
+      
     };
     this.tituloPopup = 'Nuevo Cliente';
     this.popupVisible = true;
@@ -101,7 +114,9 @@ getClienteNombre(id: number): string {
   }
 
   editarCliente(cliente: any): void {
+    console.log(cliente);
     this.clienteSeleccionado = { ...cliente };
+    this.contactos = this.clienteSeleccionado.contactos;
     this.tituloPopup = 'Editar Cliente';
     this.popupVisible = true;
     this.modoEdicion = true;
@@ -136,6 +151,7 @@ getClienteNombre(id: number): string {
       const id = this.clienteSeleccionado.id_cliente;
       this.clienteSeleccionado.usumod = localStorage.getItem('login');
       this.clienteSeleccionado.fecmod = new Date();
+      this.clienteSeleccionado.contactos = JSON.stringify(this.contactos);
       this.clienteService.editarCliente(id, this.clienteSeleccionado).subscribe({
         next: () => {
           this.popupVisible = false;
@@ -167,5 +183,36 @@ getClienteNombre(id: number): string {
     const soloNumeros = valor.replace(/[^0-9]/g, '');
     event.target.value = soloNumeros;
     this.clienteSeleccionado[campo] = soloNumeros;
+  }
+
+  nuevoContacto() {
+    this.contactoActual = {
+      persona_contacto: '',
+      telefono_contacto: '',
+      correo_contacto: ''
+    };
+    this.editIndex = null;
+    this.contactoVisible = true;
+  }
+
+  guardarContacto() {
+    if (this.editIndex != null) {
+      this.contactos[this.editIndex] = this.contactoActual;
+    } else {
+      this.contactos.push(this.contactoActual);
+    }
+    this.clienteSeleccionado.contactos = JSON.stringify(this.contactos);;
+    this.contactoVisible = false;
+  }
+
+  editarContacto(i: number) {
+    this.editIndex = i;
+    this.contactoActual = { ...this.contactos[i] }; // clonar
+    this.contactoVisible = true;
+  }
+
+  eliminarContacto(i: number) {
+    this.contactos.splice(i, 1);
+    this.clienteSeleccionado.contactos = JSON.stringify(this.contactos);;
   }
 }

@@ -72,4 +72,12 @@ export class CotizacionService {
     return this.http.post(`${URL_SERVICIOS}/mercancia/crear_mercancia`, mercancia);
   }
 
+  editarCliente(id_cliente: number, cliente: any): Observable<any> {
+    return this.http.put(`${URL_SERVICIOS}/cliente/editar_cliente/${id_cliente}`, cliente);
+  }
+
+  editarForwader(id_forwader: number, forwader: any): Observable<any> {
+    return this.http.put(`${URL_SERVICIOS}/forwader/editar_forwarder/${id_forwader}`, forwader);
+  }
+
 }

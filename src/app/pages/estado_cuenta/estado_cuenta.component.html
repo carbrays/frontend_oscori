@@ -1,0 +1,157 @@
+<!-- LISTADO DE ESTADOS -->
+<div *ngIf="!verEstado" class="card">
+  <div class="flex justify-content-between align-items-center mb-3">
+    <h3>Estados de Cuenta</h3>
+    <button pButton label="Nuevo Estado" icon="pi pi-plus" (click)="nuevoEstado()"></button>
+  </div>
+
+  <p-table [value]="estados" [paginator]="true" [rows]="10" [loading]="loading" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>BL</th>
+        <th>Fecha</th>
+        <th>Saldo USD</th>
+        <th>Saldo BS</th>
+        <th>Correlativo</th>
+        <th>Estado</th>
+        <th style="width: 140px">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td>{{ r.id_estado }}</td>
+        <td>{{ getClienteNombre(r.cliente) }}</td>
+        <td>{{ r.bl }}</td>
+        <td>{{ r.fecha | date:'yyyy-MM-dd' }}</td>
+        <td>{{ r.saldo_usd | number:'1.2-2' }}</td>
+        <td>{{ r.saldo_bs | number:'1.2-2' }}</td>
+        <td>{{ r.correlativo }}</td>
+        <td>
+          <span class="badge" [ngClass]="{
+                  'bg-green-500': r.estado === 'ACTIVO',
+                  'bg-red-500': r.estado !== 'ACTIVO'
+                }">
+            {{ r.estado }}
+          </span>
+        </td>
+        <td>
+          <button type="button" class="btn btn-sm btn-outline-success" (click)="imprimir(r); $event.stopPropagation();">
+            <i class="ri-printer-line fs-16"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-info" (click)="editar(r); $event.stopPropagation();">
+            <i class="ri-pencil-line fs-16"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(r); $event.stopPropagation();">
+            <i class="ri-delete-bin-6-line fs-16"></i>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- FORMULARIO DE ESTADO -->
+<form *ngIf="verEstado" [formGroup]="form">
+  <div class="div">
+    <button pButton type="button" icon="pi pi-plus" label="← Atrás" class="p-button-success" (click)="volverAEstadoCuenta()"></button>
+  </div>
+
+  <div class="divider my-4"></div>
+
+  <div class="card">
+    <h3 style="text-align: center;">Estado de Cuenta</h3>
+
+    <!-- DATOS GENERALES -->
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Cliente</label>
+        <ng-select [items]="clientes" bindLabel="label" bindValue="value" formControlName="cliente" placeholder="Seleccione un cliente" class="full-width"></ng-select>
+      </div>
+
+      <div class="form-row">
+        <label>BL</label>
+        <input pInputText formControlName="bl" class="full-width">
+      </div>
+
+      <div class="form-row">
+        <label>Fecha</label>
+        <p-calendar formControlName="fecha" dateFormat="yy-mm-dd" class="full-width" [showIcon] = "true"></p-calendar>
+      </div>
+
+      <!-- <div class="form-row">
+        <label>Tipo Cambio</label>
+        <input type="number" pInputText formControlName="tipo_cambio" class="full-width" (input)="calcularCambio()">
+      </div> -->
+
+    </div>
+
+    <!-- GASTOS -->
+    <h3 class="mt-4">Detalle de Gastos</h3>
+    <div class="form-row">
+      <button pButton type="button" icon="pi pi-plus" label="+ Nuevo registro" (click)="agregarGasto()"></button>
+    </div>
+    <div formArrayName="gastos" class="mt-3">
+      <p-table [value]="gastos.controls" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:110px">Fecha</th>
+      <th style="width:50px">Detalle</th>
+      <th style="width:50px">Factura</th>
+      <th style="width:50px">Debe</th>
+      <th style="width:50px">Haber</th>
+      <th style="width:50px">Saldo USD</th>
+      <th style="width:30px">Tipo Cambio</th>
+      <th style="width:50px">Saldo BS</th>
+      <th style="width:50px">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-g let-rowIndex="rowIndex">
+  <tr [formGroupName]="rowIndex">
+    <td style="width:160px">
+      <p-calendar 
+        formControlName="fecha" 
+        dateFormat="yy-mm-dd" 
+        appendTo="body" 
+        [showIcon]="true" 
+        [style]="{'width':'100%'}">
+      </p-calendar>
+    </td>
+    <td style="width:150px"><input pInputText formControlName="detalle" placeholder="Detalle" style="width:100%"></td>
+    <td style="width:100px"><input pInputText formControlName="factura" style="width:100%"></td>
+    <td style="width:100px"><input pInputText formControlName="debe" placeholder="Debe" (input)="calcularTotales()" style="width:100%"></td>
+    <td style="width:100px"><input pInputText formControlName="haber" placeholder="Haber" (input)="calcularTotales()" style="width:100%"></td>
+    <td style="width:100px"><input pInputText formControlName="saldo_usd" readonly style="width:100%"></td>
+    <td style="width:80px"><input pInputText formControlName="tipo_cambio" (input)="calcularTotales()" style="width:100%"></td>
+    <td style="width:80px"><input pInputText formControlName="saldo_bs" readonly style="width:100%"></td>
+    <td style="width:110px">
+      <button class="btn btn-sm btn-outline-danger" (click)="eliminarGasto(rowIndex)">
+        <i class="pi pi-trash"></i>Eliminar
+      </button>
+    </td>
+  </tr>
+</ng-template>
+      </p-table>
+    </div>
+
+    <!-- TOTALES -->
+    <div class="divider my-4"></div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Total Saldo en USD</label>
+        <input pInputText formControlName="saldo_usd" readonly class="full-width">
+      </div>
+      <div class="form-row">
+        <label>Total Saldo en BS</label>
+        <input pInputText formControlName="saldo_bs" readonly class="full-width">
+      </div>
+      
+    </div>
+
+    <div class="form-row">
+      <button pButton type="button" label="Guardar Estado" class="p-button-success mt-4" (click)="guardar()"></button>
+    </div>
+  </div>
+</form>

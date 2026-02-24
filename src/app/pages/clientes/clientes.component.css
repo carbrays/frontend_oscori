@@ -1,0 +1,48 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  background: #e0f2e0;
+  border-radius: 20px;
+  padding: 4px 10px;
+  margin: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid #b2dfbd;
+  white-space: normal !important;
+}
+
+.chip:hover {
+  background: #b2dfbc;
+}
+
+.chip .remove {
+  font-size: 1.5rem;     /* tamaño más grande */
+  padding-left: 8px;
+  cursor: pointer;
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+}
+
+.chip .remove:hover {
+  color: #e74c3c;
+}
+
+::ng-deep .tabla-popup thead > tr > th {
+  background-color: #1a7e1f !important;
+  color: white !important;
+}
+
+::ng-deep .tabla-popup tbody > tr {
+  background-color: #f3f4f6 !important;
+}
+
+::ng-deep .tabla-popup tbody > tr:hover {
+  background-color: #c5cae9 !important;
+}
+
+::ng-deep .tabla-popup td,
+::ng-deep .tabla-popup th {
+  padding: 10px !important;
+  font-size: 14px;
+}

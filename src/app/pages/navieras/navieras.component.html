@@ -22,7 +22,33 @@
       <td>{{ naviera.nombre_comercial }}</td>
       <td>{{ naviera.razon_social }}</td>
       <td>{{ naviera.pais_origen }}</td>
-      <td>{{ naviera.telefono_contacto }}</td>
+      <td>
+          {{naviera.telefono_contacto.length}}
+          <button type="button" class="btn-outline-info rounded-pill btn btn-icon btn-sm"
+            (click)="op.toggle($event); $event.stopPropagation()"><i
+              [class]="naviera.expanded ? 'ri-arrow-drop-up-line fs-22' : 'ri-arrow-drop-down-line fs-22'"
+              aria-hidden="true"></i></button>
+          <p-overlayPanel #op>
+            <div class="flex flex-column gap-3 w-25rem">
+              <div>
+                <p-table [value]="naviera.telefono_contacto" [style]="{'margin': '0'}" class="tabla-popup">
+                  <ng-template pTemplate="header">
+              <tr>
+                <th>Area</th>
+                <th>Telefono</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-cont>
+              <tr>
+                <td>{{ cont.area }}</td>
+                <td>{{ cont.telefono }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+        </div>
+        </p-overlayPanel>
+      </td>
       <td>{{ naviera.correo_contacto }}</td>
       <td>{{ naviera.representante }}</td>
       <td>{{ naviera.dias }}</td>
@@ -37,7 +63,7 @@
 </p-table>
 
 <p-dialog [(visible)]="popupVisible" [modal]="true" [style]="{ width: '800px' }" [header]="tituloPopup">
-  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+  <form #form="ngForm">
     <div class="p-fluid p-grid p-formgrid">
 
       <div class="p-field p-col-6">
@@ -57,7 +83,20 @@
 
       <div class="p-field p-col-6">
         <label for="telefono_contacto">Teléfono</label>
-        <input pInputText id="telefono_contacto" [(ngModel)]="navieraSeleccionada.telefono_contacto" name="telefono_contacto" />
+        <button pButton label="Añadir Telefono" icon="pi pi-plus" class="p-button-success"
+                  (click)="nuevoTelefono()">
+                </button>
+                <div class="chips-container">
+                  <div class="chip" *ngFor="let d of telefonos; let i = index" (click)="editarTelefono(i)">
+                    Area: {{ d.area }} <br>
+                    Telefono:{{ d.telefono }} <br>
+
+                    <button type="button" class="btn-outline-danger rounded-pill btn btn-icon btn-sm"
+                      (click)="eliminarTelefono(i); $event.stopPropagation();"><i class="ri-delete-bin-6-line fs-22"
+                        aria-hidden="true"></i></button>
+                    <!-- <span class="remove" (click)="eliminarContenedor(i); $event.stopPropagation();">×</span> -->
+                  </div>
+                </div>
       </div>
 
       <div class="p-field p-col-6">
@@ -92,9 +131,32 @@
 
     </div>
     <div class="p-dialog-footer">
-      <button pButton type="submit" label="Guardar" class="p-button-success"></button>
+      <button pButton (click)="guardarCambios()" label="Guardar" class="p-button-success"></button>
       <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
     </div>
   </form>
+</p-dialog>
+
+<p-dialog header="Telefono" [(visible)]="telefonoVisible" [modal]="true" [style]="{width: '650px'}">
+
+  <fieldset class="d-flex flex-wrap mb-4 p-fluid" style="border-radius: 10px; border: 1px solid #ccc;">
+    <legend>Datos del Telefono</legend>
+
+    <div class="p-1 flex-fill">
+      <label>Area</label>
+      <input pInputText [(ngModel)]="telefonoActual.area">
+    </div>
+
+    <div class="p-1 flex-fill">
+      <label>Telefono</label>
+      <input pInputText [(ngModel)]="telefonoActual.telefono">
+    </div>
+
+  </fieldset>
+
+  <p-footer>
+    <button pButton label="Guardar" icon="pi pi-check" (click)="guardarTelefono()"></button>
+  </p-footer>
+
 </p-dialog>
 

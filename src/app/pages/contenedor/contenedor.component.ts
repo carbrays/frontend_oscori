@@ -11,10 +11,10 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
-import * as htmlToImage from 'html-to-image';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+import * as htmlToImage from 'html-to-image';
 
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
@@ -186,6 +186,10 @@ export class ContenedoresComponent implements OnInit {
   contenedorFiltrados: any[] = [];
   opcionesContenedores: String[] = [];
 
+  opcionesEstado: { label: string; value: string }[] = [];
+  estadosFiltrados: any[] = [];
+  estadoSeleccionado: any = null;
+
   constructor(private contenedorService: ContenedorService, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
@@ -243,7 +247,7 @@ export class ContenedoresComponent implements OnInit {
 
       return (
         contenedorStr.includes(this.filtroContenedor.toLowerCase()) &&
-        vencimientoStr.includes(this.filtroVencimiento.toLowerCase()) &&
+        vencimientoStr.includes((this.filtroVencimiento || '').toLowerCase()) &&
         clienteStr.includes(this.filtroCliente.toLowerCase()) &&
         blMadreStr.includes(this.filtroBlMadre.toLowerCase()) &&
         mercanciaStr.includes(this.filtroMercancia.toLowerCase()) &&
@@ -407,6 +411,7 @@ export class ContenedoresComponent implements OnInit {
     this.filtroDias = '';
     this.filtroObservaciones = '';
     this.filtroDeuda = '';
+    this.estadoSeleccionado = null;
   }
 
   abrirNuevoContenedor(): void {
@@ -655,7 +660,8 @@ export class ContenedoresComponent implements OnInit {
       next: data => {
         this.gastos = data;
         this.gastos.forEach(gasto => {
-          gasto.fecha_pago = new Date(gasto.fecha_pago);
+          gasto.fecha_pago = gasto.fecha_pago ? new Date(gasto.fecha_pago) : null;
+          
         });
         console.log('Gastos cargados:', this.gastos);
       },
@@ -1630,6 +1636,80 @@ export class ContenedoresComponent implements OnInit {
 
     this.contenedorFiltrados = this.opcionesContenedores.filter(c =>
       c?.toLowerCase().includes(query)
+    );
+  }
+
+  exportarContenedoresExcel() {
+
+  const datosParaExcel = this.contenedoresFiltrados.map(c => ({
+    '#': c.id_contenedor,
+    'Cliente': this.getClienteNombre(c.id_cliente),
+    'N° Contenedor': c.numero_contenedor,
+    'Mercancía': this.getMercanciaNombre(c.id_mercancia),
+    'BL Madre': c.bl_madre,
+    'Tipo Contenedor': c.tipo_contenedor,
+    'Tamaño': c.tamano,
+    'Año': c.ano,
+    'Tipo': c.tipo_contenedor,
+    'Naviera': this.getNavieraNombre(c.id_naviera),
+    'Categoría': c.id_categoria,
+    'Ciudad Origen': this.getCiudadNombre(c.id_ciudad_origen),
+    'Ciudad Destino': this.getCiudadNombre(c.id_ciudad_destino),
+    'Estado Contenedor': c.estado_contenedor,
+    'Fecha Llegada': this.formatFecha(c.fecha_llegada),
+    'Fecha Límite': this.formatFecha(c.fecha_limite),
+    'Estado': c.estado,
+    'Fecha Devolución': this.formatFecha(c.fec_devolucion),
+    'Ubicación Devolución': c.ubicacion_devolucion,
+
+    'Días': this.calcularDiasRestantes(c.fecha_limite) >= 0
+      ? `Faltan ${this.calcularDiasRestantes(c.fecha_limite)} días`
+      : c.estado !== 'DEVUELTO'
+        ? `Vencido hace ${Math.abs(this.calcularDiasRestantes(c.fecha_limite))} días`
+        : '',
+
+    'Observaciones': c.observaciones
+  }));
+
+  // Crear hoja
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosParaExcel);
+
+  // Crear libro
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'Contenedores': worksheet },
+    SheetNames: ['Contenedores']
+  };
+
+  // Generar Excel
+  const excelBuffer: any = XLSX.write(workbook, {
+    bookType: 'xlsx',
+    type: 'array'
+  });
+
+  // Guardar archivo
+  const dataBlob = new Blob([excelBuffer], {
+    type: 'application/octet-stream'
+  });
+
+  const fechaStr = new Date().toISOString().split('T')[0];
+  saveAs(dataBlob, `contenedores_${fechaStr}.xlsx`);
+}
+
+formatFecha(fecha: string | Date) {
+    if (!fecha) return '';
+    const d = new Date(fecha);
+    return d.toISOString().split('T')[0]; // yyyy-mm-dd
+  }
+
+  filtrarEstados(event: any) {
+    if (this.opcionesEstado.length === 0) {
+      const estadosUnicos = new Set(this.contenedores.map(c => c.estado));
+      this.opcionesEstado = Array.from(estadosUnicos).map(e => ({ label: e, value: e }));
+    }
+
+    const query = event.query.toLowerCase();
+    this.estadosFiltrados = this.opcionesEstado.filter(e =>
+      e.label.toLowerCase().includes(query)
     );
   }
 

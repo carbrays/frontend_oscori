@@ -22,6 +22,10 @@ import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos
 import { UbicacionesComponent } from "./ubicaciones/ubicaciones.component";
 import { Despachos_ExpComponent } from "./despachos_exp/despachos_exp.component";
 import { Cotizacion_ExpComponent } from "./cotizacion_exp/cotizacion_exp.component";
+import { RendicionComponent } from "./rendicion/rendicion.component";
+import { EstadoCuentaComponent } from "./estado_cuenta/estado_cuenta.component";
+import { ContratoComponent } from "./contrato/contrato.component";
+import { OperacionesComponent } from "./operaciones/operaciones.component";
 
 const pagesRoutes: Routes = [
     {
@@ -45,6 +49,10 @@ const pagesRoutes: Routes = [
             { path: 'ubicaciones', component: UbicacionesComponent, data: { titulo: 'Ubicaciones' } },
             { path: 'despachos_exp', component: Despachos_ExpComponent, data: { titulo: 'Expor Despachos' } },
             { path: 'cotizacion_exp', component: Cotizacion_ExpComponent, data: { titulo: 'Expor Cotizacion' } },
+            { path: 'rendicion', component: RendicionComponent, data: { titulo: 'Rendición - Gastos de viaje' } },
+            { path: 'estado_cuenta', component: EstadoCuentaComponent, data: { titulo: 'Estados de cuenta' } },
+            { path: 'contrato', component: ContratoComponent, data: { titulo: 'Contratos' } },
+            { path: 'operaciones', component: OperacionesComponent, data: { titulo: 'Operaciones' } },
 
             /* MEMORANDUM */
             { path: 'cod-asignar', component: CodAsignarComponent, data: { titulo: 'Nuevo Memorandum' }},

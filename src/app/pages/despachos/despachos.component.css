@@ -246,3 +246,8 @@ pInputText:placeholder-shown {
   width: 100% !important; /* Asegura que el input ocupe todo el ancho */
   box-sizing: border-box;
 }
+
+::ng-deep .ng-dropdown-panel {
+  z-index: 999999 !important;
+  /* más alto que el p-dialog */
+}

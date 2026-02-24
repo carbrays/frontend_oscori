@@ -68,4 +68,25 @@ export class DespachosService {
     return this.http.delete(`${URL_SERVICIOS}/despachos/eliminar_pdf/${pdf}`);
   }
 
+  getGastosDespacho(id_despacho: number, nombreGasto: string): Observable<any[]> {
+    return this.http.get<any[]>(`${URL_SERVICIOS}/despachos/gastos/${id_despacho}/${nombreGasto}`);
+  }
+
+  insertarGasto(data: any): Observable<any> {
+    return this.http.post(`${URL_SERVICIOS}/despachos/crear_gasto`, data);
+  }
+
+  editarGasto(id: number, data: any): Observable<any> {
+    return this.http.put(`${URL_SERVICIOS}/despachos/editar_gasto/${id}`, data);
+  }
+
+  eliminarGasto(id: number, id_contenedor: number, tipo: string): Observable<any> {
+    const body = {
+      estado_actual: 'INACTIVO',
+      usumod: localStorage.getItem('login'),
+      fecmod: new Date()
+    };
+    return this.http.put(`${URL_SERVICIOS}/despachos/eliminar_gasto/${id}/${id_contenedor}/${tipo}`, body);
+  }
+
 }

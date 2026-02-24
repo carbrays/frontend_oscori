@@ -28,6 +28,7 @@ import { StepsModule } from 'primeng/steps';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ImageModule } from 'primeng/image';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TabViewModule } from 'primeng/tabview';
 
 import { NgxDocViewerModule } from 'ngx-doc-viewer';
 import { NgxSpinnerModule } from 'ngx-spinner';
@@ -41,6 +42,7 @@ import { PostulanteComponent } from "./postulante/postulante.component";
 import { ReporteComponent } from "./reporte/reporte.component";
 import { PagesComponent } from "./pages.component";
 import { ImageCropperComponent } from 'ngx-image-cropper';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 import { UsuarioComponent } from "./usuario/usuario.component";
 import { ClientesComponent } from "./clientes/clientes.component";
@@ -54,6 +56,10 @@ import { VehiculosSeguimientoComponent } from "./vehiculos_seguimiento/vehiculos
 import { UbicacionesComponent } from './ubicaciones/ubicaciones.component';
 import { Cotizacion_ExpComponent } from './cotizacion_exp/cotizacion_exp.component';
 import { Despachos_ExpComponent } from './despachos_exp/despachos_exp.component';
+import { RendicionComponent } from './rendicion/rendicion.component';
+import { EstadoCuentaComponent } from './estado_cuenta/estado_cuenta.component';
+import { ContratoComponent } from './contrato/contrato.component';
+import { OperacionesComponent } from './operaciones/operaciones.component';
 
 @NgModule({
     declarations: [
@@ -76,7 +82,11 @@ import { Despachos_ExpComponent } from './despachos_exp/despachos_exp.component'
     VehiculosSeguimientoComponent,
     UbicacionesComponent,
     Cotizacion_ExpComponent,
-    Despachos_ExpComponent
+    Despachos_ExpComponent,
+    RendicionComponent,
+    EstadoCuentaComponent,
+    ContratoComponent,
+    OperacionesComponent
     ],
     exports: [
         DashboardComponent,
@@ -122,7 +132,9 @@ import { Despachos_ExpComponent } from './despachos_exp/despachos_exp.component'
         AutoCompleteModule,
         ImageModule,
         ProgressSpinnerModule,
-        ImageCropperComponent
+        ImageCropperComponent,
+        OverlayPanelModule,
+        TabViewModule
     ]
 })
 

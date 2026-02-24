@@ -15,7 +15,12 @@ export class NavierasComponent implements OnInit {
   modoEdicion = false;
   tituloPopup = 'Naviera';
 
-  constructor(private navieraService: NavierasService) {}
+  telefonoVisible = false;
+  telefonos: any[] = [];
+  telefonoActual: any = {};
+  editIndex: any = null;
+
+  constructor(private navieraService: NavierasService) { }
 
   ngOnInit(): void {
     this.obtenerListado();
@@ -23,7 +28,12 @@ export class NavierasComponent implements OnInit {
 
   obtenerListado(): void {
     this.navieraService.getNavieras().subscribe({
-      next: (data) => this.navieras = data,
+      next: (data) => {
+        this.navieras = data;
+        this.navieras.forEach(naviera => {
+          naviera.telefono_contacto = JSON.parse(naviera.telefono_contacto || '[]');
+        });
+      },
       error: (err) => {
         console.error('Error al obtener navieras', err);
         Swal.fire('Error', 'No se pudieron cargar las navieras', 'error');
@@ -33,19 +43,19 @@ export class NavierasComponent implements OnInit {
 
   abrirNuevaNaviera(): void {
     this.navieraSeleccionada = {
-  nombre_comercial: '',
-  razon_social: '',
-  pais_origen: '',
-  sitio_web: '',
-  telefono_contacto: '',
-  correo_contacto: '',
-  direccion: '',
-  representante: '',
-  observaciones: '',
-  dias: null,
-  usucre: localStorage.getItem('login') || 'admin',
-  feccre: new Date()
-};
+      nombre_comercial: '',
+      razon_social: '',
+      pais_origen: '',
+      sitio_web: '',
+      telefono_contacto: '[]',
+      correo_contacto: '',
+      direccion: '',
+      representante: '',
+      observaciones: '',
+      dias: null,
+      usucre: localStorage.getItem('login') || 'admin',
+      feccre: new Date()
+    };
 
     this.tituloPopup = 'Nueva Naviera';
     this.popupVisible = true;
@@ -54,6 +64,7 @@ export class NavierasComponent implements OnInit {
 
   editarNaviera(naviera: any): void {
     this.navieraSeleccionada = { ...naviera };
+    this.telefonos = this.navieraSeleccionada.telefono_contacto;
     this.tituloPopup = 'Editar Naviera';
     this.popupVisible = true;
     this.modoEdicion = true;
@@ -88,9 +99,40 @@ export class NavierasComponent implements OnInit {
       });
     }
   }
+
   estaDisponible(naviera: any): string {
     console.log('Naviera:', naviera.despachos_en_proceso);
-  return naviera.despachos_en_proceso === 'LIBRE' ? 'fila-libre' : '';
-}
+    return naviera.despachos_en_proceso === 'LIBRE' ? 'fila-libre' : '';
+  }
+
+  nuevoTelefono() {
+    this.telefonoActual = {
+      area: '',
+      telefono: ''
+    };
+    this.editIndex = null;
+    this.telefonoVisible = true;
+  }
+
+  guardarTelefono() {
+    if (this.editIndex != null) {
+      this.telefonos[this.editIndex] = this.telefonoActual;
+    } else {
+      this.telefonos.push(this.telefonoActual);
+    }
+    this.navieraSeleccionada.telefono_contacto = JSON.stringify(this.telefonos);
+    this.telefonoVisible = false;
+  }
+
+  editarTelefono(i: number) {
+    this.editIndex = i;
+    this.telefonoActual = { ...this.telefonos[i] }; // clonar
+    this.telefonoVisible = true;
+  }
+
+  eliminarTelefono(i: number) {
+    this.telefonos.splice(i, 1);
+    this.navieraSeleccionada.telefono_contacto = JSON.stringify(this.telefonos);
+  }
 }
 

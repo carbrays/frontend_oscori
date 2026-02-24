@@ -11,6 +11,9 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 @Component({
   selector: 'app-cotizacion',
   templateUrl: './cotizacion.component.html',
@@ -30,8 +33,8 @@ export class CotizacionComponent implements OnInit {
   ciudades: { label: string; value: number }[] = [];
   navieras: { label: string; value: number, gate_in: number, dias: number, url: string }[] = [];
   mercancias: { label: string; value: number }[] = [];
-  clientes: { value: number, nombre_comercial: string; persona_contacto: string, telefono_contacto: string, correo_contacto: string, ciudad: number }[] = [];
-  forwaders: { label: string; value: number, razon_social: string, correo: string, telefono: string, ciudad: string }[] = [];
+  clientes: { value: number, nombre_comercial: string; persona_contacto: string, telefono_contacto: string, correo_contacto: string, ciudad: number, contactos: string }[] = [];
+  forwaders: { nombre_comercial: string; value: number, razon_social: string, correo: string, telefono: string, ciudad: string, contactos: string }[] = [];
 
   modo_cliente = [
     { label: 'CONSIGNATARIO', value: 'CONSIGNATARIO' },
@@ -162,6 +165,29 @@ export class CotizacionComponent implements OnInit {
   contenedorActual: any = {};
   editIndex: any = null;
 
+  consignatario_contactos: any[] = [];
+  nuevoConsignatarioContacto: any = {};
+  contactoConsignatarioVisible = false;
+
+  forwarder_contactos: any[] = [];
+  nuevoForwarderContacto: any = {};
+  contactoForwarderVisible = false;
+
+  flete: number = 0;
+
+  
+filtroContenedor: string = '';
+filtroTamano: string = '';
+filtroPeso: string = '';
+filtroNaviera: string = '';
+filtroTipoDoc: string = '';
+filtroTipoCarga: string = '';
+filtroOrigen: string = '';
+filtroDestino: string = '';
+filtroFecha: string = '';
+filtroFlete: string = '';
+filtroCorrelativo: string = '';
+
   constructor(private cotizacionService: CotizacionService) { }
 
   ngOnInit(): void {
@@ -227,10 +253,10 @@ export class CotizacionComponent implements OnInit {
       id_tipo_carga: null,
       // numero_contenedor: '',
       // tamano: '',
-      // peso_kg: '',
-      // id_mercancia: null,
-      // embalaje: '',
-      // volumen_m3: null,
+      peso_kg: '',
+      id_mercancia: null,
+      embalaje: '',
+      volumen_m3: null,
       id_naviera: null,
       fecha_llegada: null,
       id_ciudad_origen: null,
@@ -300,7 +326,9 @@ export class CotizacionComponent implements OnInit {
         .insertarCotizacion(this.cotizacionSeleccionada)
         .subscribe({
           next: (res) => {
+
             this.cotizacionSeleccionada.id_cotizacion = res.id_cotizacion;
+            this.cotizacionSeleccionada.correlativo = res.correlativo;
             this.obtenerListado();
             if (!this.guardarDentro) {
               Swal.fire('Guardado', 'Cotización creada correctamente.', 'success');
@@ -317,6 +345,14 @@ export class CotizacionComponent implements OnInit {
       ...cotizacion, fecha_llegada: cotizacion.fecha_llegada ? new Date(cotizacion.fecha_llegada) : null,
       fecha_limite: cotizacion.fecha_limite ? new Date(cotizacion.fecha_limite) : null
     };
+    const cliente = this.clientes.find(c => c.value === cotizacion.nombre_comercial);
+    if (cliente) {
+      this.consignatario_contactos = JSON.parse(cliente.contactos || '[]');
+    }
+    const forwader = this.forwaders.find((f) => f.value === cotizacion.c_nombre_comercial);
+    if (forwader) {
+      this.forwarder_contactos = JSON.parse(forwader.contactos || '[]');
+    }
     this.contenedores = this.cotizacionSeleccionada.contenedores;
     this.actualizarTipoCliente(this.cotizacionSeleccionada.modo_cliente);
     this.actualizarTipoCarga(this.cotizacionSeleccionada.id_tipo_carga);
@@ -375,6 +411,7 @@ export class CotizacionComponent implements OnInit {
           this.cotizacionSeleccionada = {};
           this.modoEdicion = false;
           this.activeIndex = 0;
+          this.obtenerListado();
         }
       });
     } else {
@@ -382,6 +419,7 @@ export class CotizacionComponent implements OnInit {
       this.cotizacionSeleccionada = {};
       this.modoEdicion = false;
       this.activeIndex = 0;
+      this.obtenerListado();
     }
 
 
@@ -475,12 +513,13 @@ export class CotizacionComponent implements OnInit {
     this.cotizacionService.getForwaders().subscribe({
       next: (data) => {
         this.forwaders = data.map((forwader) => ({
-          label: forwader.nombre_comercial,
+          nombre_comercial: forwader.nombre_comercial,
           value: forwader.id_forwarder,
           razon_social: forwader.persona_contacto,
           correo: forwader.correo,
           telefono: forwader.telefono,
-          ciudad: forwader.ciudad
+          ciudad: forwader.ciudad,
+          contactos: forwader.contactos
         }));
         console.log('Forwaders cargados:', this.forwaders);
       },
@@ -491,24 +530,34 @@ export class CotizacionComponent implements OnInit {
   }
   getForwaderNombre(id: number): string {
     const forwader = this.forwaders.find((f) => f.value === id);
-    return forwader ? forwader.label : 'Sin nombre';
+    return forwader ? forwader.nombre_comercial : 'Sin nombre';
   }
   buscarForwaders(event: any) {
     const query = event.query.toLowerCase();
     this.filteredForwaders = this.forwaders
-      .filter(f => f.label.toLowerCase().includes(query))
-      .map(f => f.label);
+      .filter(f => f.nombre_comercial.toLowerCase().includes(query))
+      .map(f => f.nombre_comercial);
   }
 
   contactoSeleccionado(event: any) {
     console.log('Evento seleccionado:', event);
     const forwader = this.forwaders.find(f => f.value === event);
     console.log('Forwader seleccionado:', forwader);
+
     if (forwader) {
-      // this.cotizacionSeleccionada.c_nombre_comercial = forwader.label;
-      this.cotizacionSeleccionada.c_persona_contacto = forwader.label;
-      this.cotizacionSeleccionada.c_correo = forwader.correo;
-      this.cotizacionSeleccionada.c_telefono = forwader.telefono;
+      this.forwarder_contactos = JSON.parse(forwader.contactos || '[]');
+      console.log('Contactos del consignatario:', this.forwarder_contactos);
+      if (this.forwarder_contactos.length > 0) {
+        console.log('Asignando contacto del forwarder:', this.forwarder_contactos[0]);
+        this.cotizacionSeleccionada.c_persona_contacto = this.forwarder_contactos[0].persona_contacto;
+        this.cotizacionSeleccionada.c_telefono = this.forwarder_contactos[0].telefono_contacto;
+        this.cotizacionSeleccionada.c_correo = this.forwarder_contactos[0].correo_contacto;
+      } else {
+        this.cotizacionSeleccionada.c_persona_contacto = '';
+        this.cotizacionSeleccionada.c_telefono = '';
+        this.cotizacionSeleccionada.c_correo = '';
+      }
+
       this.cotizacionSeleccionada.c_ciudad = forwader.ciudad;
     }
   }
@@ -522,7 +571,8 @@ export class CotizacionComponent implements OnInit {
           persona_contacto: cliente.persona_contacto,
           telefono_contacto: cliente.telefono_contacto,
           correo_contacto: cliente.correo_contacto,
-          ciudad: cliente.ciudad
+          ciudad: cliente.ciudad,
+          contactos: cliente.contactos
         }));
         console.log('Clientes cargados:', this.clientes);
       },
@@ -547,9 +597,18 @@ export class CotizacionComponent implements OnInit {
     const cliente = this.clientes.find(c => c.value === event);
     if (cliente) {
       // this.cotizacionSeleccionada.nombre_comercial = cliente.nombre_comercial;
-      this.cotizacionSeleccionada.persona_contacto = cliente.persona_contacto;
-      this.cotizacionSeleccionada.telefono_contacto = cliente.telefono_contacto;
-      this.cotizacionSeleccionada.correo_contacto = cliente.correo_contacto;
+      this.consignatario_contactos = JSON.parse(cliente.contactos || '[]');
+      console.log('Contactos del consignatario:', this.consignatario_contactos);
+      if (this.consignatario_contactos.length > 0) {
+        this.cotizacionSeleccionada.persona_contacto = this.consignatario_contactos[0].persona_contacto;
+        this.cotizacionSeleccionada.telefono_contacto = this.consignatario_contactos[0].telefono_contacto;
+        this.cotizacionSeleccionada.correo_contacto = this.consignatario_contactos[0].correo_contacto;
+      } else {
+        this.cotizacionSeleccionada.persona_contacto = '';
+        this.cotizacionSeleccionada.telefono_contacto = '';
+        this.cotizacionSeleccionada.correo_contacto = '';
+      }
+
       this.cotizacionSeleccionada.ciudad = cliente.ciudad;
     }
   }
@@ -559,6 +618,42 @@ export class CotizacionComponent implements OnInit {
     this.cotizacionSeleccionada.telefono_contacto = '';
     this.cotizacionSeleccionada.correo_contacto = '';
     this.cotizacionSeleccionada.ciudad = null;
+  }
+
+  contactoConsignatarioSeleccionado(selected: any) {
+    // selected es el objeto completo del contacto si bindValue no está definido, o el valor si bindValue está definido
+    const contacto = this.consignatario_contactos.find(c => c.persona_contacto === selected);
+    if (contacto) {
+
+      this.cotizacionSeleccionada.persona_contacto = contacto.persona_contacto;
+      this.cotizacionSeleccionada.telefono_contacto = contacto.telefono_contacto;
+      this.cotizacionSeleccionada.correo_contacto = contacto.correo_contacto;
+    }
+  }
+  contactoLimpio() {
+
+    this.cotizacionSeleccionada.telefono_contacto = '';
+    this.cotizacionSeleccionada.correo_contacto = '';
+  }
+
+  contactoForwarderSeleccionado(selected: any) {
+    console.log('Forwarder TOP:', this.forwarder_contactos);
+
+    const forwader = this.forwarder_contactos.find(f => f.persona_contacto === selected);
+    console.log('Forwarder seleccionado:', forwader);
+
+    if (forwader) {
+
+      this.cotizacionSeleccionada.c_persona_contacto = forwader.persona_contacto;
+      this.cotizacionSeleccionada.c_telefono = forwader.telefono_contacto;
+      this.cotizacionSeleccionada.c_correo = forwader.correo_contacto;
+    }
+  }
+
+  contactoForwarderLimpio() {
+
+    this.cotizacionSeleccionada.c_telefono = '';
+    this.cotizacionSeleccionada.c_correo = '';
   }
 
   actualizarTipoCliente(modo_cliente: string) {
@@ -596,12 +691,25 @@ export class CotizacionComponent implements OnInit {
   }
 
   actualizarTotal() {
-    // Convertimos a número ambos valores
-    const flete = Number(this.cotizacionSeleccionada.flete) || 0;
     const gateIn = Number(this.cotizacionSeleccionada.gate_in ? this.valorGateIn : 0);
-
-    this.total = flete + gateIn;
-  }
+    
+    if (this.contenedores.length > 0) {
+        // Veamos qué está pasando en cada iteración
+        const valores = this.contenedores.map((c, index) => {
+            const flete = Number(c.flete) || 0;
+            const subtotal = flete + gateIn;
+            return subtotal;
+        });
+        
+        this.total = valores.reduce((a, b) => a + b, 0);
+        this.cotizacionSeleccionada.flete = this.total;
+    } else {
+        const fleteValue = Number(this.flete) || 0;
+        this.total = fleteValue + gateIn;
+        this.cotizacionSeleccionada.flete = this.total;
+    }
+    
+}
 
   async generarPDF() {
     const logoBase64 = await this.loadBase64Image('assets/images/logo.png');
@@ -685,12 +793,21 @@ export class CotizacionComponent implements OnInit {
       correo_contacto: '',
       estado: 'ACTIVO',
       usucre: localStorage.getItem('login'),
-      feccre: new Date()
+      feccre: new Date(),
+      contactos: '[]'
     };
     this.dialogCliente = true;
   }
 
   guardarCliente() {
+    this.nuevoCliente.contactos = JSON.stringify([{
+      persona_contacto: this.nuevoCliente.persona_contacto,
+      telefono_contacto: this.nuevoCliente.telefono_contacto,
+      correo_contacto: this.nuevoCliente.correo_contacto
+    }]);
+    this.nuevoCliente.persona_contacto = '';
+    this.nuevoCliente.telefono_contacto = '';
+    this.nuevoCliente.correo_contacto = '';
     this.cotizacionService.insertarCliente(this.nuevoCliente).subscribe({
       next: () => {
         this.dialogCliente = false;
@@ -715,12 +832,21 @@ export class CotizacionComponent implements OnInit {
       ciudad: '',
       estado: 'ACTIVO',
       usucre: localStorage.getItem('login'),
-      feccre: new Date()
+      feccre: new Date(),
+      contactos: '[]'
     };
     this.dialogForwader = true;
   }
 
   guardarForwader() {
+    this.nuevoForwader.contactos = JSON.stringify([{
+      persona_contacto: this.nuevoForwader.persona_contacto,
+      telefono_contacto: this.nuevoForwader.telefono,
+      correo_contacto: this.nuevoForwader.correo
+    }]);
+    this.nuevoForwader.persona_contacto = '';
+    this.nuevoForwader.telefono = '';
+    this.nuevoForwader.correo = '';
     this.cotizacionService.insertarForwader(this.nuevoForwader).subscribe({
       next: () => {
         this.dialogForwader = false;
@@ -760,6 +886,10 @@ export class CotizacionComponent implements OnInit {
   }
 
   async generarCotizacion() {
+    this.guardarCambios();
+    console.log('Generando cotización PDF para:', this.cotizacionSeleccionada);
+    console.log('Generando PDF para:', this.contenedores);
+
     const c = this.cotizacionSeleccionada;
     const hojaMembrete = 'assets/images/membretado.jpg';
 
@@ -767,11 +897,12 @@ export class CotizacionComponent implements OnInit {
 
     const tablasContenedores = this.contenedores.map((c, index) => ([
       // ⭐ Título del contenedor
-      {
+      ...(this.contenedores.length > 1 ? [{
         text: `Contenedor ${index + 1}`,
         style: 'tituloContenedor',
         margin: [0, 10, 0, 5]
-      },
+      }] : []),
+      ,
 
       // ⭐ Tabla del contenedor
       {
@@ -784,7 +915,8 @@ export class CotizacionComponent implements OnInit {
             ['Peso (kg)', c.peso_kg || ''],
             ['Mercancía', this.getMercanciaNombre(c.id_mercancia) || ''],
             ['Embalaje', c.embalaje || ''],
-            ['Volumen (m3)', c.volumen_m3 || '']
+            ['Volumen (m3)', c.volumen_m3 || ''],
+            ['Flete', c.flete ? `${c.flete} $` : ''],
           ]
         },
         margin: [0, 0, 0, 10]
@@ -805,21 +937,24 @@ export class CotizacionComponent implements OnInit {
         { text: 'COTIZACIÓN #' + c.correlativo, style: 'header', alignment: 'center', margin: [0, 0, 0, 5] },
 
         // Datos del cliente
-        { text: 'Datos del Cliente', style: 'subheader' },
-        {
-          table: {
-            widths: ['30%', '70%'],
-            body: [
-              ['Nombre Comercial', this.getClienteNombre(c.nombre_comercial) || ''],
-              ['NIT', c.nit || ''],
-              ['Persona de Contacto', c.persona_contacto || ''],
-              ['Correo', c.correo_contacto || ''],
-              ['Teléfono', c.telefono_contacto || ''],
-              ['Ciudad', c.ciudad ? this.getCiudadNombre(c.ciudad) || '' : ''],
-            ]
-          },
-          margin: [0, 0, 0, 20]
-        },
+        ...(c.nombre_comercial
+          ? [
+            { text: 'Datos del Cliente', style: 'subheader' },
+            {
+              table: {
+                widths: ['30%', '70%'],
+                body: [
+                  ['Nombre Comercial', this.getClienteNombre(c.nombre_comercial) || ''],
+                  ['NIT', c.nit || ''],
+                  ['Persona de Contacto', c.persona_contacto || ''],
+                  ['Correo', c.correo_contacto || ''],
+                  ['Teléfono', c.telefono_contacto || ''],
+                  ['Ciudad', c.ciudad ? this.getCiudadNombre(c.ciudad) || '' : ''],
+                ]
+              },
+              margin: [0, 0, 0, 20]
+            }]
+          : []),
 
         // Datos del contacto (Forwarder)
         ...(c.c_nombre_comercial
@@ -851,13 +986,18 @@ export class CotizacionComponent implements OnInit {
               ['Tipo BL', c.tipo_bl || ''],
               ['Número BL', c.numero_bl || ''],
               ['Tipo de Carga', c.id_tipo_carga || ''],
+              // ['Peso (kg)', c.peso_kg || ''],
+              // ['Mercancía', this.getMercanciaNombre(c.id_mercancia) || ''],
+              // ['Embalaje', c.embalaje || ''],
+              // ['Volumen (m3)', c.volumen_m3 || '']
               ['Observaciones', c.observacion || '']
             ]
           },
           margin: [0, 0, 0, 20]
         },
-        { text: 'Contenedores', style: 'header' },
-        ...tablasContenedores,
+        ...(this.contenedores.length === 0) ? [] : [
+          { text: this.contenedores.length > 1 ? 'Contenedores' : 'Contenedor', style: 'subheader' },
+          ...tablasContenedores],
 
         // Datos de logística
         { text: 'Datos de Logística', style: 'subheader' },
@@ -876,7 +1016,7 @@ export class CotizacionComponent implements OnInit {
               ['Camion', c.camion || ''],
               ['Devolución', c.devolucion ? 'Sí' : 'No'],
               ['Gate In', c.gate_in ? 'Sí' : 'No'],
-              ['Flete', c.flete ? `${c.flete} $` : ''],
+              ['Total Flete', c.flete ? `${c.flete} $` : ''],
             ]
           },
           margin: [0, 0, 0, 20]
@@ -893,7 +1033,9 @@ export class CotizacionComponent implements OnInit {
       }
     };
 
-    pdfMake.createPdf(docDefinition).download(`COTIZACION_${this.getClienteNombre(c.nombre_comercial)}_${c.correlativo}.pdf`);
+    console.log("DATO1 " + c.nombre_comercial)
+    console.log("DATO2 " + c.c_nombre_comercial)
+    pdfMake.createPdf(docDefinition).download(`COTIZACION_${c.c_nombre_comercial ? this.getForwaderNombre(c.c_nombre_comercial) : this.getClienteNombre(c.nombre_comercial)}_${c.correlativo}.pdf`);
 
   }
 
@@ -915,10 +1057,27 @@ export class CotizacionComponent implements OnInit {
   }
 
   get cotizacionesFiltradas() {
-    return this.cotizaciones.filter(cotizacion => {
-      const clienteStr = this.getClienteNombre(cotizacion.nombre_comercial)?.toLowerCase() || '';
+    return this.cotizaciones.filter(c => {
+      const clienteStr = this.getClienteNombre(c.nombre_comercial)?.toLowerCase() || '';
+
+      const cont = c.contenedores?.[0] || {};
+
       return (
-        clienteStr.includes(this.filtroCliente.toLowerCase())
+        clienteStr.includes(this.filtroCliente.toLowerCase())&&
+
+      (cont.numero_contenedor || '').toString().toLowerCase().includes(this.filtroContenedor.toLowerCase()) &&
+      (cont.tamano || '').toString().toLowerCase().includes(this.filtroTamano.toLowerCase()) &&
+      (cont.peso_kg || '').toString().toLowerCase().includes(this.filtroPeso.toLowerCase()) &&
+
+      this.getNavieraNombre(c.id_naviera).toLowerCase().includes(this.filtroNaviera.toLowerCase()) &&
+      (c.tipo_documento || '').toLowerCase().includes(this.filtroTipoDoc.toLowerCase()) &&
+      (c.id_tipo_carga || '').toLowerCase().includes(this.filtroTipoCarga.toLowerCase()) &&
+      this.getCiudadNombre(c.id_ciudad_origen).toLowerCase().includes(this.filtroOrigen.toLowerCase()) &&
+      this.getCiudadNombre(c.id_ciudad_destino).toLowerCase().includes(this.filtroDestino.toLowerCase()) &&
+
+      this.formatFecha(c.fecha_llegada).includes(this.filtroFecha) &&
+      (c.flete || '').toString().includes(this.filtroFlete) &&
+      (c.correlativo || '').toString().includes(this.filtroCorrelativo)
       );
     });
   }
@@ -933,6 +1092,9 @@ export class CotizacionComponent implements OnInit {
           value: c.value
         }));
     }
+
+
+    console.log('Filtrando clientes con query:', this.opcionesClientes);
 
     const query = event.query.toLowerCase();
     this.clientesFiltrados = this.opcionesClientes.filter(c =>
@@ -973,22 +1135,61 @@ export class CotizacionComponent implements OnInit {
   }
 
   onRowClick(cotizacion: any) {
-    if (cotizacion.numero_contenedor) {
-      this.copiarTexto(cotizacion.numero_contenedor);
-      window.open(this.getNavieraUrl(cotizacion.id_naviera), '_blank');
+    if (cotizacion.contenedores.length === 1) {
+      if (cotizacion.contenedores[0].numero_contenedor) {
+        this.copiarTexto(cotizacion.contenedores[0].numero_contenedor);
+        window.open(this.getNavieraUrl(cotizacion.id_naviera), '_blank');
+      }
     }
   }
 
-  copiarTexto(texto: string) {
-    navigator.clipboard.writeText(texto)
-      .then(() => {
-        console.log('Texto copiado al portapapeles:', texto);
-        // Puedes mostrar un mensaje de confirmación visual
-      })
-      .catch(err => {
-        console.error('Error al copiar:', err);
-      });
+  onSubRowClick(cotizacion: any, contenedor: any) {
+    if (contenedor.numero_contenedor) {
+      this.copiarTexto(contenedor.numero_contenedor);
+      window.open(this.getNavieraUrl(cotizacion.id_naviera), '_blank');
+    }
+
   }
+
+  // copiarTexto(texto: string) {
+  //   navigator.clipboard.writeText(texto)
+  //     .then(() => {
+  //       console.log('Texto copiado al portapapeles:', texto);
+  //       // Puedes mostrar un mensaje de confirmación visual
+  //     })
+  //     .catch(err => {
+  //       console.error('Error al copiar:', err);
+  //     });
+  // }
+
+  copiarTexto(texto: string) {
+  // Intento Clipboard API si existe
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto)
+      .then(() => console.log("Copiado con Clipboard API"))
+      .catch(() => this.copiarConExecCommand(texto));
+  } else {
+    // Fallback para HTTP
+    this.copiarConExecCommand(texto);
+  }
+}
+
+private copiarConExecCommand(texto: string) {
+  const textarea = document.createElement("textarea");
+  textarea.value = texto;
+  // Evitar que se vea
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    console.log("Copiado con execCommand");
+  } catch (err) {
+    console.error("No se pudo copiar", err);
+  }
+  document.body.removeChild(textarea);
+}
 
   estiloFila(despacho: any): string {
 
@@ -1007,7 +1208,8 @@ export class CotizacionComponent implements OnInit {
       peso_kg: '',
       id_mercancia: null,
       embalaje: '',
-      volumen_m3: null
+      volumen_m3: null,
+      flete: null
     };
     this.editIndex = null;
     this.contenedorVisible = true;
@@ -1032,6 +1234,153 @@ export class CotizacionComponent implements OnInit {
   eliminarContenedor(i: number) {
     this.contenedores.splice(i, 1);
     this.cotizacionSeleccionada.contenedores = JSON.stringify(this.contenedores);;
+  }
+
+  crearConsignatarioContacto() {
+    this.nuevoConsignatarioContacto = {
+      persona_contacto: '',
+      telefono_contacto: '',
+      correo_contacto: ''
+    };
+    this.contactoConsignatarioVisible = true;
+  }
+
+  guardarConsignatarioContacto() {
+    const cliente = this.clientes.find(c => c.value === this.cotizacionSeleccionada.nombre_comercial);
+    let nuevo_contacto;
+    if (cliente) {
+      nuevo_contacto = JSON.parse(cliente.contactos || '[]');
+      nuevo_contacto.push(this.nuevoConsignatarioContacto);
+
+      cliente.contactos = JSON.stringify(nuevo_contacto);
+
+      this.cotizacionService.editarCliente(cliente.value, cliente).subscribe({
+        next: () => {
+          this.contactoConsignatarioVisible = false;
+          this.obtenerClientes();
+          this.consignatario_contactos = JSON.parse(cliente.contactos || '[]');
+          Swal.fire('Insertado', 'Contacto creado correctamente', 'success');
+        },
+        error: err => {
+          console.error('Error al insertar contacto:', err);
+          Swal.fire('Error', 'No se pudo insertar el contacto.', 'error');
+        }
+      });
+    } else {
+      Swal.fire('Error', 'Cliente no encontrado.', 'error');
+    }
+
+  }
+
+  crearForwarderContacto() {
+    this.nuevoForwarderContacto = {
+      persona_contacto: '',
+      telefono_contacto: '',
+      correo_contacto: ''
+    };
+    this.contactoForwarderVisible = true;
+  }
+
+  guardarForwarderContacto() {
+    const forwader = this.forwaders.find(f => f.value === this.cotizacionSeleccionada.c_nombre_comercial);
+    console.log('Forwader encontrado para agregar contacto:', forwader);
+    console.log('Forwader :', this.nuevoForwarderContacto);
+    let nuevo_contacto;
+    if (forwader) {
+      nuevo_contacto = JSON.parse(forwader.contactos || '[]');
+      nuevo_contacto.push(this.nuevoForwarderContacto);
+
+      forwader.contactos = JSON.stringify(nuevo_contacto);
+
+      this.cotizacionService.editarForwader(forwader.value, forwader).subscribe({
+        next: () => {
+          this.contactoForwarderVisible = false;
+          this.obtenerForwaders();
+          this.forwarder_contactos = JSON.parse(forwader.contactos || '[]');
+          Swal.fire('Insertado', 'Contacto creado correctamente', 'success');
+        },
+        error: err => {
+          console.error('Error al insertar forwader:', err);
+          Swal.fire('Error', 'No se pudo insertar el forwader.', 'error');
+        }
+      });
+    } else {
+      Swal.fire('Error', 'Forwader no encontrado.', 'error');
+    }
+
+  }
+
+  exportarCotizacionesExcel() {
+  const datosParaExcel: any[] = [];
+
+  this.cotizacionesFiltradas.forEach(c => {
+    // Si tiene múltiples contenedores, generamos una fila por contenedor
+    if (c.contenedores && c.contenedores.length > 1) {
+      c.contenedores.forEach((cont: { numero_contenedor: any; tamano: any; peso_kg: any; }) => {
+        datosParaExcel.push({
+          'Nombre Consignatario': c.nombre_comercial
+            ? this.getClienteNombre(c.nombre_comercial)
+            : this.getForwaderNombre(c.c_nombre_comercial) + " (" + c.tipo_cliente + ")",
+
+          'N° Contenedor': cont.numero_contenedor,
+          'Tamaño Contenedor': cont.tamano,
+          'Peso KG': cont.peso_kg,
+
+          'Naviera': this.getNavieraNombre(c.id_naviera),
+          'Tipo Documento': c.tipo_documento,
+          'Tipo Carga': c.id_tipo_carga,
+          'Origen': this.getCiudadNombre(c.id_ciudad_origen),
+          'Destino': this.getCiudadNombre(c.id_ciudad_destino),
+          'Fecha Llegada': this.formatFecha(c.fecha_llegada),
+          'Flete': c.flete,
+          'N° Cotización': c.correlativo
+        });
+      });
+
+    } else {
+      // Contenedor único o ninguno
+      const cont = c.contenedores?.[0] || {};
+
+      datosParaExcel.push({
+        'Nombre Consignatario': c.nombre_comercial
+          ? this.getClienteNombre(c.nombre_comercial)
+          : this.getForwaderNombre(c.c_nombre_comercial) + " (" + c.tipo_cliente + ")",
+
+        'N° Contenedor': cont.numero_contenedor || '',
+        'Tamaño Contenedor': cont.tamano || '',
+        'Peso KG': cont.peso_kg || '',
+
+        'Naviera': this.getNavieraNombre(c.id_naviera),
+        'Tipo Documento': c.tipo_documento,
+        'Tipo Carga': c.id_tipo_carga,
+        'Origen': this.getCiudadNombre(c.id_ciudad_origen),
+        'Destino': this.getCiudadNombre(c.id_ciudad_destino),
+        'Fecha Llegada': this.formatFecha(c.fecha_llegada),
+        'Flete': c.flete,
+        'N° Cotización': c.correlativo
+      });
+    }
+  });
+
+  // Crear hoja Excel
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosParaExcel);
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'Cotizaciones': worksheet },
+    SheetNames: ['Cotizaciones']
+  };
+
+  // Buffer y descarga
+  const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const dataBlob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+  const fecha = new Date().toISOString().split('T')[0];
+
+  saveAs(dataBlob, `cotizaciones_${fecha}.xlsx`);
+}
+
+formatFecha(fecha: string | Date) {
+    if (!fecha) return '';
+    const d = new Date(fecha);
+    return d.toISOString().split('T')[0]; // yyyy-mm-dd
   }
 
 

@@ -56,11 +56,11 @@ export class Despachos_ExpComponent implements OnInit {
   ];
 
   documentosRequeridosArica = [
-    { id: 'CRT', nombre: 'CRT' },
+    { id: 'MIC_CRT', nombre: 'MIC-CRT' },
   ];
 
   documentosRequeridosIquique = [
-    { id: 'CRT', nombre: 'CRT' },
+    { id: 'MIC_CRT', nombre: 'MIC-CRT' },
   ];
 
   estados = [

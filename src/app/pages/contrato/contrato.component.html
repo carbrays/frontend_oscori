@@ -1,0 +1,172 @@
+<!-- LISTADO DE CONTRATOS -->
+<div *ngIf="!verContrato" class="card">
+  <div class="flex justify-content-between align-items-center mb-3">
+    <h3>Contratos de Transporte</h3>
+    <button
+      pButton
+      label="Nuevo Contrato"
+      icon="pi pi-plus"
+      (click)="nuevoContrato()">
+    </button>
+  </div>
+
+  <p-table
+    [value]="contratos"
+    [paginator]="true"
+    [rows]="10"
+    responsiveLayout="scroll">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Carga</th>
+        <th>Destino</th>
+        <th>Tramo</th>
+        <th>Flete USD</th>
+        <th>Estado</th>
+        <th style="width:140px">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td>{{ r.id_contrato }}</td>
+        <td>{{ r.fecha | date:'yyyy-MM-dd' }}</td>
+        <td>{{ r.carga }}</td>
+        <td>{{ r.destino }}</td>
+        <td>{{ r.tramo }}</td>
+        <td>{{ r.flete | number:'1.2-2' }}</td>
+        <td>
+          <p-tag
+            [value]="r.estado"
+            [severity]="r.estado === 'ACTIVO' ? 'success' : 'danger'">
+          </p-tag>
+        </td>
+        <td>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-success"
+            (click)="imprimir(r)">
+            <i class="ri-printer-line"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-info"
+            (click)="editar(r)">
+            <i class="ri-pencil-line"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            (click)="eliminar(r)">
+            <i class="ri-delete-bin-6-line"></i>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+</div>
+
+
+<!-- FORMULARIO DE CONTRATO -->
+<form *ngIf="verContrato" [formGroup]="form">
+
+  <button
+    pButton
+    type="button"
+    icon="pi pi-arrow-left"
+    label="Volver"
+    class="p-button-secondary mb-3"
+    (click)="verContrato = false">
+  </button>
+
+  <div class="card">
+    <h3 class="text-center">Contrato de Transporte</h3>
+
+    <div class="form-grid">
+
+      <div class="form-row">
+        <label>Fecha</label>
+        <p-calendar
+          formControlName="fecha"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          class="full-width">
+        </p-calendar>
+      </div>
+
+      <div class="form-row">
+        <label>Carga</label>
+        <input pInputText formControlName="carga" class="full-width">
+      </div>
+
+      <!-- <div class="form-row">
+        <label>Consignatario</label>
+        <ng-select [items]="clientes" bindLabel="label" bindValue="value" formControlName="consignatario" placeholder="Seleccione un cliente" class="full-width"></ng-select>
+      </div> -->
+
+      <div class="form-row">
+        <label>Peso</label>
+        <input pInputText formControlName="peso" class="full-width">
+      </div>
+
+      <div class="form-row">
+        <label>Destino</label>
+        <input pInputText formControlName="destino" class="full-width">
+      </div>
+
+      <div class="form-row">
+        <label>Tramo</label>
+        <p-selectButton [options]="tipoTramo" formControlName="tramo" optionLabel="label" optionValue="value"
+        [style]="{ width: '100%', height: '35px' }" name="tipoTramo" class="full-width" />
+        <!-- <input pInputText formControlName="tramo" class="full-width"> -->
+      </div>
+
+      <div class="form-row">
+        <label>Flete (USD)</label>
+        <input type="number" pInputText formControlName="flete" class="full-width">
+      </div>
+
+      <div class="form-row">
+        <label>Observaciones del Flete</label>
+        <textarea
+          pInputTextarea
+          rows="3"
+          formControlName="obs_flete"
+          class="full-width">
+        </textarea>
+      </div>
+
+      <div class="form-row">
+        <label>Placa - Nombre</label>
+        <ng-select [items]="vehiculos" bindLabel="label" bindValue="value" formControlName="nombre"
+          placeholder="Seleccione un vehículo" class="full-width">
+        </ng-select>
+      </div>
+
+      <!-- <div class="form-row">
+        <label>Placa</label>
+        <input pInputText formControlName="placa" class="full-width">
+      </div> -->
+
+      <!-- <div class="form-row">
+        <label>Empresa</label>
+        <input pInputText formControlName="empresa" class="full-width">
+      </div> -->
+
+    </div>
+
+    <div class="mt-4 text-center">
+      <button
+        pButton
+        type="button"
+        label="Guardar Contrato"
+        class="p-button-success"
+        (click)="guardar()">
+      </button>
+    </div>
+  </div>
+</form>
+

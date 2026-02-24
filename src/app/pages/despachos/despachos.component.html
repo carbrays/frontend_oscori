@@ -1,3 +1,13 @@
+<p-tabView
+  [(activeIndex)]="activeIndex"
+  
+  (onChange)="onTabAnioChange($event)"
+  
+>
+  <p-tabPanel
+    *ngFor="let anio of aniosDisponibles"
+    [header]="anio.toString()">
+  
 <div class="p-mb-3 d-flex flex-wrap gap-2">
   <button pButton type="button" icon="pi pi-plus" label="Nuevo Despacho" (click)="abrirNuevoDespacho()"
     class="p-button-success"></button>
@@ -18,8 +28,21 @@
 
   <button pButton type="button" label="Limpiar filtros" (click)="limpiarFiltros()"
     icon="pi pi-filter-slash"></button>
+    <!-- <ng-select [items]="aniosDisponibles" bindLabel="label" bindValue="value" 
+          [(ngModel)]="filtroAnioCarga" [ngModelOptions]="{ standalone: true }"
+          placeholder="Año carga">
+        </ng-select> -->
+    
+<button
+  pButton
+  type="button"
+  icon="pi pi-times"
+  class="p-button-text p-button-sm"
+  (click)="filtroAnioCarga = null">
+</button>
 </div>
-
+</p-tabPanel>
+</p-tabView>
 
 <div *ngIf="mostrarTabla" class="card p-3 mb-3 shadow-sm">
 
@@ -159,7 +182,7 @@
       </p-autoComplete>
     </div>
     <div>
-      <input type="date" pInputText [(ngModel)]="filtroFechaCarga" />
+      <!-- <input type="date" pInputText [(ngModel)]="filtroFechaCarga" /> -->
     </div>
     <div>
       <p-autoComplete [(ngModel)]="estadoSeleccionado" [suggestions]="estadosFiltrados"
@@ -191,6 +214,7 @@
       <th>Peso (kg)</th>
       <th>Volumen (m³)</th>
       <th>Naviera</th>
+      <th>Nombre del Barco</th>
       <th>Origen</th>
       <th>Destino</th>
       <th>Despacho Portuario</th>
@@ -280,6 +304,7 @@
           placeholder="Buscar naviera" styleClass="w-200">
         </p-autoComplete>
       </th>
+      <th></th>
       <th>
         <!-- <input type="text" pInputText [(ngModel)]="filtroOrigen" style="width: 100%;" /> -->
         <p-autoComplete [(ngModel)]="origenSeleccionado" [suggestions]="origenesFiltrados"
@@ -376,6 +401,7 @@
       <td>{{ despacho.peso_kg }}</td>
       <td>{{ despacho.volumen_m3 }}</td>
       <td>{{ getNavieraNombre(despacho.id_naviera) }}</td>
+      <td>{{ despacho.nombre_barco }}</td>
       <td>{{ getCiudadNombre(despacho.id_ciudad_origen) }}</td>
       <td>{{ getCiudadNombre(despacho.id_ciudad_destino) }}</td>
       <td>{{ despacho.id_despacho_portuario }}</td>
@@ -406,7 +432,7 @@
       <div id="despacho-{{index}}" class="p-3 border rounded mb-3 shadow-sm" [ngClass]="estiloFila(despacho)">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div>
-            <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(despacho.id_cliente) }}</div>
+            <div class="fs-4"><b>Cliente:</b> {{ getClienteNombre(despacho.id_cliente) + (despacho.forwader ? ' (' + despacho.forwader + ')': '') }}</div>
           </div>
           <div class="fs-3">
             <b>{{ getVehiculoPlaca(despacho.id_asignacion_vehiculo_carga) }}</b>
@@ -440,6 +466,7 @@
           <div [ngClass]="{'faltante': !despacho.id_naviera}"><b>Naviera:</b> {{ getNavieraNombre(despacho.id_naviera)
             }}
           </div>
+          <div [ngClass]="{'faltante': !despacho.nombre_barco}"><b>Nombre del Barco:</b> {{ despacho.nombre_barco }}</div>
           <div *ngIf="getNavieraNombre(despacho.id_naviera) === 'MSC'" [ngClass]="{'faltante': !despacho.id_naviera}">
             <b>Autorizado:</b> {{ despacho.autorizado ? 'Sí' : 'No' }}
           </div>
@@ -516,6 +543,9 @@
           <div style="grid-column: span 2; white-space: pre-wrap; word-break: break-word;">
             <b>Descripción Adicional:</b> {{ despacho.descripcion }}
           </div>
+          <div *ngIf="getCiudadNombre(despacho.id_ciudad_origen) === 'ARICA'" style="grid-column: span 2; white-space: pre-wrap; word-break: break-word;">
+            <b>DP:</b> {{ despacho.dp }}
+          </div>
           <div *ngIf="despacho.precinto">
             <b>Precinto:</b> {{ despacho.precinto }}
           </div>
@@ -534,6 +564,10 @@
             <b>Fecha DIM:</b> {{ despacho.fecha_dim | date:'yyyy-MM-dd'
             }}
           </div>
+          <div><b>Lugar Entrega:</b> {{
+            getCiudadNombre(despacho.lugar_entrega) }}</div>
+          <div><b>Aduana Destino:</b> {{
+            getAduana(despacho.aduana_destino) }}</div>
           <div *ngIf="despacho.despacho_agencia">
             <b>Agencia:</b> {{ despacho.despacho_agencia }}
           </div>
@@ -544,6 +578,21 @@
             <b>Agencia Teléfono:</b> {{ despacho.despacho_telefono }}
           </div>
         </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+        <ng-container *ngFor="let gasto of tiposGasto">
+          <label *ngIf="despacho['tiene_' + gasto.nombre.toLowerCase()]" class="btn btn-sm" [ngClass]="{
+        'btn-success': despacho[gasto.nombre.toLowerCase()],
+        'btn-outline-danger': !despacho[gasto.nombre.toLowerCase()]
+      }" style="cursor: pointer;" for="file-{{despacho.id_despacho}}-{{gasto.id}}" title="Subir {{ gasto.nombre }}"
+            (click)="verGasto(despacho, gasto)">
+            {{ gasto.nombre }} <b>{{ despacho[gasto.nombre.toLowerCase()] }} Bs.</b><br>
+            DEUDA {{ despacho['deuda_' + gasto.nombre.toLowerCase()] ? despacho['deuda_' +
+            gasto.nombre.toLowerCase()] : 0 }} Bs.
+
+          </label>
+        </ng-container>
+      </div>
 
         <div class="d-flex flex-wrap gap-2 mt-3">
           <ng-container *ngFor="let doc of getDocumentosFiltrados(despacho)">
@@ -709,6 +758,11 @@
           name="naviera" />
       </div>
 
+      <div class="p-2 flex-fill">
+        <label for="nombre_barco">Nombre del Barco</label>
+        <input pInputText id="nombre_barco" [(ngModel)]="despachoSeleccionado.nombre_barco" name="nombre_barco" />
+      </div>
+
       <div *ngIf="getNavieraNombre(despachoSeleccionado.id_naviera) == 'MSC'"
         class="p-2 flex-fill d-flex flex-column align-items-center">
         <label for="autorizado" class="mb-1">Autorizado MSC</label>
@@ -785,6 +839,7 @@
         <p-checkbox inputId="permisos" name="permisos" [(ngModel)]="despachoSeleccionado.permisos"
           [binary]="true"></p-checkbox>
       </div>
+      
       <div *ngIf="despachoSeleccionado.id_despacho_aduanero === 'ANTICIPADO'" class="p-2 flex-fill">
         <label for="dim">DIM</label>
         <input pInputText id="dim" [(ngModel)]="despachoSeleccionado.dim" name="dim" />
@@ -798,11 +853,26 @@
           [appendTo]="'body'"></p-calendar>
       </div>
 
+      <div *ngIf="getCiudadNombre(despachoSeleccionado.id_ciudad_origen) === 'ARICA'" class="p-2 flex-fill">
+        <label for="dp">DP</label>
+        <input pInputText id="dp" [(ngModel)]="despachoSeleccionado.dp" name="dp" />
+      </div>
 
-      <!-- <div class="p-2 flex-fill">
-        <label for="descripcion">Descripción</label>
-        <textarea pInputTextarea id="descripcion" rows="1" [(ngModel)]="despachoSeleccionado.descripcion" name="descripcion"></textarea>
-      </div> -->
+      <div class="p-2 flex-fill">
+        <label for="lugar_entrega">Lugar Entrega</label>
+        <ng-select [items]="ciudades" bindLabel="label" bindValue="value"
+          [(ngModel)]="despachoSeleccionado.lugar_entrega" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione un lugar">
+        </ng-select>
+      </div>
+
+      <div class="p-2 flex-fill">
+        <label for="aduana_destino">Aduana Destino</label>
+        <ng-select [items]="aduanas" bindLabel="label" bindValue="value"
+          [(ngModel)]="despachoSeleccionado.aduana_destino" [ngModelOptions]="{ standalone: true }"
+          placeholder="Seleccione una aduana destino">
+        </ng-select>
+      </div>
 
     </div>
 
@@ -855,6 +925,30 @@
     </div>
     <div class="p-dialog-footer">
 
+      <label for="archivo">QUE GASTOS GENERO:</label>
+      <div class="d-flex flex-wrap mb-1 p-fluid">
+        <div class="p-2 flex-fill d-flex flex-column align-items-center">
+          <label for="tiene_diesel" class="mb-1">Diesel</label>
+          <p-checkbox [(ngModel)]="despachoSeleccionado.tiene_diesel" [binary]="true" inputId="tiene_diesel"
+            name="tiene_diesel">
+          </p-checkbox>
+        </div>
+
+        <div class="p-2 flex-fill d-flex flex-column align-items-center">
+          <label for="tiene_peaje" class="mb-1">Peaje</label>
+          <p-checkbox [(ngModel)]="despachoSeleccionado.tiene_peaje" [binary]="true" inputId="tiene_peaje"
+            name="tiene_peaje">
+          </p-checkbox>
+        </div>
+
+        <div class="p-2 flex-fill d-flex flex-column align-items-center">
+          <label for="tiene_viaticos" class="mb-1">Viaticos</label>
+          <p-checkbox [(ngModel)]="despachoSeleccionado.tiene_viaticos" [binary]="true" inputId="tiene_viaticos"
+            name="tiene_viaticos">
+          </p-checkbox>
+        </div>
+
+      </div>
 
       <button pButton type="submit" label="Guardar" class="p-button-success"></button>
       <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="popupVisible = false"></button>
@@ -952,6 +1046,86 @@
     <button pButton type="button" label="Cerrar" class="p-button-danger"
       (click)=" mostrarDialogObservaciones = false"></button>
 
+  </div>
+
+</p-dialog>
+
+<p-dialog [header]="tituloMostrarGastos" [(visible)]="mostrarGastos" [modal]="true" [style]="{ width: '80%' }">
+
+  <div class="p-fluid">
+    <p-table [value]="gastos" editMode="row" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ tituloMostrarGastos === "VIATICOS" ? "Dias" : "Lugar" }}</th>
+          <th>Monto</th>
+          <th>Cancelado</th>
+          <th>Fecha Pago</th>
+          <th>Modalidad Pago</th>
+          <th>Persona Pago</th>
+          <th>Comprobante</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-gasto let-rowIndex="rowIndex">
+        <tr>
+          <!-- Lugar -->
+          <td>
+            <input type="text" pInputText [(ngModel)]="gasto.descripcion" placeholder="Descripción del gasto" />
+          </td>
+
+          <!-- Monto -->
+          <td>
+            <input type="number" pInputText [(ngModel)]="gasto.monto" placeholder="0.00" />
+          </td>
+
+          <!-- Cancelado -->
+          <td class="text-center">
+            <p-checkbox [(ngModel)]="gasto.cancelado" [binary]="true"></p-checkbox>
+          </td>
+
+          <!-- Fecha Pago -->
+          <td>
+            <p-calendar inputId="fecha_pago" [(ngModel)]="gasto.fecha_pago" name="fecha_pago" dateFormat="yy-mm-dd"
+              [showIcon]="true" [style]="{ width: '100%', height: '35px' }" [appendTo]="'body'"></p-calendar>
+          </td>
+
+          <!-- Modalidad Pago -->
+          <td>
+            <ng-select [items]="modalidad_pago" bindLabel="label" bindValue="value" [(ngModel)]="gasto.modalidad_pago"
+              [ngModelOptions]="{ standalone: true }" placeholder="Seleccione una modalidad" appendTo="body">
+            </ng-select>
+          </td>
+
+          <!-- Persona Pago -->
+          <td>
+            <input type="text" pInputText [(ngModel)]="gasto.persona_pago" placeholder="Persona que pagó" />
+          </td>
+          <!-- Comprobante -->
+          <td>
+            <button class="btn btn-sm" [ngClass]="{
+                'btn-success': gasto.archivos?.length > 0,
+                'btn-outline-danger': !(gasto.archivos?.length > 0)
+                }"
+              (click)="gasto.archivos?.length > 0 ? verComprobante(gasto.archivos[0]) : gasto.modalidad_pago == 'AL CONTADO' ? generarComprobante(gasto) : subirComprobante(gasto)">
+              <i class="pi" [ngClass]="gasto.archivos?.length > 0 ? 'pi-eye' : 'pi-upload'"></i>
+              {{ gasto.archivos?.length > 0 ? 'Ver' : gasto.modalidad_pago == 'AL CONTADO' ? 'Generar' : 'Subir' }}
+            </button>
+          </td>
+          <!-- Eliminar -->
+          <td>
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminarGasto(rowIndex)">
+              <i class="pi pi-trash"></i> Eliminar
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="p-dialog-footer mt-3">
+      <button pButton type="button" label="+ Agregar" class="p-button-secondary" (click)="agregarGasto()"></button>
+      <button pButton type="submit" label="Guardar" class="p-button-success me-2" (click)="guardarGasto()"></button>
+    </div>
   </div>
 
 </p-dialog>
